@@ -51,11 +51,22 @@ matrix res_post=res["r19".."r40","c1".."c4"]
 preserve
 drop _all
 svmat res
-twoway (scatter res2 res1, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
-	(line res2 res1, lcolor(navy)) (rcap res4 res3 res1, lcolor(maroon)), ///
-	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
-	 ytitle("Effect") xlabel(-18(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
-graph export "C:\Users\fe-kn\C DE CHAISEMARTIN Dropbox\RAs De Chaisemartin\Mini course DID\Applications\Solutions\Moser and Voena 2012\graphs\graphES_moser1.pdf", replace
+// twoway (scatter res2 res1, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
+// 	(line res2 res1, lcolor(navy)) (rcap res4 res3 res1, lcolor(maroon)), ///
+// 	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
+// 	 ytitle("Effect") xlabel(-18(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
+twoway ///
+    (scatter res2 res1, msize(medlarge) msymbol(o) mcolor(gs4) legend(off)) ///
+    (line    res2 res1, lcolor(gs4)) ///
+    (rcap    res4 res3 res1, lcolor(gs10)), ///
+    scheme(s1mono) ///
+    title("TWFE Event-study estimates") ///
+    xtitle("Relative time to year before TWEA") ///
+    ytitle("Effect") ///
+    xlabel(-18(3)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-0.25 1)) ///
+    ylabel(-0.25(.25)1, grid glcolor(gs14) glwidth(vthin))
+graph export "${figures}/graphES_moser1.pdf", replace
 restore
 }
 
@@ -94,13 +105,28 @@ preserve
 drop _all
 svmat res
 svmat res_post
-twoway (scatter res2 res1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "Without Pre-Periods" 4 /*"  &" 5*/ "With Pre-Periods") pos(6) col(2))) ///
-	(line res2 res1, lcolor(midblue)) (rcap res4 res3 res1, lcolor(midblue)) ///
-	(line res_post2 res1, lcolor(red)) (rcap res_post4 res_post3 res1, lcolor(red)) ///
-	(scatter res_post2 res1, msize(small) msymbol(o) mcolor(red)), ///
-	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
-	 ytitle("Effect") xlabel(0(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
-graph export "C:\Users\134476\C DE CHAISEMARTIN Dropbox\clément de chaisemartin\A Mini course DID\Textbook\graphES_moser2.pdf", replace
+// twoway (scatter res2 res1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "Without Pre-Periods" 4 /*"  &" 5*/ "With Pre-Periods") pos(6) col(2))) ///
+// 	(line res2 res1, lcolor(midblue)) (rcap res4 res3 res1, lcolor(midblue)) ///
+// 	(line res_post2 res1, lcolor(red)) (rcap res_post4 res_post3 res1, lcolor(red)) ///
+// 	(scatter res_post2 res1, msize(small) msymbol(o) mcolor(red)), ///
+// 	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
+// 	 ytitle("Effect") xlabel(0(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
+twoway ///
+    (scatter res2 res1, msize(small) msymbol(o) mcolor(gs4) ///
+        legend(order(2 "Without Pre-Periods" 4 "With Pre-Periods") pos(6) col(2))) ///
+    (line  res2 res1, lcolor(gs4)) ///
+    (rcap  res4 res3 res1, lcolor(gs4)) ///
+    (line  res_post2 res1, lcolor(gs10)) ///
+    (rcap  res_post4 res_post3 res1, lcolor(gs10)) ///
+    (scatter res_post2 res1, msize(small) msymbol(o) mcolor(gs10)), ///
+    scheme(s1mono) ///
+    title("TWFE Event-study estimates") ///
+    xtitle("Relative time to year before TWEA") ///
+    ytitle("Effect") ///
+    xlabel(0(3)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-0.25 1)) ///
+    ylabel(-0.25(.25)1, grid glcolor(gs14) glwidth(vthin))
+graph export "${figures}/graphES_moser2.pdf", replace
 restore
 }
 
@@ -153,11 +179,23 @@ matrix res[`x'+7,4]=temp[`x'+6,6]
 preserve
 drop _all
 svmat res
-twoway (scatter res2 res1, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
-	(line res2 res1, lcolor(navy)) (rcap res4 res3 res1, lcolor(maroon)) (function y=x*`slope', range(-6 21) lcolor(gray) lpattern(dash)), ///
-	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
-	 ytitle("Effect") xlabel(-6(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
-graph export "C:\Users\fe-kn\C DE CHAISEMARTIN Dropbox\RAs De Chaisemartin\Mini course DID\Applications\Solutions\Moser and Voena 2012\graphs\graphES_moser3.pdf", replace
+// twoway (scatter res2 res1, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
+// 	(line res2 res1, lcolor(navy)) (rcap res4 res3 res1, lcolor(maroon)) (function y=x*`slope', range(-6 21) lcolor(gray) lpattern(dash)), ///
+// 	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
+// 	 ytitle("Effect") xlabel(-6(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
+twoway ///
+    (scatter  res2 res1, msize(medlarge) msymbol(o) mcolor(gs4) legend(off)) ///
+    (line     res2 res1, lcolor(gs4)) ///
+    (rcap     res4 res3 res1, lcolor(gs10)) ///
+    (function y=x*`slope', range(-6 21) lcolor(gs12) lpattern(dash)), ///
+    scheme(s1mono) ///
+    title("TWFE Event-study estimates") ///
+    xtitle("Relative time to year before TWEA") ///
+    ytitle("Effect") ///
+    xlabel(-6(3)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-0.25 1)) ///
+    ylabel(-0.25(.25)1, grid glcolor(gs14) glwidth(vthin))
+graph export "${figures}/graphES_moser3.pdf", replace
 restore
 }
 
@@ -283,8 +321,11 @@ twoway ///
     (scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(gs10)), ///
     scheme(s1mono) ///
     title("Event-study estimates") xtitle("Years after TWEA") ///
-    ytitle("Effect") xscale(range(1 21)) xlabel(1(5)21) ///
-    yscale(range(-0.5 1.5)) ylabel(-0.5(.25)1.5)
+    ytitle("Effect") ///
+    xscale(range(1 21)) ///
+    xlabel(1(5)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-0.5 1.5)) ///
+    ylabel(-0.5(.25)1.5, grid glcolor(gs14) glwidth(vthin))
 graph export "${figures}/graphES_moser_ife_did.pdf", replace
 restore
 
@@ -314,13 +355,29 @@ preserve
 drop _all
 svmat res_sc
 svmat res_post
-twoway (scatter res_sc2 res_sc1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "SC" 4 /*"  &" 5*/ "TWFE") pos(6) col(2))) ///
-	(line res_sc2 res_sc1, lcolor(midblue)) (rcap res_sc4 res_sc3 res_sc1, lcolor(midblue)) ///
-	(line res_post2 res_post1, lcolor(red)) (rcap res_post4 res_post3 res_post1, lcolor(red)) ///
-	(scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(red)), ///
-	 title("Event-study estimates") xtitle("Years after TWEA") ///
-	 ytitle("Effect") xscale(range(1 21)) xlabel(1(5)21) yscale(range(-2 2)) ylabel(-2(.5)2)
-graph export "C:\Users\134476\C DE CHAISEMARTIN Dropbox\clément de chaisemartin\A Mini course DID\Textbook\graphES_moser_sc_did.pdf", replace
+// twoway (scatter res_sc2 res_sc1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "SC" 4 /*"  &" 5*/ "TWFE") pos(6) col(2))) ///
+// 	(line res_sc2 res_sc1, lcolor(midblue)) (rcap res_sc4 res_sc3 res_sc1, lcolor(midblue)) ///
+// 	(line res_post2 res_post1, lcolor(red)) (rcap res_post4 res_post3 res_post1, lcolor(red)) ///
+// 	(scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(red)), ///
+// 	 title("Event-study estimates") xtitle("Years after TWEA") ///
+// 	 ytitle("Effect") xscale(range(1 21)) xlabel(1(5)21) yscale(range(-2 2)) ylabel(-2(.5)2)
+twoway ///
+    (scatter res_sc2 res_sc1, msize(small) msymbol(o) mcolor(gs4) ///
+        legend(order(2 "SC" 4 "TWFE") pos(6) col(2))) ///
+    (line  res_sc2   res_sc1, lcolor(gs4)) ///
+    (rcap  res_sc4   res_sc3 res_sc1, lcolor(gs4)) ///
+    (line  res_post2 res_post1, lcolor(gs10)) ///
+    (rcap  res_post4 res_post3 res_post1, lcolor(gs10)) ///
+    (scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(gs10)), ///
+    scheme(s1mono) ///
+    title("Event-study estimates") xtitle("Years after TWEA") ///
+    ytitle("Effect") ///
+    xscale(range(1 21)) ///
+    xlabel(1(5)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-2 2)) ///
+    ylabel(-2(.5)2, grid glcolor(gs14) glwidth(vthin))
+
+graph export "${figures}/graphES_moser_sc_did.pdf", replace
 restore
 
 *Demeaned
@@ -389,13 +446,29 @@ preserve
 drop _all
 svmat res_sd
 svmat res_post
-twoway (scatter res_sd2 res_sd1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "SD" 4 /*"  &" 5*/ "TWFE") pos(6) col(2))) ///
-	(line res_sd2 res_sd1, lcolor(midblue)) (rcap res_sd4 res_sd3 res_sd1, lcolor(midblue)) ///
-	(line res_post2 res_post1, lcolor(red)) (rcap res_post4 res_post3 res_post1, lcolor(red)) ///
-	(scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(red)), ///
-	 title("Event-study estimates") xtitle("Years after TWEA") ///
-	 ytitle("Effect") xscale(range(1 21)) xlabel(1(5)21) yscale(range(-2 2)) ylabel(-2(.5)2)
-graph export "C:\Users\134476\C DE CHAISEMARTIN Dropbox\clément de chaisemartin\A Mini course DID\Textbook\graphES_moser_sd_did.pdf", replace
+// twoway (scatter res_sd2 res_sd1, msize(small) msymbol(o) mcolor(midblue) legend(order(2 /*"  &" 3*/ "SD" 4 /*"  &" 5*/ "TWFE") pos(6) col(2))) ///
+// 	(line res_sd2 res_sd1, lcolor(midblue)) (rcap res_sd4 res_sd3 res_sd1, lcolor(midblue)) ///
+// 	(line res_post2 res_post1, lcolor(red)) (rcap res_post4 res_post3 res_post1, lcolor(red)) ///
+// 	(scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(red)), ///
+// 	 title("Event-study estimates") xtitle("Years after TWEA") ///
+// 	 ytitle("Effect") xscale(range(1 21)) xlabel(1(5)21) yscale(range(-2 2)) ylabel(-2(.5)2)
+twoway ///
+    (scatter res_sd2 res_sd1, msize(small) msymbol(o) mcolor(gs4) ///
+        legend(order(2 "SD" 4 "TWFE") pos(6) col(2))) ///
+    (line  res_sd2   res_sd1, lcolor(gs4)) ///
+    (rcap  res_sd4   res_sd3 res_sd1, lcolor(gs4)) ///
+    (line  res_post2 res_post1, lcolor(gs10)) ///
+    (rcap  res_post4 res_post3 res_post1, lcolor(gs10)) ///
+    (scatter res_post2 res_post1, msize(small) msymbol(o) mcolor(gs10)), ///
+    scheme(s1mono) ///
+    title("Event-study estimates") xtitle("Years after TWEA") ///
+    ytitle("Effect") ///
+    xscale(range(1 21)) ///
+    xlabel(1(5)21, grid glcolor(gs14) glwidth(vthin)) ///
+    yscale(range(-.25 1)) ///
+    ylabel(-.25(.25)1, grid glcolor(gs14) glwidth(vthin))
+
+graph export "${figures}/graphES_moser_sd_did.pdf", replace
 restore
 
 *** 5) Sensitivity analysis of Rambachan and Roth 
