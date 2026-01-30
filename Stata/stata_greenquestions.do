@@ -138,7 +138,7 @@ twoway (scatter res2 res1, msize(small) msymbol(o) mcolor(midblue) legend(order(
 	(scatter res_post2 res1, msize(small) msymbol(o) mcolor(red)), ///
 	 title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ///
 	 ytitle("Effect") xlabel(0(3)21) yscale(range(-0.25 1)) ylabel(-0.25(.25)1)
-graph export "C:\Users\134476\C DE CHAISEMARTIN Dropbox\clément de chaisemartin\A Mini course DID\Textbook\graphES_moser2.pdf", replace
+graph export "/Users/karlavega/Documents/GitHub/did_book/graphES_moser2.pdf", replace
 restore
 }
 
@@ -441,6 +441,8 @@ restore
 
 
 *** 5) Sensitivity analysis of Rambachan and Roth 
+ssc install honestdid
+ssc install coefplot, replace
 
 reghdfe patents reltimeminus* reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
 matrix l_vec = J(21,1,0)
@@ -527,7 +529,8 @@ test rel_timeminus1 rel_timeminus2 rel_timeminus3 rel_timeminus4 rel_timeminus5 
 twowayfeweights div_rate state year rel_time1, type(feTR) test_random_weights(year) weight(stpop) other_treatments(rel_time2-rel_time16) controls(rel_timeminus1-rel_timeminus9)
 
 *** 6) Sun and Abraham event-study estimators
-
+ssc install avar, replace
+ssc install ivreg2, replace
 *ssc install eventstudyinteract
 *help eventstudyinteract
 replace cohort=. if cohort==0
@@ -683,6 +686,8 @@ egen election_number=group(year)
 did_multiplegt_stat prestout cnty90 election_number numdailies, placebo(1) exact_match
 tab lag_numdailies if year==first_change
 tab lag_numdailies if changedailies!=0&changedailies!=.&year!=1868
+
+
 
 
 
