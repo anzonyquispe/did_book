@@ -22,3 +22,12 @@ panelview(div_rate ~ udl, data = datos,
           main = "Treatment Status: Wolfers (2006)",
           cex.main = 16, cex.axis.x = 8, cex.axis.y = 6,
           cex.lab = 14, cex.legend = 12)
+# Cohort outcome
+panelview(data = datos, Y = "div_rate", D = "udl",
+          index = c("state", "year"),
+          by.timing = TRUE, display.all = TRUE,
+          type = "outcome", by.cohort = TRUE,
+          xlab = "Year", ylab = "Divorce Rate",
+          main = "Average Outcomes by Cohort: Wolfers (2006)",
+          cex.main = 16, cex.axis = 10, cex.lab = 14, cex.legend = 12,
+          axis.lab.gap = c(5, 0))
