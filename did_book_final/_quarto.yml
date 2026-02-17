@@ -1,0 +1,17 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "DID Textbook: Translations"
+  author: "Anzony Quispe Rojas"
+  chapters:
+    - index.qmd
+    - chapters/ch03.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: false
+    code-tools: false
