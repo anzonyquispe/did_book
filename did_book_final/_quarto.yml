@@ -1,6 +1,6 @@
 project:
   type: book
-  output-dir: _book
+  output-dir: docs
 
 book:
   title: "DID Textbook: Translations"
@@ -8,7 +8,11 @@ book:
   chapters:
     - index.qmd
     - chapters/ch03.qmd
-
+    - chapters/ch04.qmd
+    - chapters/ch05.qmd
+    - chapters/ch06.qmd
+    - chapters/ch07.qmd
+    - chapters/ch08.qmd
 format:
   html:
     theme: cosmo

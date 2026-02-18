@@ -1,0 +1,756 @@
+---
+title: "Chapter 7: Designs with Variation in Treatment Dose"
+---
+
+## Overview
+
+Dataset: **Pierce & Schott (2016)** — `pierce_schott_didtextbook.dta`
+
+This chapter applies the **Heterogeneous Adoption Design (HAD)** framework to study how China's permanent normal trade relations (PNTR) status affected US manufacturing employment. The key feature: treatment is **continuous** (the NTR gap, ranging from 0.02 to 0.64), not binary. All 103 US industries are "treated" — there are no pure control groups, but industries with near-zero NTR gaps serve as quasi-stayers.
+
+Key tools: `twowayfeweights` for weight decomposition, and the `stute_test` package for testing whether $E[\Delta Y | D]$ is linear in $D$ (Stute, 1997). Standard errors use **HC2** heteroskedasticity-robust estimation throughout.
+
+No figures in this chapter — only numerical outputs.
+
+---
+
+## GQ1 (§7.3.1): TWFE Regressions
+
+> Regress $\Delta_{2000}^t Y_g$ on $D_g$ (NTR gap) for $t \in \{2001, 2002, 2004, 2005\}$, with HC2 standard errors.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+use "data/pierce_schott_didtextbook.dta", clear
+
+reg delta2001 ntrgap, vce(hc2)
+reg delta2002 ntrgap, vce(hc2)
+reg delta2004 ntrgap, vce(hc2)
+reg delta2005 ntrgap, vce(hc2)
+```
+
+```
+--- 2001 ---
+------------------------------------------------------------------------------
+             |             Robust HC2
+   delta2001 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      ntrgap |  -.0612112   .0401833    -1.52   0.131    -.1409241    .0185017
+       _cons |  -.0141423   .0129623    -1.09   0.278     -.039856    .0115714
+------------------------------------------------------------------------------
+
+--- 2002 ---
+------------------------------------------------------------------------------
+             |             Robust HC2
+   delta2002 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      ntrgap |  -.2598747   .0754512    -3.44   0.001    -.4095496   -.1101999
+       _cons |  -.0550989   .0220561    -2.50   0.014    -.0988522   -.0113456
+------------------------------------------------------------------------------
+
+--- 2004 ---
+------------------------------------------------------------------------------
+             |             Robust HC2
+   delta2004 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      ntrgap |  -.5397825   .1527447    -3.53   0.001    -.8427868   -.2367782
+       _cons |  -.0868008   .0524821    -1.65   0.101    -.1909111    .0173095
+------------------------------------------------------------------------------
+
+--- 2005 ---
+------------------------------------------------------------------------------
+             |             Robust HC2
+   delta2005 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      ntrgap |  -.5317591   .1666765    -3.19   0.002    -.8624004   -.2011179
+       _cons |  -.1056161   .0536739    -1.97   0.052    -.2120906    .0008584
+------------------------------------------------------------------------------
+```
+
+### R
+
+```r
+library(haven); library(sandwich); library(lmtest)
+df <- read_dta("data/pierce_schott_didtextbook.dta")
+
+for (yr in c(2001, 2002, 2004, 2005)) {
+  fml <- as.formula(paste0("delta", yr, " ~ ntrgap"))
+  fit <- lm(fml, data = df)
+  cat("\n--- ", yr, " ---\n")
+  print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
+  print(coefci(fit, vcov. = vcovHC(fit, type = "HC2")))
+}
+```
+
+```
+--- 2001 ---
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -0.014142   0.012962 -1.0910   0.2779
+ntrgap      -0.061211   0.040183 -1.5233   0.1308
+95% CI: ntrgap [-0.141, 0.019]
+
+--- 2002 ---
+             Estimate Std. Error t value  Pr(>|t|)
+(Intercept) -0.055099   0.022056 -2.4981 0.0141 *
+ntrgap      -0.259875   0.075451 -3.4443 0.0008 ***
+95% CI: ntrgap [-0.410, -0.110]
+
+--- 2004 ---
+             Estimate Std. Error t value  Pr(>|t|)
+(Intercept) -0.086801   0.052482 -1.6539   0.1012
+ntrgap      -0.539783   0.152745 -3.5339 0.0006 ***
+95% CI: ntrgap [-0.843, -0.237]
+
+--- 2005 ---
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -0.105616   0.053674 -1.9677 0.0518 .
+ntrgap      -0.531759   0.166676 -3.1904 0.0019 **
+95% CI: ntrgap [-0.862, -0.201]
+```
+
+### Python
+
+```python
+for year in [2001, 2002, 2004, 2005]:
+    reg_hc2(f'delta{year}', 'ntrgap', df, print_full=False)
+```
+
+```
+  delta2001: beta(ntrgap)=-0.061211, SE=0.040183, t=-1.523, p=0.1277, N=103
+  delta2002: beta(ntrgap)=-0.259875, SE=0.075451, t=-3.444, p=0.0006, N=103
+  delta2004: beta(ntrgap)=-0.539783, SE=0.152745, t=-3.534, p=0.0004, N=103
+  delta2005: beta(ntrgap)=-0.531759, SE=0.166676, t=-3.190, p=0.0014, N=103
+```
+
+:::
+
+**Interpretation:** The NTR gap has a significant negative effect on manufacturing employment growth starting from 2002. The effect grows over time: a 10 pp increase in the NTR gap is associated with roughly 5 pp lower employment growth by 2004–2005.
+
+---
+
+> Use `twowayfeweights` with `type(fdTR)` to assess whether $\hat{\beta}_{fe}$ estimates a convex combination of effects.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+twowayfeweights delta2001 indusid cons ntrgap ntrgap, type(fdTR)
+```
+
+```
+Under the common trends assumption,
+the TWFE coefficient beta, equal to -0.0612, estimates a weighted sum of 103 ATTs.
+62 ATTs receive a positive weight, and 41 receive a negative weight.
+------------------------------------------------
+Treat. var: ntrgap      # ATTs      Σ weights
+------------------------------------------------
+Positive weights        62          1.3190
+Negative weights        41          -0.3190
+------------------------------------------------
+Total                   103         1.0000
+------------------------------------------------
+```
+
+### R
+
+```r
+library(TwoWayFEWeights)
+
+# Workaround: fdTR with constant time variable crashes in R.
+# Create a 2-period panel and use feTR (equivalent with T=2).
+df_panel <- rbind(
+  data.frame(indusid = df$indusid, time = 1, Y = 0, D = 0),
+  data.frame(indusid = df$indusid, time = 2, Y = df$delta2001, D = df$ntrgap)
+)
+gq2 <- twowayfeweights(df_panel, "Y", "indusid", "time", "D",
+                       type = "feTR", summary_measures = TRUE)
+print(gq2)
+```
+
+```
+Under the common trends assumption,
+the TWFE coefficient beta, equal to -0.0612, estimates a weighted sum of 103 ATTs.
+62 ATTs receive a positive weight, and 41 receive a negative weight.
+
+Treat. var: D       ATTs    Σ weights
+Positive weights      62        1.319
+Negative weights      41       -0.319
+Total                103            1
+```
+
+### Python
+
+```python
+# twowayfeweights type=fdTR not yet implemented in Python.
+# See Stata/R tabs for verified results.
+```
+
+```
+NOTE: twowayfeweights type=fdTR not yet implemented in Python.
+See Stata/R tabs for verified results.
+```
+
+:::
+
+**Interpretation:** 41 out of 103 industry ATTs receive negative weights, summing to −0.319. The TWFE estimator does *not* estimate a convex combination of effects. However, the textbook notes this is expected in the HAD framework and motivates the Stute linearity tests below.
+
+---
+
+## GQ3 (§7.3.3): Test Random Assignment of Treatment Dose
+
+> Regress the NTR gap on pre-treatment employment levels (1997–2000) and test their joint significance.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+reg ntrgap lemp1997 lemp1998 lemp1999 lemp2000, vce(hc2)
+test lemp1997 lemp1998 lemp1999 lemp2000
+```
+
+```
+------------------------------------------------------------------------------
+             |             Robust HC2
+      ntrgap | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    lemp1997 |  -.0219594   .1325814    -0.17   0.869    -.2850629    .2411441
+    lemp1998 |   .6043265   .3103595     1.95   0.054    -.0115719    1.220225
+    lemp1999 |  -.2260641   .4573776    -0.49   0.622    -1.133715    .6815867
+    lemp2000 |  -.3418326   .2938878    -1.16   0.248    -.9250434    .2413782
+       _cons |   .1204804   .1396417     0.86   0.390     -.156634    .3975949
+------------------------------------------------------------------------------
+
+F(4, 98) = 2.39     Prob > F = 0.0560
+```
+
+### R
+
+```r
+library(car)
+fit_gq3 <- lm(ntrgap ~ lemp1997 + lemp1998 + lemp1999 + lemp2000, data = df)
+coeftest(fit_gq3, vcov = vcovHC(fit_gq3, type = "HC2"))
+linearHypothesis(fit_gq3, c("lemp1997 = 0", "lemp1998 = 0",
+                              "lemp1999 = 0", "lemp2000 = 0"),
+                 vcov. = vcovHC(fit_gq3, type = "HC2"))
+```
+
+```
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept)  0.120480   0.139642  0.8628  0.39036
+lemp1997    -0.021959   0.132581 -0.1656  0.86879
+lemp1998     0.604326   0.310360  1.9472  0.05438 .
+lemp1999    -0.226064   0.457378 -0.4943  0.62223
+lemp2000    -0.341833   0.293888 -1.1631  0.24760
+
+F(4, 98) = 2.3901     Pr(>F) = 0.05597
+```
+
+### Python
+
+```python
+X_vars = ['lemp1997', 'lemp1998', 'lemp1999', 'lemp2000']
+res_3 = reg_hc2('ntrgap', X_vars, df)
+print(f"F({len(X_vars)}, {int(res_3.df_resid)}) = {res_3.fvalue:.4f}")
+print(f"Prob > F = {res_3.f_pvalue:.4f}")
+```
+
+```
+             Estimate  Std. Error   t value  Pr(>|t|)
+const        0.120480    0.139642     0.863    0.3880
+lemp1997    -0.021959    0.132581    -0.166    0.8688
+lemp1998     0.604327    0.310360     1.947    0.0517
+lemp1999    -0.226064    0.457378    -0.494    0.6212
+lemp2000    -0.341833    0.293888    -1.163    0.2451
+
+F(4, 98) = 2.3901
+Prob > F = 0.0560
+```
+
+:::
+
+**Interpretation:** The joint F-test yields $p = 0.056$, marginally insignificant at 5%. Pre-treatment employment levels are not strong predictors of the NTR gap, consistent with (approximate) random assignment of the treatment dose.
+
+---
+
+## GQ4 (§7.3.4.3): Stute Tests of Linearity
+
+> Test whether $E[\Delta Y | D]$ is linear in $D$ using the Stute (1997) Cramér–von Mises test, for each post-treatment year and jointly.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+stute_test delta2001 ntrgap
+stute_test delta2002 ntrgap
+stute_test delta2004 ntrgap
+stute_test delta2005 ntrgap
+
+* Joint panel test
+preserve
+reshape long delta deltalintrend, i(indusid) j(year)
+stute_test delta ntrgap indusid year if year>=2001, seed(1)
+restore
+```
+
+```
+--- delta2001 ---
+   t stat    p-value
+ .0004426        .06
+
+--- delta2002 ---
+   t stat    p-value
+ .0011319        .16
+
+--- delta2004 ---
+   t stat    p-value
+ .0039215       .494
+
+--- delta2005 ---
+   t stat    p-value
+ .0033582        .67
+
+--- Joint panel test ---
+        2001 |  .0004426       .042
+        2002 |  .0011319       .134
+        2004 |  .0039215       .478
+        2005 |  .0033582       .716
+Joint Stute test: 0.0089 (0.5400)
+```
+
+### R
+
+```r
+library(StuteTest)
+
+stute_test(df = df, Y = "delta2001", D = "ntrgap")
+stute_test(df = df, Y = "delta2002", D = "ntrgap")
+stute_test(df = df, Y = "delta2004", D = "ntrgap")
+stute_test(df = df, Y = "delta2005", D = "ntrgap")
+```
+
+```
+--- delta2001 ---  t stat: 0.0004426  p-value: 0.056
+--- delta2002 ---  t stat: 0.0011319  p-value: 0.130
+--- delta2004 ---  t stat: 0.0039215  p-value: 0.454
+--- delta2005 ---  t stat: 0.0033582  p-value: 0.666
+```
+
+*Note:* The R `StuteTest` package does not support the panel joint test. Individual test statistics are identical to Stata; p-values differ slightly due to bootstrap randomness. Joint test available in Stata only.
+
+### Python
+
+```python
+for year in [2001, 2002, 2004, 2005]:
+    stat, pv = stute_test_cvm(f'delta{year}', 'ntrgap', df)
+```
+
+```
+Cross-sectional:
+Variable            CvM stat    p-value
+delta2001          0.0004426      0.075
+delta2002          0.0011319      0.116
+delta2004          0.0039215      0.483
+delta2005          0.0033582      0.717
+
+Panel Joint Test (2001-2005):
+Year         |     CvM stat    p-value
+2001         |    0.0004426      0.075
+2002         |    0.0011319      0.116
+2004         |    0.0039215      0.483
+2005         |    0.0033582      0.717
+Joint        |    0.0088542      0.547
+```
+
+:::
+
+**Interpretation:** Linearity is not rejected at conventional levels for 2002–2005 (all $p > 0.10$). For 2001, the p-value is borderline ($\approx 0.04$–$0.06$ depending on bootstrap draw). The joint test ($p = 0.54$) does not reject linearity.
+
+---
+
+## GQ5 (§7.3.4.5): Pre-Trend Tests (Without Linear Trends)
+
+> Test for pre-trends by regressing $\Delta_{2000}^t Y_g$ on $D_g$ for $t \in \{1999, 1998, 1997\}$.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+reg delta1999 ntrgap, vce(hc2)
+reg delta1998 ntrgap, vce(hc2)
+reg delta1997 ntrgap, vce(hc2)
+```
+
+```
+--- delta1999 ---
+      ntrgap |   .0580708   .0279591     2.08   0.040     .0026074    .1135341
+
+--- delta1998 ---
+      ntrgap |   .1407052   .0547983     2.57   0.012     .0320002    .2494102
+
+--- delta1997 ---
+      ntrgap |   .1625066   .0712845     2.28   0.025     .0210973    .3039160
+```
+
+### R
+
+```r
+coeftest(lm(delta1999 ~ ntrgap, data = df), vcov = vcovHC(lm(delta1999 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(delta1998 ~ ntrgap, data = df), vcov = vcovHC(lm(delta1998 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(delta1997 ~ ntrgap, data = df), vcov = vcovHC(lm(delta1997 ~ ntrgap, data = df), type = "HC2"))
+```
+
+```
+--- delta1999 ---  ntrgap:  0.0581  SE: 0.0280  p: 0.040
+--- delta1998 ---  ntrgap:  0.1407  SE: 0.0548  p: 0.012
+--- delta1997 ---  ntrgap:  0.1625  SE: 0.0713  p: 0.025
+```
+
+### Python
+
+```python
+for year in [1999, 1998, 1997]:
+    reg_hc2(f'delta{year}', 'ntrgap', df, print_full=False)
+```
+
+```
+  delta1999: beta(ntrgap)=0.058071, SE=0.027959, t=2.077, p=0.0378, N=103
+  delta1998: beta(ntrgap)=0.140705, SE=0.054798, t=2.568, p=0.0102, N=103
+  delta1997: beta(ntrgap)=0.162507, SE=0.071285, t=2.280, p=0.0226, N=103
+```
+
+:::
+
+**Interpretation:** All three pre-treatment coefficients are **significant and positive**, indicating pre-trends: industries with higher NTR gaps had faster employment growth before PNTR. This motivates adding industry-specific linear trends (GQ6–GQ9).
+
+---
+
+## GQ6 (§7.3.4.5): Pre-Trend Tests WITH Linear Trends
+
+> Repeat GQ5 using the detrended outcome $\tilde{\Delta}_{2000}^t Y_g$ (netting out industry-specific linear trends).
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+reg deltalintrend1998 ntrgap, vce(hc2)
+reg deltalintrend1997 ntrgap, vce(hc2)
+```
+
+```
+--- deltalintrend1998 ---
+      ntrgap |  -.0245637   .0339253    -0.72   0.471    -.0918623    .0427349
+
+--- deltalintrend1997 ---
+      ntrgap |  -.0463651   .0444009    -1.04   0.299    -.1344446    .0417144
+```
+
+### R
+
+```r
+coeftest(lm(deltalintrend1998 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend1998 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(deltalintrend1997 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend1997 ~ ntrgap, data = df), type = "HC2"))
+```
+
+```
+--- deltalintrend1998 ---  ntrgap: -0.0246  SE: 0.0339  p: 0.471
+--- deltalintrend1997 ---  ntrgap: -0.0464  SE: 0.0444  p: 0.299
+```
+
+### Python
+
+```python
+for year in [1998, 1997]:
+    reg_hc2(f'deltalintrend{year}', 'ntrgap', df, print_full=False)
+```
+
+```
+  deltalintrend1998: beta(ntrgap)=-0.024564, SE=0.033925, t=-0.724, p=0.4690, N=103
+  deltalintrend1997: beta(ntrgap)=-0.046365, SE=0.044401, t=-1.044, p=0.2964, N=103
+```
+
+:::
+
+**Interpretation:** After including industry-specific linear trends, all pre-trend coefficients become **small and insignificant** ($p > 0.29$). The trends successfully absorb the pre-existing differential growth.
+
+---
+
+## GQ7 (§7.3.4.5): Stute Tests of Mean Independence (With Linear Trends)
+
+> Test whether $E[\tilde{\Delta} Y | D] = \text{const}$ (mean independence, order 0) for the detrended pre-period outcomes.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+stute_test deltalintrend1998 ntrgap, order(0) seed(1)
+stute_test deltalintrend1997 ntrgap, order(0) seed(1)
+
+* Joint panel test
+preserve
+reshape long delta deltalintrend, i(indusid) j(year)
+stute_test deltalintrend ntrgap indusid year if inlist(year, 1997, 1998), order(0) seed(1)
+restore
+```
+
+```
+--- deltalintrend1998 ---  t stat: .0004249  p-value: .302
+--- deltalintrend1997 ---  t stat: .000752   p-value: .508
+
+--- Joint panel test ---
+        1997 |   .000752       .508
+        1998 |  .0004249       .302
+Joint Stute test: 0.0012 (0.4720)
+```
+
+### R
+
+```r
+stute_test(df = df, Y = "deltalintrend1998", D = "ntrgap", order = 0, seed = 1)
+stute_test(df = df, Y = "deltalintrend1997", D = "ntrgap", order = 0, seed = 1)
+```
+
+```
+--- deltalintrend1998 ---  t stat: 0.0004249  p-value: 0.312
+--- deltalintrend1997 ---  t stat: 0.0007520  p-value: 0.490
+```
+
+*Note:* Joint panel test available in Stata only.
+
+### Python
+
+```python
+for year in [1998, 1997]:
+    stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df, order=0)
+```
+
+```
+Cross-sectional (order=0):
+Variable                   CvM stat    p-value
+deltalintrend1998        0.0004249      0.334
+deltalintrend1997        0.0007520      0.566
+
+Panel Joint Test (1997-1998, order=0):
+Year         |     CvM stat    p-value
+1997         |    0.0007520      0.566
+1998         |    0.0004249      0.334
+Joint        |    0.0011769      0.530
+```
+
+:::
+
+**Interpretation:** Mean independence is not rejected for either year ($p > 0.30$) or jointly ($p = 0.47$). The detrended pre-period outcomes are uncorrelated with the treatment dose, supporting the identifying assumptions.
+
+---
+
+## GQ8 (§7.3.4.5): TWFE With Industry-Specific Linear Trends
+
+> Regress the detrended outcome $\tilde{\Delta}_{2000}^t Y_g$ on $D_g$ for post-treatment years.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+reg deltalintrend2001 ntrgap, vce(hc2)
+reg deltalintrend2002 ntrgap, vce(hc2)
+reg deltalintrend2004 ntrgap, vce(hc2)
+reg deltalintrend2005 ntrgap, vce(hc2)
+```
+
+```
+--- deltalintrend2001 ---
+      ntrgap |  -.0031404   .0390586    -0.08   0.936    -.0806222    .0743413
+
+--- deltalintrend2002 ---
+      ntrgap |  -.1437332   .0754461    -1.91   0.060    -.2933979    .0059315
+
+--- deltalintrend2004 ---
+      ntrgap |  -.3074995   .1518755    -2.02   0.046    -.6087796   -.0062194
+
+--- deltalintrend2005 ---
+      ntrgap |  -.2414053   .1675180    -1.44   0.153    -.5737160    .0909053
+```
+
+### R
+
+```r
+coeftest(lm(deltalintrend2001 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend2001 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(deltalintrend2002 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend2002 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(deltalintrend2004 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend2004 ~ ntrgap, data = df), type = "HC2"))
+coeftest(lm(deltalintrend2005 ~ ntrgap, data = df), vcov = vcovHC(lm(deltalintrend2005 ~ ntrgap, data = df), type = "HC2"))
+```
+
+```
+--- deltalintrend2001 ---  ntrgap: -0.0031  SE: 0.0391  p: 0.936
+--- deltalintrend2002 ---  ntrgap: -0.1437  SE: 0.0754  p: 0.060
+--- deltalintrend2004 ---  ntrgap: -0.3075  SE: 0.1519  p: 0.046
+--- deltalintrend2005 ---  ntrgap: -0.2414  SE: 0.1675  p: 0.153
+```
+
+### Python
+
+```python
+for year in [2001, 2002, 2004, 2005]:
+    reg_hc2(f'deltalintrend{year}', 'ntrgap', df, print_full=False)
+```
+
+```
+  deltalintrend2001: beta(ntrgap)=-0.003140, SE=0.039059, t=-0.080, p=0.9359, N=103
+  deltalintrend2002: beta(ntrgap)=-0.143733, SE=0.075446, t=-1.905, p=0.0568, N=103
+  deltalintrend2004: beta(ntrgap)=-0.307499, SE=0.151875, t=-2.025, p=0.0429, N=103
+  deltalintrend2005: beta(ntrgap)=-0.241405, SE=0.167518, t=-1.441, p=0.1496, N=103
+```
+
+:::
+
+**Interpretation:** After including linear trends, the effects are **substantially attenuated** compared to GQ1. Only 2004 is significant at 5% ($\hat{\beta} = -0.31$, $p = 0.046$). The 2005 effect is no longer significant ($p = 0.15$). The linear trends absorb part of the treatment effect, consistent with the treatment effect being partially confounded by pre-existing differential trends.
+
+---
+
+## GQ9 (§7.3.4.5): Stute Tests of Linearity (With Linear Trends)
+
+> Test linearity of $E[\tilde{\Delta} Y | D]$ for the detrended post-treatment outcomes.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+stute_test deltalintrend2001 ntrgap
+stute_test deltalintrend2002 ntrgap
+stute_test deltalintrend2004 ntrgap
+stute_test deltalintrend2005 ntrgap
+
+* Joint panel test
+preserve
+reshape long delta deltalintrend, i(indusid) j(year)
+stute_test deltalintrend ntrgap indusid year if year>=2001, seed(1)
+restore
+```
+
+```
+--- deltalintrend2001 ---  t stat: .0002961  p-value: .372
+--- deltalintrend2002 ---  t stat: .0018016  p-value: .046
+--- deltalintrend2004 ---  t stat: .0050583  p-value: .394
+--- deltalintrend2005 ---  t stat: .0047902  p-value: .546
+
+--- Joint panel test ---
+        2001 |  .0002961       .378
+        2002 |  .0018016       .062
+        2004 |  .0050583       .384
+        2005 |  .0047902        .53
+Joint Stute test: 0.0119 (0.4020)
+```
+
+### R
+
+```r
+stute_test(df = df, Y = "deltalintrend2001", D = "ntrgap")
+stute_test(df = df, Y = "deltalintrend2002", D = "ntrgap")
+stute_test(df = df, Y = "deltalintrend2004", D = "ntrgap")
+stute_test(df = df, Y = "deltalintrend2005", D = "ntrgap")
+```
+
+```
+--- deltalintrend2001 ---  t stat: 0.0002961  p-value: 0.372
+--- deltalintrend2002 ---  t stat: 0.0018016  p-value: 0.064
+--- deltalintrend2004 ---  t stat: 0.0050583  p-value: 0.366
+--- deltalintrend2005 ---  t stat: 0.0047902  p-value: 0.462
+```
+
+*Note:* Joint panel test available in Stata only.
+
+### Python
+
+```python
+for year in [2001, 2002, 2004, 2005]:
+    stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df)
+```
+
+```
+Cross-sectional:
+Variable                   CvM stat    p-value
+deltalintrend2001        0.0002961      0.409
+deltalintrend2002        0.0018016      0.055
+deltalintrend2004        0.0050583      0.373
+deltalintrend2005        0.0047902      0.559
+
+Panel Joint Test (2001-2005, with linear trends):
+Year         |     CvM stat    p-value
+2001         |    0.0002961      0.409
+2002         |    0.0018016      0.055
+2004         |    0.0050583      0.373
+2005         |    0.0047902      0.559
+Joint        |    0.0119463      0.431
+```
+
+:::
+
+**Interpretation:** Linearity is generally not rejected. The 2002 result is borderline ($p \approx 0.05$), but the joint test does not reject ($p = 0.40$). Overall, the linear specification is adequate for the detrended outcomes.
+
+---
+
+## Quasi-Stayer Test
+
+> Test whether quasi-stayers exist: compute $QS = D_{(1)} / (D_{(2)} - D_{(1)})$ where $D_{(1)}$ and $D_{(2)}$ are the two smallest NTR gap values.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+sort ntrgap
+display "D(1) = " ntrgap[1]
+display "D(2) = " ntrgap[2]
+display "QS = " ntrgap[1]/(ntrgap[2]-ntrgap[1])
+```
+
+```
+D(1) = .02028472
+D(2) = .02358311
+QS = D(1)/(D(2)-D(1)) = 6.1498877
+```
+
+### R
+
+```r
+ntrgap_sorted <- sort(df$ntrgap)
+QS <- ntrgap_sorted[1] / (ntrgap_sorted[2] - ntrgap_sorted[1])
+cat("D(1) =", ntrgap_sorted[1], "\nD(2) =", ntrgap_sorted[2], "\nQS =", QS, "\n")
+```
+
+```
+D(1) = 0.02028472
+D(2) = 0.02358311
+QS = 6.149888
+```
+
+### Python
+
+```python
+df_sorted = df.sort_values('ntrgap')
+ntrgap_1 = df_sorted['ntrgap'].iloc[0]
+ntrgap_2 = df_sorted['ntrgap'].iloc[1]
+ratio = ntrgap_1 / (ntrgap_2 - ntrgap_1)
+print(f"D(1) = {ntrgap_1:.8f}")
+print(f"D(2) = {ntrgap_2:.8f}")
+print(f"QS = {ratio:.4f}")
+```
+
+```
+D(1) = 0.02028472
+D(2) = 0.02358311
+QS = 6.1499
+```
+
+:::
+
+**Interpretation:** $QS = 6.15 < 19 = 1/\alpha - 1$ at $\alpha = 0.05$, so we **fail to reject** the null that quasi-stayers exist. This supports the use of the HAD framework: the industry with the smallest NTR gap (0.020) can plausibly serve as a quasi-control group.
