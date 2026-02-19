@@ -4,54 +4,257 @@ title: "Chapter 5: TWFE Estimators Outside of the Classical Design"
 
 ## Overview
 
-Dataset: **Gentzkow, Shapiro and Sinkinson (2011)** — `gentzkowetal_didtextbook.dta`
+Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta`
 
-This chapter investigates what the TWFE estimator $\hat{\beta}_{fe}$ estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1872 to 1928.
+This chapter investigates what the TWFE estimator $\hat{\beta}^{fe}$ estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1872 to 1928.
 
-Key tool: the `twowayfeweights` package (Stata/R) decomposes $\hat{\beta}_{fe}$ into a weighted sum of treatment effects, where some weights may be **negative** — meaning $\hat{\beta}_{fe}$ may not estimate a convex combination of effects.
+Key tool: the `twowayfeweights` package (Stata/R) decomposes $\hat{\beta}^{fe}$ into a weighted sum of treatment effects, where some weights may be negative — meaning $\hat{\beta}^{fe}$ may not estimate a convex combination of effects.
 
-No plots in this chapter — only numerical outputs from regressions and decompositions.
+No event-study plots in this chapter — only numerical outputs from regressions and decompositions.
 
 ---
 
-## 5.6.1 Basic TWFE Regression
-
-> Regress turnout on number of newspapers and county and year FEs, clustering standard errors at the county level. Then decompose $\hat{\beta}_{fe}$ using `twowayfeweights`.
+## Panel View
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-use "data/gentzkowetal_didtextbook.dta", clear
+* ssc install panelview, replace
+gen has_newspaper = (numdailies > 0) if numdailies != .
 
-* TWFE regression
+panelview prestout has_newspaper, i(cnty90) t(year) type(treat) ///
+    title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)") ///
+    legend(label(1 "No newspaper") label(2 "Has newspaper"))
+graph export "figures/ch05_panelview_stata.png", replace width(1200)
+```
+
+<img src="../figures/ch05_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
+
+### R
+
+```r
+library(panelView)
+panelview(prestout ~ numdailies, data = df,
+          index = c("cnty90", "year"), type = "treat",
+          main = "Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)",
+          xlab = "Year", ylab = "County")
+```
+
+<img src="../figures/ch05_panelview_R.png" alt="Treatment Status (R)" width="100%" />
+
+### Python
+
+```python
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+
+pivot = df.pivot_table(index="cnty90", columns="year",
+                       values="numdailies", aggfunc="max").fillna(0)
+pivot_bin = (pivot > 0).astype(int)
+
+ever_treated = pivot_bin.max(axis=1)
+order = list(ever_treated[ever_treated == 0].index) + \
+        list(ever_treated[ever_treated == 1].index)
+pivot_bin = pivot_bin.reindex(order)
+
+fig, ax = plt.subplots(figsize=(12, 7))
+cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
+ax.imshow(pivot_bin.values, aspect="auto", cmap=cmap, interpolation="nearest")
+
+years = pivot_bin.columns.astype(int)
+tick_pos = list(range(0, len(years), 2))
+ax.set_xticks(tick_pos)
+ax.set_xticklabels([str(years[i]) for i in tick_pos], fontsize=9, rotation=45)
+ax.set_xlabel("Year", fontsize=12)
+ax.set_ylabel("County", fontsize=11)
+ax.set_title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)\n"
+             f"{len(pivot_bin)} counties × {len(years)} elections | "
+             f"D = has ≥1 daily newspaper", fontsize=13)
+
+legend_elements = [Patch(facecolor="#4575b4", label="No newspaper (D=0)"),
+                   Patch(facecolor="#d73027", label="Has newspaper (D≥1)")]
+ax.legend(handles=legend_elements, loc="upper left", fontsize=10)
+plt.tight_layout()
+plt.savefig("figures/ch05_panelview_Python.png", dpi=150, bbox_inches="tight")
+plt.show()
+```
+
+<img src="../figures/ch05_panelview_Python.png" alt="Treatment Status (Python)" width="100%" />
+
+:::
+
+---
+
+## 5.6.1 Basic TWFE Regression
+
+Regress turnout on number of newspapers and county and year FEs, clustering standard errors at the county level. Then decompose $\hat{\beta}^{fe}$ using `twowayfeweights`.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
 areg prestout i.year numdailies, absorb(cnty90) cluster(cnty90)
 ```
 
 ```
-Linear regression, absorbing indicators            Number of obs   =    16,852
-Absorbed variable: cnty90                           No. of categories =   1,195
-                                                    F(  15,  1194)  =    74.01
-                                                    Prob > F        =   0.0000
-                                                    R-squared       =   0.6666
-                                                    Adj R-squared   =   0.6404
-                                                    Root MSE        =   0.0883
+Linear regression, absorbing indicators             Number of obs     = 16,872
+Absorbed variable: cnty90                           No. of categories =  1,195
+                                                    F(16, 1194)       = 310.47
+                                                    Prob > F          = 0.0000
+                                                    R-squared         = 0.7006
+                                                    Adj R-squared     = 0.6774
+                                                    Root MSE          = 0.1255
 
-                              (Std. err. adjusted for 1,195 clusters in cnty90)
---------------------------------------------------------------------------------
-               |               Robust
-      prestout | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
-   numdailies  |   .0029064   .0016071     1.81   0.071    -.0002472    .0060601
-         ...   |
-         _cons |   .5979562   .0028482   209.94   0.000     .5923685    .6035438
---------------------------------------------------------------------------------
+                             (Std. err. adjusted for 1,195 clusters in cnty90)
+------------------------------------------------------------------------------
+             |               Robust
+    prestout | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        year |
+       1872  |  -.0117399   .0084998    -1.38   0.167    -.0284162    .0049364
+       1876  |   .0682968   .0079161     8.63   0.000     .0527658    .0838278
+       1880  |   .0707524   .0084285     8.39   0.000     .0542160    .0872888
+       1884  |   .0743330   .0093760     7.93   0.000     .0559377    .0927284
+       1888  |   .0837409   .0095892     8.73   0.000     .0649273    .1025545
+       1892  |   .0409980   .0096998     4.23   0.000     .0219675    .0600285
+       1896  |   .0730286   .0106514     6.86   0.000     .0521311    .0939262
+       1900  |   .0143816   .0112282     1.28   0.200    -.0076475    .0364107
+       1904  |  -.0782734   .0109829    -7.13   0.000    -.0998212   -.0567255
+       1908  |  -.0663333   .0111551    -5.95   0.000    -.0882192   -.0444474
+       1912  |  -.1294217   .0110474   -11.72   0.000    -.1510962   -.1077473
+       1916  |  -.0910842   .0111088    -8.20   0.000    -.1128791   -.0692893
+       1920  |  -.1519845   .0108909   -13.96   0.000    -.1733520   -.1306170
+       1924  |  -.1649369   .0109407   -15.08   0.000    -.1864020   -.1434718
+       1928  |  -.1102546   .0108236   -10.19   0.000    -.1314900   -.0890193
+             |
+  numdailies |   .0029393   .0016283     1.81   0.071    -.0002553    .0061339
+       _cons |   .6764326   .0082986    81.51   0.000     .6601511    .6927140
+------------------------------------------------------------------------------
 ```
 
 ```stata
-* Decomposition
 twowayfeweights prestout cnty90 year numdailies, type(feTR)
+```
+
+```
+Under the common trends assumption,
+the TWFE coefficient beta, equal to 0.0029, estimates a weighted sum of 10378 ATTs.
+6180 ATTs receive a positive weight, and 4198 receive a negative weight.
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6180        1.4740
+Negative weights        4198        -0.4740
+------------------------------------------------
+Total                   10378       1.0000
+------------------------------------------------
+```
+
+### R
+
+```r
+library(fixest)
+model1 <- feols(prestout ~ numdailies + i(year) | cnty90,
+                data = df, cluster = ~cnty90,
+                ssc = ssc(fixef.K = "full"))
+```
+
+```
+Dep. var.: prestout | Obs: 16872 | FE: cnty90 | Cluster: cnty90
+------------------------------------------------------------------------------------------
+Variable                   Coefficient    Std. Err.    t value   Pr(>|t|)         2.5%        97.5%
+------------------------------------------------------------------------------------------
+numdailies                   0.0029393    0.0016283       1.81      0.071   -0.0002553    0.0061339
+year::1872                  -0.0117399    0.0084998      -1.38      0.167   -0.0284162    0.0049364
+year::1876                   0.0682968    0.0079161       8.63      0.000    0.0527658    0.0838278
+year::1880                   0.0707524    0.0084285       8.39      0.000    0.0542160    0.0872888
+year::1884                   0.0743330    0.0093760       7.93      0.000    0.0559377    0.0927284
+year::1888                   0.0837409    0.0095892       8.73      0.000    0.0649273    0.1025545
+year::1892                   0.0409980    0.0096998       4.23      0.000    0.0219675    0.0600285
+year::1896                   0.0730286    0.0106514       6.86      0.000    0.0521311    0.0939262
+year::1900                   0.0143816    0.0112282       1.28      0.200   -0.0076475    0.0364107
+year::1904                  -0.0782734    0.0109829      -7.13      0.000   -0.0998212   -0.0567255
+year::1908                  -0.0663333    0.0111551      -5.95      0.000   -0.0882192   -0.0444474
+year::1912                  -0.1294217    0.0110474     -11.72      0.000   -0.1510962   -0.1077473
+year::1916                  -0.0910842    0.0111088      -8.20      0.000   -0.1128791   -0.0692893
+year::1920                  -0.1519845    0.0108909     -13.96      0.000   -0.1733520   -0.1306170
+year::1924                  -0.1649369    0.0109407     -15.08      0.000   -0.1864020   -0.1434718
+year::1928                  -0.1102546    0.0108236     -10.19      0.000   -0.1314900   -0.0890193
+------------------------------------------------------------------------------------------
+```
+
+```r
+library(TwoWayFEWeights)
+decomp1 <- twowayfeweights(df, "prestout", "cnty90", "year",
+                            "numdailies", type = "feTR")
+```
+
+```
+Under the common trends assumption,
+the TWFE coefficient beta, equal to 0.0029, estimates a weighted sum of 10378 ATTs.
+6180 ATTs receive a positive weight, and 4198 receive a negative weight.
+
+Treat. var: numdailies     ATTs    Σ weights
+Positive weights           6180        1.474
+Negative weights           4198       -0.474
+Total                     10378            1
+```
+
+### Python
+
+```python
+import pyfixest as pf
+
+m1 = pf.feols(
+    "prestout ~ numdailies + C(year) | cnty90",
+    data=df,
+    vcov={"CRV1": "cnty90"},
+    ssc=pf.ssc(adj=True, fixef_k="full", cluster_adj=True)
+)
+```
+
+```
+Dep. var.:      prestout
+Observations:   16872
+Fixed effects:  cnty90
+Cluster var:    cnty90
+--------------------------------------------------------------------------------
+Variable              Coefficient    Std. Err.          t      P>|t|                 [95% CI]
+--------------------------------------------------------------------------------
+numdailies              0.0029393    0.0016283       1.81      0.071 [-0.0002521,  0.0061308]
+year::1872             -0.0117399    0.0084998      -1.38      0.167 [-0.0283996,  0.0049198]
+year::1876              0.0682968    0.0079161       8.63      0.000 [ 0.0527813,  0.0838123]
+year::1880              0.0707524    0.0084285       8.39      0.000 [ 0.0542325,  0.0872723]
+year::1884              0.0743330    0.0093760       7.93      0.000 [ 0.0559560,  0.0927101]
+year::1888              0.0837409    0.0095892       8.73      0.000 [ 0.0649460,  0.1025357]
+year::1892              0.0409980    0.0096998       4.23      0.000 [ 0.0219864,  0.0600096]
+year::1896              0.0730286    0.0106514       6.86      0.000 [ 0.0521519,  0.0939054]
+year::1900              0.0143816    0.0112282       1.28      0.200 [-0.0076256,  0.0363888]
+year::1904             -0.0782734    0.0109829      -7.13      0.000 [-0.0997998, -0.0567469]
+year::1908             -0.0663333    0.0111551      -5.95      0.000 [-0.0881974, -0.0444692]
+year::1912             -0.1294217    0.0110474     -11.72      0.000 [-0.1510746, -0.1077688]
+year::1916             -0.0910842    0.0111088      -8.20      0.000 [-0.1128574, -0.0693110]
+year::1920             -0.1519845    0.0108909     -13.96      0.000 [-0.1733307, -0.1306383]
+year::1924             -0.1649369    0.0109407     -15.08      0.000 [-0.1863807, -0.1434932]
+year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688, -0.0890405]
+--------------------------------------------------------------------------------
+```
+
+```python
+# Decomposition (manual implementation of twowayfeweights feTR)
+eps = np.array(pf.feols("numdailies ~ 1 | cnty90 + year", data=df).resid())
+D_vals = df['numdailies'].astype(float).values
+N = len(D_vals)
+denom_W = np.mean(eps * D_vals)
+weight = eps * D_vals / (N * denom_W)
+
+att = D_vals > 0
+pos = att & (weight > 1e-9)
+neg = att & (weight < -1e-9)
 ```
 
 ```
@@ -59,408 +262,253 @@ Under the common trends assumption, beta estimates a weighted sum of 10378
 ATTs.
 6180 ATTs receive a positive weight, and 4198 receive a negative weight.
 The sum of the positive weights is equal to 1.4740.
-The sum of the negative weights is equal to -.4740.
-```
-
-### R
-
-```r
-library(haven); library(fixest); library(TwoWayFEWeights)
-
-df <- read_dta("data/gentzkowetal_didtextbook.dta")
-
-# TWFE regression
-twfe_reg <- feols(prestout ~ numdailies | cnty90 + year, 
-                  data = df, cluster = ~cnty90)
-summary(twfe_reg)
-```
-
-```
-OLS estimation, Pair: cnty90 & year.
-Dep. var.: prestout
-Observations: 16,852
-
-Standard-errors: Clustered (cnty90) 
-             Estimate Std. Error t value Pr(>|t|)
-numdailies  0.002906   0.001571   1.850   0.0646
-
----
-Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
-
-```r
-# Decomposition
-twfe_decomp <- twowayfeweights(df, "prestout", "cnty90", "year", "numdailies", 
-                                type = "feTR")
-```
-
-```
-Under the common trends assumption, beta estimates a weighted sum of 10378
-ATTs.
-6180 ATTs receive a positive weight, and 4198 receive a negative weight.
-The sum of the positive weights is equal to 1.474.
-The sum of the negative weights is equal to -0.474.
-```
-
-### Python
-
-```python
-import pandas as pd
-import numpy as np
-import pyfixest as pf
-import warnings
-warnings.filterwarnings('ignore')
-from pathlib import Path
-
-datapath = Path("data")
-df = pd.read_stata(datapath / "gentzkowetal_didtextbook.dta")
-
-# TWFE regression
-result = pf.feols(
-    "prestout ~ numdailies + C(year) | cnty90", 
-    data=df, 
-    vcov={"CRV1": "cnty90"},
-    ssc=pf.ssc(adj=True, fixef_k="full", cluster_adj=True)
-)
-print(result.summary())
-```
-
-```
-Estimation:  OLS
-Dep. var.: prestout, Fixed effects: cnty90
-Inference:  CRV1
-Observations:  16872
-
-| Coefficient     |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
-|:----------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
-| numdailies      |      0.003 |        0.002 |     1.805 |      0.071 | -0.000 |   0.006 |
-| C(year)[T.1872] |     -0.012 |        0.008 |    -1.381 |      0.167 | -0.028 |   0.005 |
-| C(year)[T.1876] |      0.068 |        0.008 |     8.628 |      0.000 |  0.053 |   0.084 |
-| C(year)[T.1880] |      0.071 |        0.008 |     8.394 |      0.000 |  0.054 |   0.087 |
-| C(year)[T.1884] |      0.074 |        0.009 |     7.928 |      0.000 |  0.056 |   0.093 |
-| C(year)[T.1888] |      0.084 |        0.010 |     8.733 |      0.000 |  0.065 |   0.103 |
-| C(year)[T.1892] |      0.041 |        0.010 |     4.227 |      0.000 |  0.022 |   0.060 |
-| C(year)[T.1896] |      0.073 |        0.011 |     6.856 |      0.000 |  0.052 |   0.094 |
-| C(year)[T.1900] |      0.014 |        0.011 |     1.281 |      0.200 | -0.008 |   0.036 |
-| C(year)[T.1904] |     -0.078 |        0.011 |    -7.127 |      0.000 | -0.100 |  -0.057 |
-| C(year)[T.1908] |     -0.066 |        0.011 |    -5.946 |      0.000 | -0.088 |  -0.044 |
-| C(year)[T.1912] |     -0.129 |        0.011 |   -11.715 |      0.000 | -0.151 |  -0.108 |
-| C(year)[T.1916] |     -0.091 |        0.011 |    -8.199 |      0.000 | -0.113 |  -0.069 |
-| C(year)[T.1920] |     -0.152 |        0.011 |   -13.955 |      0.000 | -0.173 |  -0.131 |
-| C(year)[T.1924] |     -0.165 |        0.011 |   -15.076 |      0.000 | -0.186 |  -0.143 |
-| C(year)[T.1928] |     -0.110 |        0.011 |   -10.187 |      0.000 | -0.131 |  -0.089 |
----
-RMSE: 0.121 R2: 0.701 R2 Within: 0.326
-```
-
-```python
-# Decomposition
-Y, G, T, D = 'prestout', 'cnty90', 'year', 'numdailies'
-eps = np.array(pf.feols(f"{D} ~ 1 | {G} + {T}", data=df).resid())
-D_vals = df[D].astype(float).values
-N = len(D_vals)
-denom_W = np.mean(eps * D_vals)
-weight = eps * D_vals / (N * denom_W)
-beta = np.array(pf.feols(f"{Y} ~ {D} | {G} + {T}", data=df).coef())[0]
-
-att = D_vals > 0
-pos = att & (weight > 0)
-neg = att & (weight < 0)
-
-print(f"beta = {beta:.4f}")
-print(f"Positive: {pos.sum()}, Σ = {weight[pos].sum():.4f}")
-print(f"Negative: {neg.sum()}, Σ = {weight[neg].sum():.4f}")
-```
-
-```
-Under the common trends assumption,
-the TWFE coefficient beta, equal to 0.0029, estimates a weighted
-sum of 10378 ATTs.
-6180 ATTs receive a positive weight, and 4198 receive a negative weight.
-------------------------------------------------
-Treat. var: numdailies   # ATTs      Σ weights
-------------------------------------------------
-Positive weights         6180        1.4740
-Negative weights         4198        -0.4740
-------------------------------------------------
-Total                    10378       1.0000
+The sum of the negative weights is equal to -0.4740.
 ```
 
 :::
-
-**Interpretation:** $\hat{\beta}_{fe} = 0.0029$: one more newspaper would increase turnout by 0.29 percentage points (marginally significant, s.e. = 0.0016). The decomposition reveals that under the parallel-trends assumption, $\hat{\beta}_{fe}$ estimates a weighted sum of 10,378 county×election-year effects, where 6,180 are weighted positively and 4,198 are weighted negatively (negative weights sum to −0.47). Accordingly, $\hat{\beta}_{fe}$ is far from estimating a convex combination of effects.
 
 ---
 
 ## 5.6.2 TWFE Regression with State-Year FEs
 
-> Regress turnout on number of newspapers and county, year, and state-year FEs. Then decompose using `twowayfeweights` with the `controls` option.
+Regress turnout on number of newspapers and county, year, and state-year FEs. Then decompose using `twowayfeweights` with the controls option.
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-* Create state-year dummies
 qui tab styr, gen(styr)
-
-* TWFE with state-year FEs
 qui areg prestout i.year i.styr numdailies, absorb(cnty90) cluster(cnty90)
-display _b[numdailies], _se[numdailies]
+display "numdailies:  coef = " %12.7f _b[numdailies] ///
+   "  se = " %12.7f _se[numdailies]
 ```
 
 ```
--.00119671   .00106448
+numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```stata
-* Decomposition with state-year controls
 twowayfeweights prestout cnty90 year numdailies, type(feTR) controls(styr1-styr683)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 10342
-ATTs.
+Under the common trends assumption,
+the TWFE coefficient beta, equal to -0.0012, estimates a weighted sum of 10342 ATTs.
 6195 ATTs receive a positive weight, and 4147 receive a negative weight.
-The sum of the positive weights is equal to 1.5331.
-The sum of the negative weights is equal to -.5331.
-36 observations receive a weight equal to 0.
+10378 (g,t) cells receive the treatment, but the ATTs of 36 cells receive a weight equal to zero.
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6195        1.5331
+Negative weights        4147        -0.5331
+------------------------------------------------
+Total                   10342       1.0000
+------------------------------------------------
 ```
 
 ### R
 
 ```r
-library(dplyr); library(fastDummies)
-
-# Create state-year dummies
-df <- df %>% mutate(styr_factor = as.factor(styr))
-df <- dummy_cols(df, select_columns = "styr_factor", 
-                 remove_first_dummy = FALSE, remove_selected_columns = FALSE)
-styr_cols <- names(df)[grepl("^styr_factor_", names(df))]
-
-# TWFE with state-year FEs
-twfe_styr_reg <- feols(prestout ~ numdailies | cnty90 + year + styr, 
-                       data = df, cluster = ~cnty90)
-cat("Coefficient:", coef(twfe_styr_reg)["numdailies"], "\n")
-cat("SE:", se(twfe_styr_reg)["numdailies"], "\n")
+model2 <- feols(prestout ~ numdailies + i(year) + i(styr) | cnty90,
+                data = df, cluster = ~cnty90,
+                ssc = ssc(fixef.K = "full"))
 ```
 
 ```
-Coefficient: -0.001196712
-SE: 0.001063528
-
-NOTE: 22 observations removed because of singleton fixed-effects.
+numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```r
-# Decomposition with state-year controls
-twfe_styr_decomp <- twowayfeweights(df, "prestout", "cnty90", "year", "numdailies", 
-                                     type = "feTR", controls = styr_cols)
+decomp2 <- twowayfeweights(df, "prestout", "cnty90", "year",
+                            "numdailies", type = "feTR",
+                            controls = styr_cols)
 ```
 
 ```
-63 control variables are collinear with the group and time FE and will be removed.
-
-Under the common trends assumption, beta estimates a weighted sum of 10342
-ATTs.
+Under the common trends assumption,
+the TWFE coefficient beta, equal to -0.0012, estimates a weighted sum of 10342 ATTs.
 6195 ATTs receive a positive weight, and 4147 receive a negative weight.
-The sum of the positive weights is equal to 1.5331.
-The sum of the negative weights is equal to -0.5331.
-36 observations receive a weight equal to 0.
+10378 (g,t) cells receive the treatment, but the ATTs of 36 cells receive a weight equal to zero.
+
+Treat. var: numdailies     ATTs    Σ weights
+Positive weights           6195       1.5331
+Negative weights           4147      -0.5331
+Total                     10342            1
 ```
 
 ### Python
 
 ```python
-# TWFE with state-specific trends
-result = pf.feols(
+m2 = pf.feols(
     "prestout ~ numdailies + C(year) + C(styr) | cnty90",
     data=df,
     vcov={"CRV1": "cnty90"},
     ssc=pf.ssc(adj=True, fixef_k="full", cluster_adj=True)
 )
-print(f"numdailies coef: {result.coef()['numdailies']:.7f}")
-print(f"numdailies se:   {result.se()['numdailies']:.7f}")
 ```
 
 ```
-numdailies coef: -0.0012122
-numdailies se:   0.0010962
+numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
+(year and state-year FEs absorbed, not shown)
 ```
 
 ```python
-# Decomposition
-D_vals = df['numdailies'].astype(float).values
-N = len(D_vals)
-eps = np.array(pf.feols("numdailies ~ C(styr) | cnty90 + year", 
-                         data=df, fixef_rm="none").resid())
-denom_W = np.mean(eps * D_vals)
-weight = eps * D_vals / (N * denom_W)
-beta = result.coef()['numdailies']
-
-att = D_vals > 0
-tol = 1e-9
-pos = att & (weight > tol)
-neg = att & (weight < -tol)
-zero = att & (np.abs(weight) <= tol)
-
-print(f"beta = {beta:.4f}, ATTs = {pos.sum()+neg.sum()}")
-print(f"Positive: {pos.sum()}, Σ = {weight[pos].sum():.4f}")
-print(f"Negative: {neg.sum()}, Σ = {weight[neg].sum():.4f}")
-print(f"Zero: {zero.sum()}")
+# Decomposition with state-year controls
+eps2 = np.array(pf.feols("numdailies ~ C(styr) | cnty90 + year",
+                          data=df, fixef_rm="none").resid())
+D_vals2 = df['numdailies'].astype(float).values
+N2 = len(D_vals2)
+denom_W2 = np.mean(eps2 * D_vals2)
+weight2 = eps2 * D_vals2 / (N2 * denom_W2)
 ```
 
 ```
-beta = -0.0012, ATTs = 10342
-Positive: 6195, Σ = 1.5331
-Negative: 4147, Σ = -0.5331
-Zero: 36
+Under the common trends assumption, beta estimates a weighted sum of 10342
+ATTs.
+6195 ATTs receive a positive weight, and 4147 receive a negative weight.
+36 observations receive a weight equal to 0.
+The sum of the positive weights is equal to 1.5331.
+The sum of the negative weights is equal to -0.5331.
 ```
 
 :::
-
-**Interpretation:** Adding state-year FEs flips the sign: $\hat{\beta} = -0.0012$ (s.e. = 0.0011, insignificant). The decomposition shows 10,342 ATTs with 6,195 positive and 4,147 negative weights (negative sum = −0.53), even worse than the basic TWFE. 36 cells receive zero weight.
 
 ---
 
 ## 5.6.3 FD Regression with State-Year FEs
 
-> Regress the change in turnout on the change in number of newspapers and state-year FEs. Decompose using `twowayfeweights` with `type(fdTR)`, and test if weights are correlated with the year variable.
+Regress the change in turnout on the change in number of newspapers and state-year FEs. Decompose using `twowayfeweights` with `type(fdTR)`, and test if weights are correlated with the year variable.
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-* FD regression
 areg changeprestout changedailies, absorb(styr) cluster(cnty90)
 ```
 
 ```
-Linear regression, absorbing indicators            Number of obs   =    15,627
-Absorbed variable: styr                             No. of categories =     683
-                                                    F(   1,  1194)  =      7.69
-                                                    Prob > F        =    0.0056
-                                                    R-squared       =    0.0828
-                                                    Adj R-squared   =    0.0419
-                                                    Root MSE        =    0.0750
+Linear regression, absorbing indicators             Number of obs     = 15,627
+Absorbed variable: styr                             No. of categories =    634
+                                                    F(1, 1194)        =   7.68
+                                                    Prob > F          = 0.0057
+                                                    R-squared         = 0.5690
+                                                    Adj R-squared     = 0.5507
+                                                    Root MSE          = 0.0816
 
                               (Std. err. adjusted for 1,195 clusters in cnty90)
---------------------------------------------------------------------------------
-               |               Robust
-changeprestout | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
- changedailies |   .0025719   .0009275     2.77   0.006     .0007519    .0043919
-         _cons |  -.0013968   .0002543    -5.49   0.000    -.0018958   -.0008979
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+              |               Robust
+changeprest~t | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+changedailies |   .0025907   .0009351     2.77   0.006     .0007561    .0044252
+        _cons |  -.0072455   .0003658   -19.81   0.000    -.0079632   -.0065278
+-------------------------------------------------------------------------------
 ```
 
 ```stata
-* FD decomposition
 twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
     type(fdTR) controls(styr1-styr683)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 9876
-ATTs.
+Under the common trends assumption,
+the TWFE coefficient beta, equal to 0.0026, estimates a weighted sum of 9876 ATTs.
 5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-The sum of the positive weights is equal to 2.4271.
-The sum of the negative weights is equal to -1.4271.
-502 observations receive a weight equal to 0.
+10378 (g,t) cells receive the treatment, but the ATTs of 502 cells receive a weight equal to zero.
+------------------------------------------------
+Treat. var: changedailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights           5371        2.4271
+Negative weights           4505        -1.4271
+------------------------------------------------
+Total                      9876        1.0000
+------------------------------------------------
 ```
 
 ```stata
-* Test if weights correlated with year
 twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
     type(fdTR) controls(styr1-styr683) test_random_weights(year)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 9876
-ATTs.
-5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-The sum of the positive weights is equal to 2.4271.
-The sum of the negative weights is equal to -1.4271.
-502 observations receive a weight equal to 0.
+Regression of variables possibly correlated with the treatment effect on the weights
 
-The coefficient of year in the regression of the weights on year is:
-   Coef          SE         t       Corr(weights, year)
--.1674271   .0510117   -3.2821307      -.0631614
+             Coef           SE       t-stat  Correlation
+year    -.1674271    .05101171   -3.2821307    -.0631614
 ```
 
 ### R
 
 ```r
-# FD regression
-fd_reg <- feols(changeprestout ~ changedailies | styr, 
-                data = df, cluster = ~cnty90)
-summary(fd_reg)
+model3 <- feols(changeprestout ~ changedailies | styr,
+                data = df, cluster = ~cnty90,
+                ssc = ssc(fixef.K = "full"))
 ```
 
 ```
-OLS estimation, Pair: styr.
-Dep. var.: changeprestout
-Observations: 15,607 (1,245 NA + 20 singletons removed)
-
-Standard-errors: Clustered (cnty90) 
-               Estimate Std. Error t value Pr(>|t|)
-changedailies  0.002572   0.000934   2.753  0.00601 **
+Dep. var.: changeprestout | Obs: 15607 | FE: styr | Cluster: cnty90
+------------------------------------------------------------------------------------------
+Variable                   Coefficient    Std. Err.    t value   Pr(>|t|)         2.5%        97.5%
+------------------------------------------------------------------------------------------
+changedailies                0.0025907    0.0009345       2.77     0.0057    0.0007573    0.0044241
+------------------------------------------------------------------------------------------
 ```
 
 ```r
-# FD decomposition
-fd_decomp <- twowayfeweights(df, "changeprestout", "cnty90", "year", 
-                              "changedailies", "numdailies", 
-                              type = "fdTR", controls = styr_cols)
+decomp3 <- twowayfeweights(df, "changeprestout", "cnty90", "year",
+                            "changedailies", D0 = "numdailies",
+                            type = "fdTR", controls = styr_cols)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 9876
-ATTs.
+Under the common trends assumption,
+the TWFE coefficient beta, equal to 0.0026, estimates a weighted sum of 9876 ATTs.
 5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-The sum of the positive weights is equal to 2.4271.
-The sum of the negative weights is equal to -1.4271.
-502 observations receive a weight equal to 0.
+10378 (g,t) cells receive the treatment, but the ATTs of 502 cells receive a weight equal to zero.
+
+Treat. var: changedailies    ATTs    Σ weights
+Positive weights             5371       2.4271
+Negative weights             4505      -1.4271
+Total                        9876            1
 ```
 
 ```r
-# Test if weights correlated with year
-fd_decomp_test <- twowayfeweights(df, "changeprestout", "cnty90", "year", 
-                                   "changedailies", "numdailies", 
-                                   type = "fdTR", controls = styr_cols,
-                                   test_random_weights = "year")
+decomp3_test <- twowayfeweights(df, "changeprestout", "cnty90", "year",
+                                 "changedailies", D0 = "numdailies",
+                                 type = "fdTR", controls = styr_cols,
+                                 test_random_weights = "year")
 ```
 
 ```
-The coefficient of year in the regression of the weights on year is:
-   Coef          SE         t       Corr(weights, year)
--.1674271   .0510117   -3.282131       -.0631614
+Regression of variables possibly correlated with the treatment effect on the weights:
+              Coef         SE    t-stat Correlation
+RW_year -0.1674271 0.05101171 -3.282131  -0.0631614
 ```
 
 ### Python
 
 ```python
-# FD regression with state-year FEs
-result = pf.feols(
+m3 = pf.feols(
     "changeprestout ~ changedailies | styr",
     data=df,
     vcov={"CRV1": "cnty90"},
     ssc=pf.ssc(adj=True, fixef_k="full", cluster_adj=True),
     fixef_rm="none"
 )
-
-b = np.array(result.coef())[0]
-se = np.array(result.se())[0]
-t = np.array(result.tstat())[0]
-p = np.array(result.pvalue())[0]
-print(f"changedailies: coef={b:.7f}  se={se:.7f}  t={t:.2f}  p={p:.4f}")
-print(f"N={result._N}")
 ```
 
 ```
-changedailies: coef=0.0025907  se=0.0009351  t=2.77  p=0.0057
-N=15627
+Dep. var.:      changeprestout
+Observations:   15627
+Fixed effects:  styr
+Cluster var:    cnty90
+--------------------------------------------------------------------------------
+Variable              Coefficient    Std. Err.          t      P>|t|                 [95% CI]
+--------------------------------------------------------------------------------
+changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580,  0.0044234]
+--------------------------------------------------------------------------------
 ```
 
 ```python
@@ -469,7 +517,7 @@ D0 = df['numdailies'].astype(float).values
 N = len(df)
 mask = ~df['changedailies'].isna()
 eps = np.zeros(N)
-eps[mask] = np.array(pf.feols("changedailies ~ C(styr) | year", 
+eps[mask] = np.array(pf.feols("changedailies ~ C(styr) | year",
                                data=df[mask], fixef_rm="none").resid())
 
 yr2fn = {y: i for i, y in enumerate(sorted(df['year'].unique()))}
@@ -486,46 +534,40 @@ work['w'] = work['w'].fillna(work['eps'])
 
 denom_W = (work['w'] * work['D0']).mean()
 weight = work['w'].values * work['D0'].values / (N * denom_W)
-
-att = work['D0'].values > 0
-tol = 1e-9
-pos = att & (weight > tol)
-neg = att & (weight < -tol)
-zero = att & (np.abs(weight) <= tol)
 ```
 
 ```
-Positive: 5371, Σ=2.4271
-Negative: 4505, Σ=-1.4271
-Zero: 502, Total ATTs: 9876
+Under the common trends assumption, beta estimates a weighted sum of 9876
+ATTs.
+5371 ATTs receive a positive weight, and 4505 receive a negative weight.
+502 observations receive a weight equal to 0.
+The sum of the positive weights is equal to 2.4271.
+The sum of the negative weights is equal to -1.4271.
 ```
 
 ```python
-# Test if weights correlated with year
-# ... (weight-year regression)
+# Test random weights (year)
+mean_D0 = work['D0'].mean()
+mean_wD0 = (work['w'] * work['D0']).mean()
+work['sigma'] = work['w'] * mean_D0 / mean_wD0
+
+sub = att & np.isfinite(work['sigma'].values)
+reg_df = pd.DataFrame({
+    'year_val': work.loc[sub, 'year_orig'].values,
+    'sigma': work.loc[sub, 'sigma'].values,
+    'nat_w': work.loc[sub, 'D0'].values,
+    'G': work.loc[sub, 'G'].astype(str).values
+})
+reg_df['nat_w'] = reg_df['nat_w'] / reg_df['nat_w'].sum()
+
+rw_reg = pf.feols("year_val ~ sigma", data=reg_df,
+                   weights="nat_w", vcov={"CRV1": "G"})
 ```
 
 ```
-Under the common trends assumption,
-the TWFE coefficient beta, equal to 0.0026, estimates a weighted
-sum of 9876 ATTs.
-5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-10378 (g,t) cells receive the treatment, but the ATTs of 502 cells
-receive a weight equal to zero.
-------------------------------------------------
-Treat. var: changedail~s # ATTs      Σ weights
-------------------------------------------------
-Positive weights         5371        2.4271
-Negative weights         4505        -1.4271
-------------------------------------------------
-Total                    9876        1.0000
-------------------------------------------------
-Regression of variables possibly correlated with the treatment ef-
-fect on the weights
-                     Coef           SE       t-stat  Correlation
-        year   -0.1674271   0.05101171   -3.2821306   -0.0631614
+The coefficient of year in the regression of the weights on year is:
+    Coef          SE         t       Corr(weights, year)
+  -0.1674271   0.0510117   -3.2821306       -0.0631614
 ```
 
 :::
-
-**Interpretation:** The FD regression gives $\hat{\beta}_{fd} = 0.0026$ (s.e. = 0.0009), significant at all conventional levels. But the decomposition is even more problematic: 9,876 ATTs with 5,371 positive and 4,505 negative weights (negative sum = −1.43). The test reveals weights are significantly negatively correlated with year (t = −3.28): the FD regression upweights newspapers' effects in early elections and downweights effects in late elections. If newspapers' effect diminishes over time (e.g., radio appears), the FD regression could overestimate the average effect; if it increases over time (e.g., rising literacy), it could underestimate it.

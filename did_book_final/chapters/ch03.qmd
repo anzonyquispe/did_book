@@ -10,6 +10,70 @@ The Trading with the Enemy Act (TWEA) allowed US firms to use German-owned paten
 
 ---
 
+## Panel View
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+* ssc install panelview, replace
+panelview patents twea, i(subclass) t(year) type(treat) ///
+    title("Treatment Status: Moser & Voena (2012)")
+graph export "figures/ch03_panelview_stata.png", replace width(1200)
+```
+
+<img src="../figures/ch03_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
+
+### R
+
+```r
+library(panelView)
+panelview(patents ~ twea, data = df,
+          index = c("subclass", "year"), type = "treat",
+          main = "Treatment Status: Moser & Voena (2012)",
+          xlab = "Year", ylab = "Subclass",
+          legend.labs = c("Control", "Treated"))
+```
+
+<img src="../figures/ch03_panelview_R.png" alt="Treatment Status (R)" width="100%" />
+
+### Python
+
+```python
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+
+pivot = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="max")
+pivot = pivot.fillna(0).astype(int)
+treated_subs = df.loc[df["treatmentgroup"] == 1, "subclass"].unique()
+control_subs = df.loc[df["treatmentgroup"] == 0, "subclass"].unique()
+pivot = pivot.reindex(list(control_subs) + list(treated_subs))
+
+fig, ax = plt.subplots(figsize=(12, 7))
+cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
+ax.imshow(pivot.values, aspect="auto", cmap=cmap, interpolation="nearest")
+years = pivot.columns.astype(int)
+tick_positions = list(range(0, len(years), 5))
+ax.set_xticks(tick_positions)
+ax.set_xticklabels([str(years[i]) for i in tick_positions])
+ax.set_xlabel("Year"); ax.set_ylabel("Subclass")
+ax.set_title("Treatment Status: Moser & Voena (2012)\n"
+             "7,248 subclasses × 40 years | 336 treated from 1919")
+ax.legend(handles=[Patch(facecolor="#4575b4", label="Control (D=0)"),
+                   Patch(facecolor="#d73027", label="Treated (D=1)")], loc="upper left")
+plt.tight_layout()
+plt.savefig("figures/ch03_panelview_Python.png", dpi=150, bbox_inches="tight")
+plt.show()
+```
+
+<img src="../figures/ch03_panelview_Python.png" alt="Treatment Status (Python)" width="100%" />
+
+:::
+
+---
+
 ## Green Question 1: Static TWFE Regression
 
 > Using the `moser_voena_didtextbook` dataset, run the TWFE regression of the number of patents in subclass $g$ and year $t$ on subclass and year FEs and the `twea` treatment, clustering standard errors at the subclass level.
@@ -79,15 +143,15 @@ Inference:  CRV1
 Observations:  289920
 
 | Coefficient   |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
-|:--------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
-| twea          |      0.288 |        0.039 |     7.413 |      0.000 |  0.212 |   0.364 |
+|:--------------|------------|--------------|-----------|------------|--------|---------|
+| twea          |    0.28826 |      0.03889 |   7.41278 |      0.000 |  0.212 |   0.365 |
 ---
 RMSE: 0.978 R2: 0.479 R2 Within: 0.001
 ```
 
 :::
 
-**Result:** The coefficient on `twea` is **0.2883** ($t = 7.41$, $p < 0.001$) across all three languages. Compulsory licensing has a positive and significant effect on US innovation.
+**Result:** The coefficient on `twea` is **0.28826** ($t = 7.41$, $p < 0.001$) across all three languages. Compulsory licensing has a positive and significant effect on US innovation.
 
 ---
 
@@ -144,17 +208,17 @@ print(m2.summary())
 ```
 
 ```
-| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
-|:---------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
-| Intercept      |      0.314 |        0.010 |    32.017 |      0.000 |  0.295 |   0.334 |
-| treatmentgroup |     -0.178 |        0.034 |    -5.266 |      0.000 | -0.244 |  -0.112 |
-| post           |      0.300 |        0.009 |    33.071 |      0.000 |  0.282 |   0.317 |
-| twea           |      0.288 |        0.039 |     7.413 |      0.000 |  0.212 |   0.364 |
+| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |    2.5% |   97.5% |
+|:---------------|------------|--------------|-----------|------------|---------|---------|
+| Intercept      |    0.31437 |      0.00982 |  32.01738 |      0.000 |  0.2951 |   0.334 |
+| treatmentgroup |   -0.17809 |      0.03382 |  -5.26648 |      0.000 | -0.2444 |  -0.112 |
+| post           |    0.29967 |      0.00906 |  33.07069 |      0.000 |  0.2819 |   0.317 |
+| twea           |    0.28826 |      0.03889 |   7.41326 |      0.000 |  0.2120 |   0.365 |
 ```
 
 :::
 
-**Result:** The coefficient on `twea` is **identical** (0.2883) in both specifications across all three languages.
+**Result:** The coefficient on `twea` is **identical** (0.28826) in both specifications across all three languages.
 
 ---
 
@@ -209,15 +273,15 @@ print(m3.summary())
 ```
 
 ```
-| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
-|:---------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
-| Intercept      |      0.314 |        0.010 |    32.017 |      0.000 |  0.295 |   0.334 |
-| treatmentgroup |     -0.178 |        0.034 |    -5.266 |      0.000 | -0.244 |  -0.112 |
+| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |    2.5% |   97.5% |
+|:---------------|------------|--------------|-----------|------------|---------|---------|
+| Intercept      |    0.31437 |      0.00982 |  32.01743 |      0.000 |  0.2951 |   0.334 |
+| treatmentgroup |   -0.17809 |      0.03382 |  -5.26649 |      0.000 | -0.2444 |  -0.112 |
 ```
 
 :::
 
-**Result:** The coefficient is **−0.1781** ($t = -5.27$, $p < 0.001$). Treatment is **not** randomly assigned — treated subclasses had fewer patents before the TWEA.
+**Result:** The coefficient is **−0.17809** ($t = -5.27$, $p < 0.001$). Treatment is **not** randomly assigned — treated subclasses had fewer patents before the TWEA.
 
 ---
 
@@ -390,7 +454,24 @@ summary(model5)
 treatmentgroup -0.178087   0.033818 -5.266118 1.4334e-07 ***
 reltimeplus1    0.010801   0.030976  0.348674 7.2734e-01
 reltimeplus2    0.039302   0.030205  1.301183 1.9324e-01
-...
+reltimeplus3    0.049843   0.035973  1.385634 1.6590e-01
+reltimeplus4    0.016650   0.041810  0.398234 6.9050e-01
+reltimeplus5    0.080307   0.049547  1.620753 1.0514e-01
+reltimeplus6    0.008982   0.041055  0.218776 8.2685e-01
+reltimeplus7    0.012950   0.047263  0.274032 7.8404e-01
+reltimeplus8    0.088554   0.043202  2.049798 4.0405e-02 *
+reltimeplus9    0.188545   0.047944  3.932590 8.4570e-05 ***
+reltimeplus10   0.211549   0.050361  4.201191 2.6755e-05 ***
+reltimeplus11   0.119680   0.052021  2.300631 2.1441e-02 *
+reltimeplus12   0.110152   0.059302  1.857479 6.3256e-02
+reltimeplus13   0.226678   0.069128  3.278641 1.0478e-03 **
+reltimeplus14   0.629497   0.104057  6.050261 1.5073e-09 ***
+reltimeplus15   0.603869   0.099484  6.069422 1.3510e-09 ***
+reltimeplus16   0.414116   0.085848  4.823560 1.4305e-06 ***
+reltimeplus17   0.533039   0.095709  5.568517 2.6464e-08 ***
+reltimeplus18   0.704604   0.109204  6.452210 1.1588e-10 ***
+reltimeplus19   0.554658   0.093022  5.963752 2.5802e-09 ***
+reltimeplus20   0.665005   0.102471  6.490150 9.2071e-11 ***
 reltimeplus21   0.784714   0.119014  6.593469 4.5985e-11 ***
 ---
 RMSE: 1.33696   Adj. R2: 0.025481
@@ -405,13 +486,30 @@ print(m5.summary())
 ```
 
 ```
-| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
-|:---------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
-| reltimeplus1   |      0.011 |        0.031 |     0.349 |      0.727 | -0.050 |   0.072 |
-| reltimeplus2   |      0.039 |        0.030 |     1.301 |      0.193 | -0.020 |   0.099 |
-...
-| reltimeplus21  |      0.785 |        0.119 |     6.593 |      0.000 |  0.551 |   1.018 |
-| treatmentgroup |     -0.178 |        0.034 |    -5.266 |      0.000 | -0.244 |  -0.112 |
+| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |    2.5% |   97.5% |
+|:---------------|------------|--------------|-----------|------------|---------|---------|
+| reltimeplus1   |    0.01080 |      0.03098 |   0.34867 |    0.72734 | -0.0499 |   0.072 |
+| reltimeplus2   |    0.03930 |      0.03020 |   1.30118 |    0.19324 | -0.0199 |   0.099 |
+| reltimeplus3   |    0.04984 |      0.03597 |   1.38563 |    0.16590 | -0.0207 |   0.120 |
+| reltimeplus4   |    0.01665 |      0.04181 |   0.39823 |    0.69050 | -0.0653 |   0.099 |
+| reltimeplus5   |    0.08031 |      0.04955 |   1.62075 |    0.10514 | -0.0168 |   0.177 |
+| reltimeplus6   |    0.00898 |      0.04106 |   0.21878 |    0.82685 | -0.0715 |   0.089 |
+| reltimeplus7   |    0.01295 |      0.04726 |   0.27403 |    0.78404 | -0.0797 |   0.106 |
+| reltimeplus8   |    0.08855 |      0.04320 |   2.04980 |    0.04041 |  0.0039 |   0.173 |
+| reltimeplus9   |    0.18855 |      0.04794 |   3.93259 |    0.00008 |  0.0946 |   0.283 |
+| reltimeplus10  |    0.21155 |      0.05036 |   4.20119 |    0.00003 |  0.1128 |   0.310 |
+| reltimeplus11  |    0.11968 |      0.05202 |   2.30063 |    0.02144 |  0.0177 |   0.222 |
+| reltimeplus12  |    0.11015 |      0.05930 |   1.85748 |    0.06326 | -0.0061 |   0.226 |
+| reltimeplus13  |    0.22668 |      0.06913 |   3.27864 |    0.00105 |  0.0912 |   0.362 |
+| reltimeplus14  |    0.62950 |      0.10406 |   6.05026 |    0.00000 |  0.4255 |   0.833 |
+| reltimeplus15  |    0.60387 |      0.09948 |   6.06942 |    0.00000 |  0.4089 |   0.799 |
+| reltimeplus16  |    0.41412 |      0.08585 |   4.82356 |    0.00000 |  0.2458 |   0.582 |
+| reltimeplus17  |    0.53304 |      0.09571 |   5.56852 |    0.00000 |  0.3454 |   0.721 |
+| reltimeplus18  |    0.70460 |      0.10920 |   6.45221 |    0.00000 |  0.4905 |   0.919 |
+| reltimeplus19  |    0.55466 |      0.09302 |   5.96375 |    0.00000 |  0.3723 |   0.737 |
+| reltimeplus20  |    0.66500 |      0.10247 |   6.49015 |    0.00000 |  0.4641 |   0.866 |
+| reltimeplus21  |    0.78471 |      0.11901 |   6.59347 |    0.00000 |  0.5514 |   1.018 |
+| treatmentgroup |   -0.17809 |      0.03382 |  -5.26612 |    0.00000 | -0.2444 |  -0.112 |
 ---
 RMSE: 1.337 R2: 0.026 R2 Within: 0.001
 ```
@@ -649,11 +747,43 @@ for (yr in 1900:1939) {
 ```
 Year 1900: F = 3.2735, p = 0.0000
 Year 1901: F = 2.5398, p = 0.0000
-...
+Year 1902: F = 3.3703, p = 0.0000
+Year 1903: F = 3.1775, p = 0.0000
+Year 1904: F = 4.0726, p = 0.0000
+Year 1905: F = 3.9685, p = 0.0000
+Year 1906: F = 3.5803, p = 0.0000
+Year 1907: F = 1.7711, p = 0.0000
+Year 1908: F = 2.5510, p = 0.0000
+Year 1909: F = 3.7689, p = 0.0000
+Year 1910: F = 2.2839, p = 0.0000
+Year 1911: F = 1.8151, p = 0.0000
+Year 1912: F = 3.7112, p = 0.0000
+Year 1913: F = 2.2403, p = 0.0000
+Year 1914: F = 2.7455, p = 0.0000
+Year 1915: F = 3.6764, p = 0.0000
+Year 1916: F = 3.2690, p = 0.0000
+Year 1917: F = 1.6222, p = 0.0000
+Year 1918: F =      ., p =      .
+Year 1919: F = 1.7652, p = 0.0000
+Year 1920: F = 1.7161, p = 0.0000
+Year 1921: F = 2.6409, p = 0.0000
+Year 1922: F = 1.6035, p = 0.0000
+Year 1923: F = 1.2684, p = 0.0040
+Year 1924: F = 2.3221, p = 0.0000
+Year 1925: F = 1.6974, p = 0.0000
+Year 1926: F = 2.4032, p = 0.0000
+Year 1927: F = 1.5314, p = 0.0000
+Year 1928: F = 1.7269, p = 0.0000
+Year 1929: F = 1.2982, p = 0.0016
 Year 1930: F = 1.1443, p = 0.0999
 Year 1931: F = 1.5775, p = 0.0000
 Year 1932: F = 0.7764, p = 0.0008
-...
+Year 1933: F = 0.8284, p = 0.0134
+Year 1934: F = 1.1337, p = 0.1256
+Year 1935: F = 0.8164, p = 0.0076
+Year 1936: F = 0.7675, p = 0.0005
+Year 1937: F = 0.8621, p = 0.0522
+Year 1938: F = 0.8692, p = 0.0668
 Year 1939: F = 0.7569, p = 0.0002
 ```
 
@@ -674,11 +804,43 @@ for yr in range(1900, 1940):
 ```
 Year 1900: F = 3.2740  p = 0.0000
 Year 1901: F = 2.5396  p = 0.0000
-...
+Year 1902: F = 3.3701  p = 0.0000
+Year 1903: F = 3.1773  p = 0.0000
+Year 1904: F = 4.0723  p = 0.0000
+Year 1905: F = 3.9683  p = 0.0000
+Year 1906: F = 3.5801  p = 0.0000
+Year 1907: F = 1.7712  p = 0.0000
+Year 1908: F = 2.5509  p = 0.0000
+Year 1909: F = 3.7687  p = 0.0000
+Year 1910: F = 2.2838  p = 0.0000
+Year 1911: F = 1.8153  p = 0.0000
+Year 1912: F = 3.7110  p = 0.0000
+Year 1913: F = 2.2402  p = 0.0000
+Year 1914: F = 2.7453  p = 0.0000
+Year 1915: F = 3.6762  p = 0.0000
+Year 1916: F = 3.2688  p = 0.0000
+Year 1917: F = 1.6223  p = 0.0000
+Year 1918: (undefined - reference year)
+Year 1919: F = 1.7651  p = 0.0000
+Year 1920: F = 1.7159  p = 0.0000
+Year 1921: F = 2.6407  p = 0.0000
+Year 1922: F = 1.6034  p = 0.0000
+Year 1923: F = 1.2684  p = 0.0040
+Year 1924: F = 2.3220  p = 0.0000
+Year 1925: F = 1.6973  p = 0.0000
+Year 1926: F = 2.4031  p = 0.0000
+Year 1927: F = 1.5313  p = 0.0000
+Year 1928: F = 1.7268  p = 0.0000
+Year 1929: F = 1.2981  p = 0.0016
 Year 1930: F = 1.1442  p = 0.1002
 Year 1931: F = 1.5777  p = 0.0000
 Year 1932: F = 0.7765  p = 0.0008
-...
+Year 1933: F = 0.8284  p = 0.0134
+Year 1934: F = 1.1336  p = 0.1258
+Year 1935: F = 0.8164  p = 0.0076
+Year 1936: F = 0.7675  p = 0.0005
+Year 1937: F = 0.8621  p = 0.0522
+Year 1938: F = 0.8692  p = 0.0668
 Year 1939: F = 0.7569  p = 0.0002
 ```
 

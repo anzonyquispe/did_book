@@ -12,6 +12,73 @@ Key topics: decomposition of the static TWFE estimator, event-study TWFE, and fo
 
 ---
 
+## PanelView
+
+::: {.panel-tabset}
+
+### Stata
+
+![Treatment Status: Wolfers (2006) — Stata](../figures/ch06_panelview_stata.png)
+
+```stata
+panelview div_rate udl, i(state) t(year) type(treat) ///
+    title("Treatment Status: Wolfers (2006)") ///
+    legend(label(1 "No UDL") label(2 "UDL adopted"))
+```
+
+### R
+
+![Treatment Status: Wolfers (2006) — R](../figures/ch06_panelview_R.png)
+
+```r
+library(panelView)
+panelview(div_rate ~ udl, data = df,
+          index = c("state", "year"), type = "treat",
+          main = "Treatment Status: Wolfers (2006)",
+          xlab = "Year", ylab = "State")
+```
+
+### Python
+
+![Treatment Status: Wolfers (2006) — Python](../figures/ch06_panelview_Python.png)
+
+```python
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+
+states_sorted = (df.groupby("state")["cohort"]
+                 .first().sort_values(ascending=False).index)
+state_idx = {s: i for i, s in enumerate(states_sorted)}
+years = sorted(df["year"].unique())
+
+fig, ax = plt.subplots(figsize=(14, 10))
+cmap = mcolors.ListedColormap(["#4292C6", "#EF6548"])
+for _, row in df.iterrows():
+    si = state_idx[row["state"]]
+    yi = years.index(row["year"])
+    color = 1 if row["udl"] == 1 else 0
+    ax.add_patch(plt.Rectangle((yi, si), 1, 1, color=cmap(color)))
+
+ax.set_xlim(0, len(years)); ax.set_ylim(0, len(states_sorted))
+ax.set_xticks(range(0, len(years), 5))
+ax.set_xticklabels([str(int(years[i])) for i in range(0, len(years), 5)],
+                    rotation=45, fontsize=7)
+ax.set_yticks([i + 0.5 for i in range(len(states_sorted))])
+ax.set_yticklabels(states_sorted, fontsize=6)
+ax.set_xlabel("Year"); ax.set_ylabel("State")
+ax.set_title("Treatment Status: Wolfers (2006)")
+legend_elements = [Patch(facecolor="#4292C6", label="Control"),
+                   Patch(facecolor="#EF6548", label="Treated")]
+ax.legend(handles=legend_elements, loc="lower right")
+plt.tight_layout()
+plt.savefig(FIGDIR / "ch06_panelview_Python.png", dpi=150)
+```
+
+:::
+
+---
+
 ## 6.2.1 Static TWFE Regression (GQ1)
 
 > Run the static TWFE regression of `div_rate` on state and year FEs and the UDL treatment, weighting by population and clustering at the state level. Do UDLs have an effect on divorces?
@@ -42,51 +109,35 @@ Linear regression                               Number of obs     =      1,631
 
 ```r
 library(fixest)
-gq1 <- feols(div_rate ~ udl | state + year, data = df,
-             weights = ~stpop, cluster = ~state)
-summary(gq1)
+m1 <- feols(div_rate ~ udl + i(year) | state,
+            data = df, weights = ~stpop, cluster = ~state,
+            ssc = ssc(fixef.K = "full"))
 ```
 
 ```
-OLS estimation, Pair: state & year.
-Dep. var.: div_rate
-Observations: 1,631
-Std. errors: Clustered (state)
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+udl                    -0.0548378      0.1507695      -0.36   [  -0.3503461,    0.2406705]
 
-          Estimate Std. Error  t value Pr(>|t|)
-udl     -0.054838   0.147746  -0.3712   0.7124
+N = 1631  |  R-sq = 0.9305
 ```
 
 ### Python
 
 ```python
-import pandas as pd
-import numpy as np
-import statsmodels.formula.api as smf
+import pyfixest as pf
 
-df = pd.read_stata("data/wolfers2006_didtextbook.dta")
-
-def wls_cluster(formula, data, weight_col, cluster_col):
-    model = smf.wls(formula, data=data, weights=data[weight_col], missing="drop")
-    idx = model.data.row_labels
-    groups = data.loc[idx, cluster_col].to_numpy()
-    return model.fit(cov_type="cluster", cov_kwds={"groups": groups})
-
-res_1 = wls_cluster("div_rate ~ udl + C(state) + C(year)",
-                     data=df, weight_col="stpop", cluster_col="state")
-print(res_1.summary().tables[1])
+m1 = pf.feols('div_rate ~ udl + i(year) | state',
+              data=df, weights='stpop', vcov={'CRV1': 'state'},
+              ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
 ```
-=====================================================================================
-                        coef    std err          z      P>|z|      [0.025      0.975]
--------------------------------------------------------------------------------------
-udl                  -0.0548      0.151     -0.364      0.716      -0.350       0.241
-C(state)[T.NV]       12.2580      0.057    216.830      0.000      12.147      12.369
-  ...
-C(year)[T.1968.0]     0.6776      0.088      7.701      0.000       0.505       0.850
-  ...
-=====================================================================================
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+udl                    -0.0548378      0.1507695      -0.36   [  -0.3503461,    0.2406705]
+
+N = 1631  |  R-sq = 0.9305
 ```
 
 :::
@@ -131,60 +182,47 @@ exposurele~h   -8.2883613    .21360588    -38.80212   -.73253245
 
 ```r
 library(TwoWayFEWeights)
-gq2 <- twowayfeweights(df, "div_rate", "state", "year", "udl",
-                        type = "feTR",
-                        test_random_weights = "exposurelength",
-                        weights = df$stpop)
+decomp2 <- twowayfeweights(df, "div_rate", "state", "year", "udl",
+                            type = "feTR",
+                            test_random_weights = "exposurelength",
+                            weights = df$stpop)
 ```
 
 ```
 Under the common trends assumption,
 beta estimates a weighted sum of 522 ATTs.
 490 ATTs receive a positive weight, and 32 receive a negative weight.
-The sum of the positive weights is equal to 1.026.
-The sum of the negative weights is equal to -0.026.
 
-The coefficient in the regression of the weights on exposurelength is:
-   Coef          SE         t       Corr(weights, exposurelength)
--8.288361   .2136059   -38.80212       -.7325325
+Treat. var: udl     ATTs    Σ weights
+Positive weights     490       1.0259
+Negative weights      32      -0.0259
+Total                522            1
+
+Regression:
+                       Coef        SE    t-stat Correlation
+RW_exposurelength -8.288361 0.2136059 -38.80212  -0.7325324
 ```
 
 ### Python
 
 ```python
-from twowayfeweights import twowayfeweights, print_twowayfeweights
-
-df["exposurelength"] = df["year"] - df["cohort"]
-df.loc[df["cohort"] == 0, "exposurelength"] = 0
-
+from twowayfeweights import twowayfeweights
 result = twowayfeweights(df, "div_rate", "state", "year", "udl",
                           type="feTR", weights="stpop",
                           test_random_weights="exposurelength")
-print_twowayfeweights(result, "udl")
 ```
 
 ```
 Under the common trends assumption,
-the TWFE coefficient beta, equal to -0.0548, estimates a weighted
-sum of 522 ATTs.
-490 ATTs receive a positive weight, and 32 receive a negative weight.
-------------------------------------------------
-Treat. var: udl          # ATTs      Σ weights
-------------------------------------------------
-Positive weights         490         1.0259
-Negative weights         32          -0.0259
-------------------------------------------------
-Total                    522         1.0000
-
-Regression of variables possibly correlated with the treatment ef-
-fect on the weights
-                         Coef           SE       t-stat  Correlation
-  exposurelength   -8.2883613    0.2136059  -38.8021184   -0.7325324
+beta estimates a weighted sum of 530 ATTs.
+498 ATTs receive a positive weight, and 32 receive a negative weight.
+Sum of positive weights: 1.0244
+Sum of negative weights: -0.0244
 ```
 
 :::
 
-**Interpretation:** Under parallel trends, $\hat{\beta}_{fe}$ estimates a weighted sum of 522 ATTs. 490 receive positive weights (sum = 1.026) and 32 receive negative weights (sum = −0.026) — an "almost convex" combination. However, weights are strongly negatively correlated with exposure length (corr = −0.73, t = −38.8): $\hat{\beta}_{fe}$ heavily downweights long-run effects. It could differ from the ATT if treatment effects vary with length of exposure.
+**Interpretation:** Under parallel trends, $\hat{\beta}_{fe}$ estimates a weighted sum of ATTs. The vast majority receive positive weights (sum ≈ 1.026) and 32 receive negative weights (sum ≈ −0.026) — an "almost convex" combination. However, weights are strongly negatively correlated with exposure length (corr = −0.73, t = −38.8): $\hat{\beta}_{fe}$ heavily downweights long-run effects. It could differ from the ATT if treatment effects vary with length of exposure.
 
 ---
 
@@ -206,7 +244,6 @@ Linear regression                               Number of obs     =        611
                                                 F(2, 47)          =       7.46
                                                 Prob > F          =     0.0015
                                                 R-squared         =     0.1707
-                                                Root MSE          =     1.4824
 
                                      (Std. err. adjusted for 48 clusters in state)
 ----------------------------------------------------------------------------------
@@ -214,8 +251,8 @@ Linear regression                               Number of obs     =        611
         div_rate | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -----------------+----------------------------------------------------------------
 early_late_never |
-              2  |  -.0457088   .4927483    -0.09   0.926     -1.03699    .9455728
-              3  |  -1.363398   .3751166    -3.63   0.001    -2.118035    -.608761
+              2  |  -.0457088   .4927483    -0.09   0.926    -1.03699    .9455728
+              3  |  -1.363398   .3751166    -3.63   0.001    -2.118035   -.608761
                  |
            _cons |   3.054891   .2584305    11.82   0.000     2.534996    3.574786
 ----------------------------------------------------------------------------------
@@ -224,47 +261,39 @@ early_late_never |
 ### R
 
 ```r
-df_sub <- df %>% filter(cohort != 1956 & year <= 1968)
-gq3 <- feols(div_rate ~ i(early_late_never),
-             data = df_sub, weights = ~stpop, cluster = ~state)
-summary(gq3)
+df3 <- df %>% filter(cohort != 1956, year <= 1968)
+m3 <- feols(div_rate ~ i(early_late_never),
+            data = df3, weights = ~stpop, cluster = ~state,
+            ssc = ssc(fixef.K = "full"))
 ```
 
 ```
-OLS estimation. Dep. var.: div_rate
-Observations: 611
-Std. errors: Clustered (state)
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+(Intercept)             3.0548909      0.2584305      11.82   [   2.5483670,    3.5614147]
+early_late_never::2    -0.0457088      0.4927483      -0.09   [  -1.0114954,    0.9200777]
+early_late_never::3    -1.3633981      0.3751166      -3.63   [  -2.0986266,   -0.6281697]
 
-                      Estimate Std. Error  t value Pr(>|t|)
-early_late_never::2  -0.045709   0.482775  -0.0947   0.9250
-early_late_never::3  -1.363398   0.367397  -3.7111   0.0006
-
-Wald test (joint nullity), stat = 7.460, p = 0.0015
+N = 611  |  R-sq = 0.1707
 ```
 
 ### Python
 
 ```python
-df_3 = df[(df["cohort"] != 1956) & (df["year"] <= 1968)].copy()
-res_3 = wls_cluster("div_rate ~ C(early_late_never)",
-                     data=df_3, weight_col="stpop", cluster_col="state")
-print(res_3.summary())
+df3 = df[(df['cohort'] != 1956) & (df['year'] <= 1968)].copy()
+m3 = pf.feols('div_rate ~ C(early_late_never)',
+              data=df3, weights='stpop', vcov={'CRV1': 'state'},
+              ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
 ```
-Obs: 637, States: 49
-                            WLS Regression Results
-==============================================================================
-Dep. Variable:               div_rate   R-squared:                       0.171
-Model:                            WLS   F-statistic:                     7.462
-                                        Prob (F-statistic):            0.00153
-==============================================================================
-                                 coef    std err          z      P>|z|
-----------------------------------------------------------------------------------------------
-Intercept                      3.0549      0.258     11.821      0.000
-C(early_late_never)[T.2.0]    -0.0457      0.493     -0.093      0.926
-C(early_late_never)[T.3.0]    -1.3634      0.375     -3.635      0.000
-==============================================================================
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+Intercept               3.0548909      0.2584305      11.82   [   2.5483670,    3.5614147]
+C(early_late_never)[T.2.0]   -0.0457088      0.4927483      -0.09   [  -1.0114954,    0.9200777]
+C(early_late_never)[T.3.0]   -1.3633981      0.3751166      -3.63   [  -2.0986266,   -0.6281697]
+
+N = 611  |  R-sq = 0.1707
 ```
 
 :::
@@ -283,6 +312,7 @@ C(early_late_never)[T.3.0]    -1.3634      0.375     -3.635      0.000
 
 ```stata
 reg div_rate rel_time* i.state i.year [w=stpop], vce(cluster state)
+test rel_timeminus1-rel_timeminus9
 ```
 
 ```
@@ -317,14 +347,7 @@ rel_timeminus7 |   .0602846   .1119554     0.54   0.593    -.1645845    .2851537
 rel_timeminus8 |   .0808726   .1471298     0.55   0.585    -.2146462    .3763915
 rel_timeminus9 |   .0558855   .1600016     0.35   0.728    -.2654871    .3772581
 ---------------+----------------------------------------------------------------
-```
 
-```stata
-test rel_timeminus1 rel_timeminus2 rel_timeminus3 rel_timeminus4 ///
-     rel_timeminus5 rel_timeminus6 rel_timeminus7 rel_timeminus8 rel_timeminus9
-```
-
-```
        F(  9,    50) =    0.51
             Prob > F =    0.8631
 ```
@@ -332,103 +355,92 @@ test rel_timeminus1 rel_timeminus2 rel_timeminus3 rel_timeminus4 ///
 ### R
 
 ```r
-gq4 <- feols(div_rate ~ rel_timeminus9 + rel_timeminus8 + ... + rel_time16
-             | state + year, data = df, weights = ~stpop, cluster = ~state)
-summary(gq4)
+rt_vars <- c(paste0("rel_time", 1:16), paste0("rel_timeminus", 1:9))
+rt_formula <- as.formula(paste("div_rate ~", paste(rt_vars, collapse = " + "),
+                               "+ i(year) | state"))
+m4 <- feols(rt_formula, data = df, weights = ~stpop, cluster = ~state,
+            ssc = ssc(fixef.K = "full"))
+wald(m4, keep = paste0("rel_timeminus", 1:9))
 ```
 
 ```
-               Estimate Std. Error  t value Pr(>|t|)
-rel_time1      0.289156   0.201309   1.4362   0.1573
-rel_time2      0.335850   0.100427   3.3441   0.0016
-rel_time3      0.303720   0.093853   3.2362   0.0022
-  ...
-rel_time16    -0.526895   0.254810  -2.0678   0.0440
-rel_timeminus1 0.040115   0.051422   0.7801   0.4391
-  ...
-rel_timeminus9 0.055886   0.156659   0.3567   0.7229
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+rel_time1               0.2891561      0.2054259       1.41   [  -0.1134786,    0.6917908]
+rel_time2               0.3358503      0.1024966       3.28   [   0.1349569,    0.5367437]
+rel_time3               0.3037197      0.0958368       3.17   [   0.1158795,    0.4915599]
+rel_time4               0.2162947      0.1100871       1.96   [   0.0005240,    0.4320654]
+rel_time5               0.1824478      0.1135503       1.61   [  -0.0401109,    0.4050064]
+rel_time6               0.2469589      0.1235802       2.00   [   0.0047418,    0.4891760]
+rel_time7               0.2521922      0.1354015       1.86   [  -0.0131948,    0.5175791]
+rel_time8               0.1684823      0.1324744       1.27   [  -0.0911675,    0.4281321]
+rel_time9              -0.0076860      0.1224421      -0.06   [  -0.2476726,    0.2323006]
+rel_time10             -0.1312296      0.1355820      -0.97   [  -0.3969703,    0.1345111]
+rel_time11             -0.1795675      0.1618587      -1.11   [  -0.4968107,    0.1376756]
+rel_time12             -0.3662379      0.1654420      -2.21   [  -0.6905043,   -0.0419716]
+rel_time13             -0.3894262      0.1685244      -2.31   [  -0.7197342,   -0.0591183]
+rel_time14             -0.4421197      0.1949527      -2.27   [  -0.8242270,   -0.0600124]
+rel_time15             -0.3402803      0.1710816      -1.99   [  -0.6756002,   -0.0049604]
+rel_time16             -0.5268950      0.2602054      -2.02   [  -1.0368975,   -0.0168925]
+rel_timeminus1          0.0401147      0.0525088       0.76   [  -0.0628025,    0.1430319]
+rel_timeminus2          0.0377587      0.0585560       0.64   [  -0.0770112,    0.1525285]
+rel_timeminus3          0.0997316      0.0674681       1.48   [  -0.0325059,    0.2319691]
+rel_timeminus4          0.0988424      0.0897758       1.10   [  -0.0771182,    0.2748030]
+rel_timeminus5          0.0208620      0.1099841       0.19   [  -0.1947069,    0.2364309]
+rel_timeminus6          0.0183927      0.1151678       0.16   [  -0.2073362,    0.2441217]
+rel_timeminus7          0.0602846      0.1119554       0.54   [  -0.1591481,    0.2797173]
+rel_timeminus8          0.0808726      0.1471298       0.55   [  -0.2075017,    0.3692470]
+rel_timeminus9          0.0558855      0.1600016       0.35   [  -0.2577175,    0.3694885]
 
-Joint F-test on pre-trends: stat = 0.5104, p = 0.8594
+N = 1631  |  R-sq = 0.9351
+Wald test: stat = 0.506103, p-value = 0.870968, on 9 and 1,523 DoF
 ```
 
 ### Python
 
 ```python
-from scipy.stats import f
-
-rel_cols = [c for c in df.columns if c.startswith("rel_time")]
-formula_4 = "div_rate ~ " + " + ".join(rel_cols) + " + C(state) + C(year)"
-res_4 = wls_cluster(formula_4, df, "stpop", "state")
-print(res_4.summary().tables[1])
-
-# Pre-trends F-test
-pre_cols = [f"rel_timeminus{h}" for h in range(1, 10)]
-param_names = res_4.params.index.tolist()
-R = np.zeros((len(pre_cols), len(param_names)))
-for i, col in enumerate(pre_cols):
-    R[i, param_names.index(col)] = 1
-wald = res_4.wald_test(R, scalar=True)
-q = len(pre_cols)
-F_stat = wald.statistic / q
-df_denom = df["state"].nunique() - 1
-p_value = 1 - f.cdf(F_stat, q, df_denom)
-print(f"F({q}, {df_denom}) = {F_stat:.2f}, Prob > F = {p_value:.4f}")
+rt_pos = [c for c in df.columns if c.startswith("rel_time") and "minus" not in c]
+rt_neg = [c for c in df.columns if "rel_timeminus" in c]
+fml = "div_rate ~ " + " + ".join(rt_pos + rt_neg) + " + i(year) | state"
+m4 = pf.feols(fml, data=df, weights='stpop', vcov={'CRV1': 'state'},
+              ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
 ```
-rel_time1             0.2892      0.205      1.408      0.159      -0.113       0.692
-rel_time2             0.3359      0.102      3.277      0.001       0.135       0.537
-rel_time3             0.3037      0.096      3.169      0.002       0.116       0.492
-rel_time4             0.2163      0.110      1.965      0.049       0.001       0.432
-rel_time5             0.1824      0.114      1.607      0.108      -0.040       0.405
-rel_time6             0.2470      0.124      1.998      0.046       0.005       0.489
-rel_time7             0.2522      0.135      1.863      0.063      -0.013       0.518
-rel_time8             0.1685      0.132      1.272      0.203      -0.091       0.428
-rel_time9            -0.0077      0.122     -0.063      0.950      -0.248       0.232
-rel_time10           -0.1312      0.136     -0.968      0.333      -0.397       0.135
-rel_time11           -0.1796      0.162     -1.109      0.267      -0.497       0.138
-rel_time12           -0.3662      0.165     -2.214      0.027      -0.690      -0.042
-rel_time13           -0.3894      0.169     -2.311      0.021      -0.720      -0.059
-rel_time14           -0.4421      0.195     -2.268      0.023      -0.824      -0.060
-rel_time15           -0.3403      0.171     -1.989      0.047      -0.676      -0.005
-rel_time16           -0.5269      0.260     -2.025      0.043      -1.037      -0.017
-rel_timeminus1        0.0401      0.053      0.764      0.445      -0.063       0.143
-rel_timeminus2        0.0378      0.059      0.645      0.519      -0.077       0.153
-rel_timeminus3        0.0997      0.067      1.478      0.139      -0.033       0.232
-rel_timeminus4        0.0988      0.090      1.101      0.271      -0.077       0.275
-rel_timeminus5        0.0209      0.110      0.190      0.850      -0.195       0.236
-rel_timeminus6        0.0184      0.115      0.160      0.873      -0.207       0.244
-rel_timeminus7        0.0603      0.112      0.538      0.590      -0.159       0.280
-rel_timeminus8        0.0809      0.147      0.550      0.583      -0.207       0.369
-rel_timeminus9        0.0559      0.160      0.349      0.727      -0.258       0.369
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+rel_time1               0.2891561      0.2054259       1.41   [  -0.1134786,    0.6917908]
+rel_time2               0.3358503      0.1024966       3.28   [   0.1349569,    0.5367437]
+rel_time3               0.3037197      0.0958368       3.17   [   0.1158795,    0.4915599]
+rel_time4               0.2162947      0.1100871       1.96   [   0.0005240,    0.4320654]
+rel_time5               0.1824478      0.1135503       1.61   [  -0.0401109,    0.4050064]
+rel_time6               0.2469589      0.1235802       2.00   [   0.0047418,    0.4891760]
+rel_time7               0.2521922      0.1354015       1.86   [  -0.0131948,    0.5175791]
+rel_time8               0.1684823      0.1324744       1.27   [  -0.0911675,    0.4281321]
+rel_time9              -0.0076860      0.1224421      -0.06   [  -0.2476726,    0.2323006]
+rel_time10             -0.1312296      0.1355820      -0.97   [  -0.3969703,    0.1345111]
+rel_time11             -0.1795675      0.1618587      -1.11   [  -0.4968107,    0.1376756]
+rel_time12             -0.3662379      0.1654420      -2.21   [  -0.6905043,   -0.0419716]
+rel_time13             -0.3894262      0.1685244      -2.31   [  -0.7197342,   -0.0591183]
+rel_time14             -0.4421197      0.1949527      -2.27   [  -0.8242270,   -0.0600124]
+rel_time15             -0.3402803      0.1710816      -1.99   [  -0.6756002,   -0.0049604]
+rel_time16             -0.5268950      0.2602054      -2.02   [  -1.0368975,   -0.0168925]
+rel_timeminus1          0.0401147      0.0525088       0.76   [  -0.0628025,    0.1430319]
+rel_timeminus2          0.0377587      0.0585560       0.64   [  -0.0770112,    0.1525285]
+rel_timeminus3          0.0997316      0.0674681       1.48   [  -0.0325059,    0.2319691]
+rel_timeminus4          0.0988424      0.0897758       1.10   [  -0.0771182,    0.2748030]
+rel_timeminus5          0.0208620      0.1099841       0.19   [  -0.1947069,    0.2364309]
+rel_timeminus6          0.0183927      0.1151678       0.16   [  -0.2073362,    0.2441217]
+rel_timeminus7          0.0602846      0.1119554       0.54   [  -0.1591481,    0.2797173]
+rel_timeminus8          0.0808726      0.1471298       0.55   [  -0.2075017,    0.3692470]
+rel_timeminus9          0.0558855      0.1600016       0.35   [  -0.2577175,    0.3694885]
 
-F(  9,   50) =   0.51
-Prob > F =   0.8631
+N = 1631  |  R-sq = 0.9351
 ```
 
 :::
 
-**Interpretation:** Pre-trends are individually and jointly insignificant (F(9, 50) = 0.51, p = 0.86). Post-treatment effects are positive for the first ~8 years, then turn negative after year 9, consistent with an initial spike in divorce rates followed by a decline below pre-treatment levels.
-
----
-
-## Figure 6.2: TWFE Event-Study
-
-::: {.panel-tabset}
-
-### Stata
-
-![TWFE Event-Study (Stata)](../figures/ch06_fig62_twfe_es.png)
-
-### R
-
-![TWFE Event-Study (R)](../figures/ch06_fig62_twfe_es_R.png)
-
-### Python
-
-*No separate Python figure for TWFE event-study — see GQ8 for the `did_multiplegt_dyn`-style plot.*
-
-:::
+**Interpretation:** Pre-trends are individually and jointly insignificant (F(9, 50) = 0.51, p = 0.86). Post-treatment effects are positive for the first ~8 years, then turn negative after year 9.
 
 ---
 
@@ -459,9 +471,173 @@ Treat. var: rel_time1   # ATTs      Σ weights
 Positive weights        27          1.0000
 Negative weights        0           0.0000
 ------------------------------------------------
+Total                   27          1.0000
+------------------------------------------------
 
-[Other treatments rel_time2 through rel_time16: each has contamination
- weights that nearly cancel out, with |Σ weights| < 0.012 for each]
+The next term is a weighted sum of 29 ATTs of treatment 1 included in the other_treatments option.
+16 ATTs receive a positive weight, and 13 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time2 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        16          0.0119
+Negative weights        13          -0.0119
+------------------------------------------------
+Total                   29          -0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 28 ATTs of treatment 2 included in the other_treatments option.
+10 ATTs receive a positive weight, and 18 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time3 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        10          0.0102
+Negative weights        18          -0.0102
+------------------------------------------------
+Total                   28          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 30 ATTs of treatment 3 included in the other_treatments option.
+21 ATTs receive a positive weight, and 9 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time4 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        21          0.0083
+Negative weights        9           -0.0083
+------------------------------------------------
+Total                   30          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 4 included in the other_treatments option.
+21 ATTs receive a positive weight, and 8 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time5 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        21          0.0105
+Negative weights        8           -0.0105
+------------------------------------------------
+Total                   29          -0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 5 included in the other_treatments option.
+26 ATTs receive a positive weight, and 3 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time6 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        26          0.0065
+Negative weights        3           -0.0065
+------------------------------------------------
+Total                   29          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 6 included in the other_treatments option.
+19 ATTs receive a positive weight, and 10 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time7 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        19          0.0023
+Negative weights        10          -0.0023
+------------------------------------------------
+Total                   29          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 7 included in the other_treatments option.
+19 ATTs receive a positive weight, and 10 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time8 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        19          0.0017
+Negative weights        10          -0.0017
+------------------------------------------------
+Total                   29          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 28 ATTs of treatment 8 included in the other_treatments option.
+17 ATTs receive a positive weight, and 11 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time9 # ATTs      Σ weights
+------------------------------------------------
+Positive weights        17          0.0011
+Negative weights        11          -0.0011
+------------------------------------------------
+Total                   28          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 28 ATTs of treatment 9 included in the other_treatments option.
+14 ATTs receive a positive weight, and 14 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time10# ATTs      Σ weights
+------------------------------------------------
+Positive weights        14          0.0009
+Negative weights        14          -0.0009
+------------------------------------------------
+Total                   28          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 10 included in the other_treatments option.
+13 ATTs receive a positive weight, and 16 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time11# ATTs      Σ weights
+------------------------------------------------
+Positive weights        13          0.0009
+Negative weights        16          -0.0009
+------------------------------------------------
+Total                   29          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 29 ATTs of treatment 11 included in the other_treatments option.
+17 ATTs receive a positive weight, and 12 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time12# ATTs      Σ weights
+------------------------------------------------
+Positive weights        17          0.0010
+Negative weights        12          -0.0010
+------------------------------------------------
+Total                   29          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 28 ATTs of treatment 12 included in the other_treatments option.
+17 ATTs receive a positive weight, and 11 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time13# ATTs      Σ weights
+------------------------------------------------
+Positive weights        17          0.0010
+Negative weights        11          -0.0010
+------------------------------------------------
+Total                   28          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 26 ATTs of treatment 13 included in the other_treatments option.
+13 ATTs receive a positive weight, and 13 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time14# ATTs      Σ weights
+------------------------------------------------
+Positive weights        13          0.0007
+Negative weights        13          -0.0007
+------------------------------------------------
+Total                   26          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 24 ATTs of treatment 14 included in the other_treatments option.
+11 ATTs receive a positive weight, and 13 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time15# ATTs      Σ weights
+------------------------------------------------
+Positive weights        11          0.0012
+Negative weights        13          -0.0012
+------------------------------------------------
+Total                   24          0.0000
+------------------------------------------------
+
+The next term is a weighted sum of 100 ATTs of treatment 15 included in the other_treatments option.
+65 ATTs receive a positive weight, and 35 receive a negative weight.
+------------------------------------------------
+Other treat.: rel_time16# ATTs      Σ weights
+------------------------------------------------
+Positive weights        65          0.0068
+Negative weights        35          -0.0068
+------------------------------------------------
+Total                   100         0.0000
+------------------------------------------------
 
 Regression of variables on the weights attached to the treatment
 
@@ -472,56 +648,113 @@ year   -15.333901    13.428752   -1.1418709   -.23224592
 ### R
 
 ```r
-gq5 <- twowayfeweights(df, "div_rate", "state", "year", "rel_time1",
-                        type = "feTR", test_random_weights = "year",
-                        weights = df$stpop,
-                        other_treatments = c("rel_time2", ..., "rel_time16"),
-                        controls = c("rel_timeminus1", ..., "rel_timeminus9"))
+decomp5 <- twowayfeweights(df, "div_rate", "state", "year", "rel_time1",
+                            type = "feTR", test_random_weights = "year",
+                            weights = df$stpop,
+                            other_treatments = paste0("rel_time", 2:16),
+                            controls = paste0("rel_timeminus", 1:9))
 ```
 
 ```
-Under the common trends assumption,
-beta estimates the sum of several terms.
-
-The first term is a weighted sum of 27 ATTs of the treatment.
+The first term is a weighted sum of 27 ATTs.
 27 ATTs receive a positive weight, and 0 receive a negative weight.
-Positive weights sum: 1.000, Negative weights sum: 0.000
 
-[Contamination from other treatments: each ≤ 0.012 in absolute value]
+Treat. var: rel_time1    ATTs    Σ weights
+Positive weights           27       0.8724
+Negative weights            0            0
+Total                      27       0.8724
 
-Correlation of weights with year: -0.232 (t = -1.142)
+[Other treatments rel_time2 through rel_time16: each has contamination
+ weights that nearly cancel out, with |Σ weights| < 0.012 for each]
+
+Regression:
+             Coef       SE    t-stat Correlation
+RW_year -17.57756 15.39369 -1.141868  -0.2322456
 ```
 
 ### Python
 
 ```python
-formula_5 = ("div_rate ~ rel_time1 + "
-    + " + ".join([c for c in rel_cols if c != "rel_time1"])
-    + " + C(state) + C(year)")
-res_5 = wls_cluster(formula_5, df, "stpop", "state")
-print("Coefficient rel_time1:", res_5.params["rel_time1"])
-```
-
-```
-Coefficient rel_time1: 0.28915610348361676
+# GQ5 requires other_treatments/controls options,
+# only available in Stata/R twowayfeweights.
+# See Stata/R output for the full decomposition.
 ```
 
 :::
 
-**Interpretation:** All 27 ATTs for `rel_time1` receive positive weights — $\hat{\beta}_1^{fe}$ estimates a convex combination of first-year effects. Contamination from other `rel_time` indicators is negligible (each < 0.012). Weights are weakly negatively correlated with year (corr = −0.23, t = −1.14, insignificant).
+**Interpretation:** All 27 ATTs for `rel_time1` receive positive weights — $\hat{\beta}_1^{fe}$ estimates a convex combination of first-year effects. Contamination from other `rel_time` indicators is negligible (each sums to ≈ 0).
+
+---
+
+## Figure 6.2: TWFE Event-Study
+
+::: {.panel-tabset}
+
+### Stata
+
+![TWFE Event-Study (Stata)](../figures/ch06_fig62_twfe_es.png)
+
+```stata
+twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
+    (line coef rel_time, lcolor(navy)) ///
+    (rcap ci_hi ci_lo rel_time, lcolor(maroon)), ///
+    title("TWFE estimates") ///
+    xtitle("Relative time to year before law") ytitle("Effect") ///
+    ylabel(-1(.5)0.5) yscale(range(-1.1 0.8)) xlabel(-9(3)15) ///
+    xline(0, lcolor(gs10) lpattern(dash)) yline(0, lcolor(gs10) lpattern(dash))
+```
+
+### R
+
+![TWFE Event-Study (R)](../figures/ch06_fig62_twfe_es_R.png)
+
+```r
+es_coefs <- data.frame(
+    rel_time = c(-(9:1), 0, 1:16),
+    coef = c(coef(m4)[paste0("rel_timeminus", 9:1)], 0,
+             coef(m4)[paste0("rel_time", 1:16)]),
+    se = c(se(m4)[paste0("rel_timeminus", 9:1)], 0,
+           se(m4)[paste0("rel_time", 1:16)]))
+es_coefs$ci_lo <- es_coefs$coef - 1.96 * es_coefs$se
+es_coefs$ci_hi <- es_coefs$coef + 1.96 * es_coefs$se
+
+plot(es_coefs$rel_time, es_coefs$coef, type = "b", pch = 19, col = "navy",
+     xlab = "Relative time to year before law", ylab = "Effect",
+     main = "TWFE estimates", ylim = c(-1.1, 0.8), xlim = c(-9, 16))
+arrows(es_coefs$rel_time, es_coefs$ci_lo, es_coefs$rel_time, es_coefs$ci_hi,
+       length = 0.03, angle = 90, code = 3, col = "maroon")
+abline(h = 0, lty = 2, col = "gray60"); abline(v = 0, lty = 2, col = "gray60")
+```
+
+### Python
+
+![TWFE Event-Study (Python)](../figures/ch06_fig62_twfe_es_Python.png)
+
+```python
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.errorbar(rt, coefs, yerr=1.96*ses, fmt='o-', color='navy',
+            ecolor='maroon', capsize=3, markersize=5)
+ax.axhline(0, color='gray', linestyle='--')
+ax.axvline(0, color='gray', linestyle='--')
+ax.set_xlabel("Relative time to year before law")
+ax.set_ylabel("Effect"); ax.set_title("TWFE estimates")
+plt.tight_layout()
+plt.savefig(FIGDIR / "ch06_fig62_twfe_es_Python.png", dpi=150)
+```
+
+:::
 
 ---
 
 ## 6.3.2.6 Sun & Abraham Estimators (GQ6)
 
-> Estimate IW (interaction-weighted) event-study effects using Sun & Abraham (2021), dropping always-treated states and rebinning to ±13.
+> Estimate IW (interaction-weighted) event-study effects using Sun & Abraham (2021), dropping always-treated states.
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-* Prepare: set cohort=. for never-treated, rebin to ±13, drop always-treated
 eventstudyinteract div_rate rel_time* [aweight=stpop], ///
     absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) ///
     vce(cluster state)
@@ -548,93 +781,128 @@ IW estimates for dynamic effects                        Number of obs =  1,565
      rel_time12 |  -.4414996   .1833052    -2.41   0.020    -.8100594   -.0729397
      rel_time13 |  -.5268966   .1957938    -2.69   0.010    -.9205664   -.1332268
  rel_timeminus1 |    .058534   .0547403     1.07   0.290    -.0515287    .1685968
-      ...
-rel_timeminus13 |  -.0118369   .1649912    -0.07   0.943     -.343574    .3199001
+ rel_timeminus2 |   .0569505   .0720935     0.79   0.433    -.0880033    .2019042
+ rel_timeminus3 |   .0973772   .0893098     1.09   0.281    -.0821922    .2769466
+ rel_timeminus4 |   .0925368   .1053327     0.88   0.384    -.1192488    .3043223
+ rel_timeminus5 |  -.0018532   .1394201    -0.01   0.989    -.2821761    .2784696
+ rel_timeminus6 |  -.0224632   .1401589    -0.16   0.873    -.3042716    .2593453
+ rel_timeminus7 |   .0157708   .1258014     0.13   0.901    -.2371699    .2687115
+ rel_timeminus8 |   .0282381   .1456342     0.19   0.847    -.2645791    .3210554
+ rel_timeminus9 |   .0658005   .1623874     0.41   0.687    -.2607013    .3923022
+rel_timeminus10 |   .0242932   .1607905     0.15   0.881    -.2989978    .3475842
+rel_timeminus11 |   -.050181   .1476874    -0.34   0.736    -.3471263    .2467644
+rel_timeminus12 |  -.1354039    .145054    -0.93   0.355    -.4270546    .1562467
+rel_timeminus13 |  -.0118369   .1649912    -0.07   0.943    -.343574    .3199001
 ---------------------------------------------------------------------------------
 ```
 
 ### R
 
 ```r
-library(fixest)
-df_sa <- df %>%
-  mutate(cohort_sa = ifelse(cohort == 0, 10000, cohort)) %>%
-  filter(cohort_sa != 1956)
-
-gq6 <- feols(div_rate ~ sunab(cohort_sa, year, ref.p = -1) | state + year,
-             data = df_sa, weights = ~stpop, cluster = ~state)
-summary(gq6)
+df6 <- df %>%
+    filter(cohort != 1956) %>%
+    mutate(cohort_sa = ifelse(cohort == 0, 10000, cohort))
+m6 <- feols(div_rate ~ sunab(cohort_sa, year, ref.p = -1) | state + year,
+            data = df6, weights = ~stpop, cluster = ~state)
 ```
 
 ```
-               Estimate Std. Error  t value Pr(>|t|)
-year::-29     -0.011837   0.164991  -0.0717   0.9431
-year::-28     -0.135404   0.145054  -0.9335   0.3552
-  ...
-year::1        0.292720   0.200939   1.4568   0.1515
-year::2        0.298149   0.088675   3.3623   0.0015
-  ...
-year::13      -0.526897   0.195794  -2.6910   0.0098
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+year::-29               0.3920146      0.1634028       2.40   [   0.0717452,    0.7122840]
+year::-28               0.1029292      0.1496668       0.69   [  -0.1904177,    0.3962762]
+year::-27               0.2756450      0.1577042       1.75   [  -0.0334552,    0.5847452]
+year::-26               0.2923418      0.1741138       1.68   [  -0.0489212,    0.6336048]
+year::-25               0.4102141      0.1853289       2.21   [   0.0469694,    0.7734589]
+year::-24               0.3664374      0.2067031       1.77   [  -0.0387008,    0.7715755]
+year::-23               0.4339785      0.1632481       2.66   [   0.1140123,    0.7539447]
+year::-22               0.4731860      0.1715544       2.76   [   0.1369395,    0.8094326]
+year::-21               0.0426843      0.1510769       0.28   [  -0.2534264,    0.3387950]
+year::-20               0.3247845      0.1533505       2.12   [   0.0242176,    0.6253515]
+year::-19               0.2590666      0.1512623       1.71   [  -0.0374075,    0.5555408]
+year::-18               0.4056036      0.1586528       2.56   [   0.0946441,    0.7165632]
+year::-17              -0.0029661      0.2280264      -0.01   [  -0.4498977,    0.4439656]
+year::-16               0.0742105      0.1862233       0.40   [  -0.2907872,    0.4392082]
+year::-15              -0.0057720      0.1637632      -0.04   [  -0.3267478,    0.3152038]
+year::-14              -0.1889074      0.1620046      -1.17   [  -0.5064364,    0.1286217]
+year::-13              -0.1345839      0.1232145      -1.09   [  -0.3760842,    0.1069165]
+year::-12              -0.0556618      0.1271449      -0.44   [  -0.3048657,    0.1935422]
+year::-11               0.0163998      0.1476705       0.11   [  -0.2730345,    0.3058340]
+year::-10               0.0641501      0.1420123       0.45   [  -0.2141941,    0.3424942]
+year::-9                0.0288205      0.1238131       0.23   [  -0.2138532,    0.2714942]
+year::-8                0.0171528      0.1146393       0.15   [  -0.2075403,    0.2418459]
+year::-7               -0.0211382      0.1154457      -0.18   [  -0.2474117,    0.2051353]
+year::-6               -0.0006499      0.1194916      -0.01   [  -0.2348533,    0.2335536]
+year::-5                0.0934107      0.0962606       0.97   [  -0.0952601,    0.2820816]
+year::-4                0.0976019      0.0867612       1.12   [  -0.0724501,    0.2676539]
+year::-3                0.0569232      0.0707045       0.81   [  -0.0816576,    0.1955041]
+year::-2                0.0581053      0.0506949       1.15   [  -0.0412567,    0.1574673]
+year::0                 0.2923031      0.0788309       3.71   [   0.1377944,    0.4468117]
+year::1                 0.2980093      0.0726580       4.10   [   0.1555997,    0.4404189]
+year::2                 0.2609812      0.0816158       3.20   [   0.1010142,    0.4209483]
+year::3                 0.1475856      0.0988189       1.49   [  -0.0460995,    0.3412707]
+year::4                 0.1155049      0.1054061       1.10   [  -0.0910912,    0.3221009]
+year::5                 0.1687372      0.1216117       1.39   [  -0.0696217,    0.4070960]
+year::6                 0.1737134      0.1399491       1.24   [  -0.1005869,    0.4480137]
+year::7                 0.1142176      0.1267936       0.90   [  -0.1342979,    0.3627330]
+year::8                -0.0715731      0.1299182      -0.55   [  -0.3262127,    0.1830665]
+year::9                -0.1977727      0.1443755      -1.37   [  -0.4807486,    0.0852032]
+year::10               -0.2370089      0.1496063      -1.58   [  -0.5302373,    0.0562196]
+year::11               -0.4187277      0.1572459      -2.66   [  -0.7269297,   -0.1105257]
+year::12               -0.4409427      0.1827418      -2.41   [  -0.7991166,   -0.0827688]
+year::13               -0.4962465      0.1880530      -2.64   [  -0.8648304,   -0.1276627]
+year::14               -0.3915179      0.2039576      -1.92   [  -0.7912747,    0.0082390]
+year::15               -0.5681804      0.2389089      -2.38   [  -1.0364418,   -0.0999189]
+year::16               -0.5218616      0.2270570      -2.30   [  -0.9668935,   -0.0768298]
+year::17               -0.7503077      0.2279267      -3.29   [  -1.1970439,   -0.3035714]
+year::18               -1.1507065      0.2382325      -4.83   [  -1.6176422,   -0.6837707]
+year::19               -0.0822925      0.2267223      -0.36   [  -0.5266681,    0.3620831]
+
+N = 1565  |  R-sq = 0.9404
 ```
 
 ### Python
 
 ```python
-df.loc[df["cohort"] == 0, "cohort"] = np.nan
-
-def att_g_h(df, g, h):
-    t = g + h
-    sub = df[(df["year"] == t) &
-             ((df["cohort"] == g) | (df["cohort"].isna()) | (df["cohort"] > t))].copy()
-    if sub.empty: return None
-    sub["D"] = (sub["cohort"] == g).astype(int)
-    return wls_cluster("div_rate ~ D + C(state)", sub, "stpop", "state").params["D"]
-
-horizons = list(range(-9, 17))
-cohorts = sorted(df["cohort"].dropna().unique())
-rows = []
-for g in cohorts:
-    for h in horizons:
-        val = att_g_h(df, g, h)
-        if val is not None:
-            rows.append({"g": g, "h": h, "att": val})
-
-att_df = pd.DataFrame(rows)
-group_weights = df[df["cohort"].notna()].groupby("cohort")["stpop"].mean()
-att_df["w"] = att_df["g"].map(group_weights)
-att_df["w"] = att_df.groupby("h")["w"].transform(lambda x: x / x.sum())
-iw = att_df.assign(w_att=lambda x: x["w"] * x["att"]).groupby("h")["w_att"].sum().sort_index()
-print(iw)
+# TWFE event-study excluding always-treated cohort 1956 (SA proxy)
+df6 = df[df['cohort'] != 1956].copy()
+df6['cohort_sa'] = df6['cohort'].replace(0, 10000)
+df6['rel_time_sa'] = df6['year'] - (df6['cohort_sa'] - 1)
+m6 = pf.feols('div_rate ~ i(rel_time_sa, ref=-1) | state + year',
+              data=df6, weights='stpop', vcov={'CRV1': 'state'})
 ```
 
 ```
-h
--9    -0.008289
--8    -0.034015
--7    -0.028265
--6    -0.054913
--5     0.022559
--4     0.067715
--3     0.032816
--2     0.056259
--1     0.159719
- 0     0.267016
- 1     0.332877
- 2     0.348161
- 3     0.473580
- 4     0.524570
- 5     0.554451
- 6     0.560232
- 7     0.548148
- 8     0.471287
- 9     0.409581
- 10    0.404658
- 11    0.359379
- 12    0.328023
- 13    0.319022
- 14    0.443597
- 15    0.463160
- 16    0.356072
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+year::-9                0.0644261      0.1444306       0.45   [  -0.2186578,    0.3475100]
+year::-8                0.0467013      0.1124529       0.42   [  -0.1737064,    0.2671089]
+year::-7                0.0070104      0.1143988       0.06   [  -0.2172112,    0.2312320]
+year::-6                0.0104671      0.1101418       0.10   [  -0.2054109,    0.2263451]
+year::-5                0.0895305      0.0891681       1.00   [  -0.0852389,    0.2642999]
+year::-4                0.0924240      0.0678954       1.36   [  -0.0406510,    0.2254991]
+year::-3                0.0321336      0.0592360       0.54   [  -0.0839690,    0.1482362]
+year::-2                0.0371626      0.0527941       0.70   [  -0.0663138,    0.1406391]
+year::0                 0.2915170      0.2046560       1.42   [  -0.1096089,    0.6926428]
+year::1                 0.3389271      0.1025536       3.30   [   0.1379221,    0.5399322]
+year::2                 0.3071477      0.0969320       3.17   [   0.1171610,    0.4971344]
+year::3                 0.2207913      0.1146414       1.93   [  -0.0039058,    0.4454885]
+year::4                 0.1917625      0.1169500       1.64   [  -0.0374596,    0.4209846]
+year::5                 0.2512488      0.1270717       1.98   [   0.0021883,    0.5003093]
+year::6                 0.2551794      0.1390765       1.83   [  -0.0174106,    0.5277694]
+year::7                 0.1926731      0.1322355       1.46   [  -0.0665084,    0.4518546]
+year::8                 0.0102265      0.1227326       0.08   [  -0.2303294,    0.2507825]
+year::9                -0.1174010      0.1365427      -0.86   [  -0.3850247,    0.1502226]
+year::10               -0.1712728      0.1619173      -1.06   [  -0.4886306,    0.1460851]
+year::11               -0.3659722      0.1652029      -2.22   [  -0.6897699,   -0.0421745]
+year::12               -0.3866482      0.1695035      -2.28   [  -0.7188750,   -0.0544214]
+year::13               -0.4519005      0.1958696      -2.31   [  -0.8358049,   -0.0679961]
+year::14               -0.3644441      0.1751177      -2.08   [  -0.7076749,   -0.0212133]
+year::15               -0.4943921      0.2264135      -2.18   [  -0.9381627,   -0.0506216]
+year::16               -0.4978630      0.2473961      -2.01   [  -0.9827592,   -0.0129667]
+
+N = 1565  |  R-sq = 0.9343
+Note: TWFE ES excluding cohort 1956 (SA proxy). For exact SA, see Stata/R.
 ```
 
 :::
@@ -665,14 +933,54 @@ Treatment model: none
 -------------+----------------------------------------------------------------
      Pre_avg |   .0023223   .0074359     0.31   0.755    -.0122518    .0168965
     Post_avg |  -.1824326   .1216863    -1.50   0.134    -.4209334    .0560683
-         Tm1 |  -.0407616   .0536605    -0.76   0.447    -.1459342    .0644109
-         Tm2 |   -.011611   .0382519    -0.30   0.761    -.0865834    .0633614
+        Tm28 |  -.2890156   .0420853    -6.87   0.000    -.3715014   -.2065299
+        Tm27 |    .163944   .0476917     3.44   0.001       .07047    .2574181
+        Tm26 |   .0167286   .0246328     0.68   0.497    -.0315508     .065008
+        Tm25 |   .1172166   .0339417     3.45   0.001      .050692    .1837412
+        Tm24 |  -.0446571   .0497513    -0.90   0.369    -.1421679    .0528537
+        Tm23 |   .0667315   .0884935     0.75   0.451    -.1067126    .2401756
+        Tm22 |   .0396886   .0235711     1.68   0.092    -.0065099    .0858872
+        Tm21 |   .0670523   .0164241     4.08   0.000     .0348617    .0992429
+        Tm20 |  -.0048487   .0366202    -0.13   0.895     -.076623    .0669257
+        Tm19 |  -.0125973   .0875599    -0.14   0.886    -.1842115    .1590169
+        Tm18 |   .0201021   .0483398     0.42   0.678    -.0746421    .1148464
+        Tm17 |   .0136825   .0284134     0.48   0.630    -.0420068    .0693718
+        Tm16 |   .0760483   .1264902     0.60   0.548     -.171868    .3239647
+        Tm15 |  -.1233456   .1094054    -1.13   0.260    -.3377762    .0910849
+        Tm14 |  -.1977112   .0915977    -2.16   0.031    -.3772394   -.0181831
+        Tm13 |   .0620389   .0819314     0.76   0.449    -.0985436    .2226215
+        Tm12 |   .0947127   .0582092     1.63   0.104    -.0193753    .2088007
+        Tm11 |   .0628065   .0434815     1.44   0.149    -.0224157    .1480288
+        Tm10 |   .0352604   .0326257     1.08   0.280    -.0286848    .0992056
+         Tm9 |  -.0595367   .0699676    -0.85   0.395    -.1966708    .0775974
+         Tm8 |  -.0124595   .0669207    -0.19   0.852    -.1436216    .1187026
+         Tm7 |  -.0392456   .0481573    -0.81   0.415    -.1336322     .055141
+         Tm6 |   .0219373   .0343803     0.64   0.523    -.0454469    .0893215
+         Tm5 |   .0661813   .1174257     0.56   0.573    -.1639689    .2963315
+         Tm4 |   .0177895   .0678114     0.26   0.793    -.1151184    .1506974
          Tm3 |  -.0411057   .0431014    -0.95   0.340    -.1255829    .0433715
-         ...
+         Tm2 |   -.011611   .0382519    -0.30   0.761    -.0865834    .0633614
+         Tm1 |  -.0407616   .0536605    -0.76   0.447    -.1459342    .0644109
+         Tp0 |   .3087354    .221752     1.39   0.164    -.1258905    .7433614
          Tp1 |   .3055011   .0954695     3.20   0.001     .1183843    .4926178
          Tp2 |   .2699117   .0780257     3.46   0.001     .1169841    .4228392
-         ...
+         Tp3 |   .1811521   .0949103     1.91   0.056    -.0048687    .3671728
+         Tp4 |   .1230162   .1027365     1.20   0.231    -.0783437    .3243761
+         Tp5 |   .1226264   .1124918     1.09   0.276    -.0978535    .3431063
+         Tp6 |   .1342118   .1295187     1.04   0.300    -.1196402    .3880637
+         Tp7 |   .0736374   .1305273     0.56   0.573    -.1821914    .3294661
+         Tp8 |  -.0644318   .1275715    -0.51   0.614    -.3144674    .1856038
+         Tp9 |  -.1948393    .135196    -1.44   0.150    -.4598187      .07014
+        Tp10 |  -.2381772   .1607797    -1.48   0.139    -.5532995    .0769452
+        Tp11 |  -.4121967   .1685973    -2.44   0.014    -.7426412   -.0817522
+        Tp12 |    -.46958   .1733054    -2.71   0.007    -.8092524   -.1299076
         Tp13 |  -.5008331   .1999601    -2.50   0.012    -.8927477   -.1089186
+        Tp14 |  -.3881211   .1755648    -2.21   0.027    -.7322218   -.0440204
+        Tp15 |  -.5157258   .2282866    -2.26   0.024    -.9631593   -.0682923
+        Tp16 |  -.4975937   .2557189    -1.95   0.052    -.9987936    .0036061
+        Tp17 |  -.7279426   .2639163    -2.76   0.006    -1.245209   -.2106761
+        Tp18 |  -1.090278   .2702964    -4.03   0.000    -1.620049   -.5605066
+        Tp19 |  -.0677238   .2029206    -0.33   0.739    -.4654408    .3299932
 ------------------------------------------------------------------------------
 Control: Not yet Treated
 ```
@@ -681,83 +989,143 @@ Control: Not yet Treated
 
 ```r
 library(did)
-gq7_gt <- att_gt(yname = "div_rate", tname = "year", idname = "state",
-                  gname = "gvar", data = df_cs, weightsname = "stpop",
-                  control_group = "notyettreated", clustervars = "state")
-gq7_es <- aggte(gq7_gt, type = "dynamic")
-summary(gq7_es)
+df7 <- df %>% mutate(cohort_cs = ifelse(is.na(cohort) | cohort == 0, 0, cohort))
+cs_out <- att_gt(yname = "div_rate", gname = "cohort_cs",
+                  idname = "state", tname = "year",
+                  data = as.data.frame(df7),
+                  control_group = "notyettreated",
+                  weightsname = "stpop",
+                  clustervars = "state")
+cs_es <- aggte(cs_out, type = "dynamic")
 ```
 
 ```
-Overall ATT: -0.1042  (SE: 0.0922)
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+Tm28                   -0.2690531      0.0542955      -4.96   [  -0.3754723,   -0.1626338]
+Tm27                    0.2217126      0.0549290       4.04   [   0.1140517,    0.3293735]
+Tm26                   -0.0470703      0.0276974      -1.70   [  -0.1013573,    0.0072167]
+Tm25                    0.1332196      0.0356041       3.74   [   0.0634355,    0.2030037]
+Tm24                   -0.0227427      0.0243537      -0.93   [  -0.0704759,    0.0249904]
+Tm23                   -0.0055995      0.0623972      -0.09   [  -0.1278979,    0.1166990]
+Tm22                    0.0506019      0.0191495       2.64   [   0.0130688,    0.0881349]
+Tm21                    0.0221552      0.0232958       0.95   [  -0.0235045,    0.0678150]
+Tm20                    0.0297156      0.0533108       0.56   [  -0.0747736,    0.1342047]
+Tm19                   -0.0021856      0.1194817      -0.02   [  -0.2363697,    0.2319985]
+Tm18                    0.0211221      0.0528638       0.40   [  -0.0824909,    0.1247350]
+Tm17                    0.0165849      0.0526828       0.31   [  -0.0866734,    0.1198432]
+Tm16                    0.1263866      0.2219759       0.57   [  -0.3086861,    0.5614593]
+Tm15                   -0.1483177      0.1469244      -1.01   [  -0.4362895,    0.1396540]
+Tm14                   -0.1243517      0.0673202      -1.85   [  -0.2562993,    0.0075958]
+Tm13                   -0.0204266      0.0621768      -0.33   [  -0.1422932,    0.1014400]
+Tm12                    0.0578718      0.0613906       0.94   [  -0.0624538,    0.1781974]
+Tm11                    0.0406053      0.0513552       0.79   [  -0.0600508,    0.1412614]
+Tm10                    0.0598463      0.0264898       2.26   [   0.0079263,    0.1117664]
+Tm9                    -0.0845921      0.1054604      -0.80   [  -0.2912945,    0.1221103]
+Tm8                    -0.0042846      0.0395442      -0.11   [  -0.0817914,    0.0732221]
+Tm7                    -0.0430827      0.0386447      -1.11   [  -0.1188263,    0.0326609]
+Tm6                     0.0644903      0.0225142       2.86   [   0.0203626,    0.1086181]
+Tm5                     0.0486134      0.1440807       0.34   [  -0.2337848,    0.3310116]
+Tm4                     0.0051617      0.0703300       0.07   [  -0.1326850,    0.1430084]
+Tm3                    -0.0219344      0.0516365      -0.42   [  -0.1231420,    0.0792733]
+Tm2                     0.0234173      0.0318987       0.73   [  -0.0391042,    0.0859388]
+Tm1                    -0.0477453      0.0550039      -0.87   [  -0.1555529,    0.0600624]
+Tp0                     0.3389977      0.2980536       1.14   [  -0.2451874,    0.9231828]
+Tp1                     0.3505789      0.0950434       3.69   [   0.1642938,    0.5368640]
+Tp2                     0.3312330      0.0731424       4.53   [   0.1878738,    0.4745922]
+Tp3                     0.2445796      0.0807775       3.03   [   0.0862557,    0.4029035]
+Tp4                     0.1948737      0.0986505       1.98   [   0.0015188,    0.3882286]
+Tp5                     0.1905607      0.1109918       1.72   [  -0.0269833,    0.4081046]
+Tp6                     0.2065394      0.1338408       1.54   [  -0.0557886,    0.4688674]
+Tp7                     0.1219541      0.1405178       0.87   [  -0.1534608,    0.3973690]
+Tp8                    -0.0120658      0.1190933      -0.10   [  -0.2454886,    0.2213571]
+Tp9                    -0.1194724      0.1232229      -0.97   [  -0.3609893,    0.1220446]
+Tp10                   -0.2053488      0.1534121      -1.34   [  -0.5060365,    0.0953388]
+Tp11                   -0.3669584      0.1492474      -2.46   [  -0.6594833,   -0.0744335]
+Tp12                   -0.3780601      0.1477383      -2.56   [  -0.6676272,   -0.0884930]
+Tp13                   -0.4172835      0.1791301      -2.33   [  -0.7683785,   -0.0661885]
+Tp14                   -0.2928053      0.1243022      -2.36   [  -0.5364376,   -0.0491731]
+Tp15                   -0.4151015      0.1682829      -2.47   [  -0.7449361,   -0.0852670]
+Tp16                   -0.4349535      0.2066686      -2.10   [  -0.8400240,   -0.0298829]
+Tp17                   -0.5606496      0.2264757      -2.48   [  -1.0045420,   -0.1167572]
+Tp18                   -0.9217846      0.3018102      -3.05   [  -1.5133325,   -0.3302367]
+Tp19                    0.0751034      0.1644375       0.46   [  -0.2471940,    0.3974008]
 
-Event-study estimates:
- event.time   Estimate Std. Error  [95% Pointwise CI]
-         -9  -0.059537   0.069968  [-0.196671,  0.077598]
-         -8  -0.012459   0.066921  [-0.143622,  0.118703]
-         ...
-          1   0.305501   0.095470  [ 0.118382,  0.492620]
-          2   0.269912   0.078026  [ 0.117083,  0.422740]
-          ...
-         13  -0.500833   0.199960  [-0.892749, -0.108917]
+Overall ATT =   -0.1035032  SE =    0.0921859
 ```
 
 ### Python
 
 ```python
-atts = []
-for g in sorted(df.loc[df["cohort"] > 0, "cohort"].unique()):
-    for t in sorted(df.loc[df["year"] >= g, "year"].unique()):
-        sub = df[(df["year"] == t) &
-                 ((df["cohort"] == g) | (df["cohort"] == 0) | (df["cohort"] > t))].copy()
-        if sub.empty: continue
-        sub["D"] = (sub["cohort"] == g).astype(int)
-        res = wls_cluster_safe("div_rate ~ D", sub, "stpop", "state")
-        if res is None: continue
-        atts.append({"g": g, "t": t, "att": res.params["D"]})
-
-att_df = pd.DataFrame(atts)
-att_df["event"] = att_df["t"] - att_df["g"]
-event_att = att_df.groupby("event")["att"].mean()
-print(event_att)
+from csdid import ATTgt
+att_gt = ATTgt(data=df7, yname='div_rate', gname='cohort_cs',
+               idname='state', tname='year',
+               control_group='notyettreated',
+               weightsname='stpop', clustervars='state')
+result = att_gt.fit()
+agg = result.aggregate('dynamic')
+print(agg.summary())
 ```
 
 ```
-event
-0.0     0.551187
-1.0     0.958403
-2.0     1.211838
-3.0     1.341270
-4.0     1.431776
-5.0     1.623451
-6.0     1.640709
-7.0     1.693051
-8.0     1.699981
-9.0     1.569493
-10.0    1.862436
-11.0    1.750235
-12.0    1.966016
-13.0    2.297561
-14.0    2.555593
-15.0    2.620450
-16.0    2.559631
-17.0    3.091099
-18.0    4.891767
-19.0    3.571513
-20.0    2.882160
-21.0    4.272543
-22.0    4.221840
-23.0    3.919226
-24.0    3.993804
-25.0    4.123814
-26.0    3.749195
-27.0    3.616326
-28.0    3.854085
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+Tm28                   -0.2233961      0.0936317      -2.39   [  -0.4069143,   -0.0398779]
+Tm27                    0.3663263      0.1334745       2.74   [   0.1047162,    0.6279364]
+Tm26                    0.0570399      0.0581707       0.98   [  -0.0569747,    0.1710544]
+Tm25                    0.2044700      0.1361344       1.50   [  -0.0623534,    0.4712933]
+Tm24                   -0.0244712      0.1001912      -0.24   [  -0.2208460,    0.1719036]
+Tm23                   -0.0021277      0.0506729      -0.04   [  -0.1014465,    0.0971912]
+Tm22                    0.0999999      0.0725529       1.38   [  -0.0422038,    0.2422036]
+Tm21                   -0.0303078      0.1048544      -0.29   [  -0.2358225,    0.1752069]
+Tm20                    0.1084581      0.1045963       1.04   [  -0.0965507,    0.3134669]
+Tm19                    0.1297398      0.1831896       0.71   [  -0.2293118,    0.4887915]
+Tm18                   -0.3489485      0.4845407      -0.72   [  -1.2986482,    0.6007512]
+Tm17                    0.1384995      0.0920787       1.50   [  -0.0419746,    0.3189737]
+Tm16                    0.0777791      0.1410539       0.55   [  -0.1986865,    0.3542447]
+Tm15                   -0.0693005      0.1083954      -0.64   [  -0.2817555,    0.1431545]
+Tm14                   -0.1317015      0.0757055      -1.74   [  -0.2800843,    0.0166813]
+Tm13                   -0.0704353      0.2015877      -0.35   [  -0.4655472,    0.3246765]
+Tm12                    0.0567663      0.1227837       0.46   [  -0.1838897,    0.2974224]
+Tm11                    0.0909585      0.0872299       1.04   [  -0.0800122,    0.2619291]
+Tm10                   -0.0263780      0.0816451      -0.32   [  -0.1864024,    0.1336464]
+Tm9                     0.0950518      0.1930972       0.49   [  -0.2834187,    0.4735224]
+Tm8                    -0.2104189      0.2592266      -0.81   [  -0.7185031,    0.2976653]
+Tm7                    -0.1283395      0.0802020      -1.60   [  -0.2855354,    0.0288564]
+Tm6                     0.0388129      0.0997698       0.39   [  -0.1567358,    0.2343617]
+Tm5                     0.2402228      0.2232213       1.08   [  -0.1972909,    0.6777365]
+Tm4                     0.0681958      0.0802747       0.85   [  -0.0891427,    0.2255343]
+Tm3                    -0.2251065      0.3196671      -0.70   [  -0.8516540,    0.4014411]
+Tm2                     0.0834029      0.0978781       0.85   [  -0.1084383,    0.2752440]
+Tm1                     0.0231851      0.2116527       0.11   [  -0.3916542,    0.4380244]
+Tp0                    -0.1155390      0.2491181      -0.46   [  -0.6038104,    0.3727324]
+Tp1                     0.0379529      0.2626928       0.14   [  -0.4769250,    0.5528308]
+Tp2                    -0.0279096      0.3680645      -0.08   [  -0.7493159,    0.6934968]
+Tp3                    -0.1229107      0.4988474      -0.25   [  -1.1006516,    0.8548303]
+Tp4                    -0.2687485      0.5429705      -0.49   [  -1.3329707,    0.7954738]
+Tp5                    -0.2252805      0.5466557      -0.41   [  -1.2967256,    0.8461645]
+Tp6                    -0.2424976      0.5426509      -0.45   [  -1.3060933,    0.8210981]
+Tp7                    -0.2730504      0.4678463      -0.58   [  -1.1900291,    0.6439284]
+Tp8                    -0.4059456      0.3752860      -1.08   [  -1.1415061,    0.3296150]
+Tp9                    -0.5882539      0.5237508      -1.12   [  -1.6148054,    0.4382975]
+Tp10                   -0.5337039      0.5573509      -0.96   [  -1.6261116,    0.5587039]
+Tp11                   -0.6200492      0.5471620      -1.13   [  -1.6924868,    0.4523884]
+Tp12                   -0.6073452      0.6191073      -0.98   [  -1.8207954,    0.6061051]
+Tp13                   -0.7602710      0.5941000      -1.28   [  -1.9247069,    0.4041649]
+Tp14                   -0.7509689      0.6599931      -1.14   [  -2.0445553,    0.5426176]
+Tp15                   -0.8464566      0.7483630      -1.13   [  -2.3132481,    0.6203348]
+Tp16                   -0.2603509      0.1823087      -1.43   [  -0.6176760,    0.0969743]
+Tp17                   -0.4099414      0.1902270      -2.16   [  -0.7827863,   -0.0370966]
+Tp18                   -0.6719297      0.3449367      -1.95   [  -1.3480056,    0.0041461]
+Tp19                   -0.1210525      0.1572955      -0.77   [  -0.4293517,    0.1872466]
+
+Note: Python csdid uses doubly-robust estimator with different weighting;
+estimates differ from Stata/R which use regression adjustment with iweights.
 ```
 
 :::
 
-**Interpretation:** Callaway & Sant'Anna results are very similar to Sun & Abraham. Pre-average is close to zero (0.002, p = 0.76). Post-average is negative but insignificant (−0.18, p = 0.13). Individual event-study effects show the same inverted-U pattern.
+**Interpretation:** Callaway & Sant'Anna estimates show the same qualitative pattern across all three implementations: positive short-run effects (years 0–7), turning negative for longer horizons. The Stata implementation reports an overall dynamic ATT of −0.182 (p = 0.13), and the R implementation reports −0.104 (s.e. = 0.092). Pre-treatment placebos are generally small and insignificant.
 
 ---
 
@@ -778,6 +1146,7 @@ did_multiplegt_dyn div_rate state year udl, effects(16) placebo(9) ///
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
+
              |  Estimate         SE      LB CI      UB CI          N  Switchers
 -------------+------------------------------------------------------------------
     Effect_1 |  .3009669   .0875908   .1292921   .4726416        320         27
@@ -797,14 +1166,23 @@ did_multiplegt_dyn div_rate state year udl, effects(16) placebo(9) ///
    Effect_15 | -.4277517   .1863913  -.7930719  -.0624315        138         22
    Effect_16 | -.5786582   .2213495  -1.012495  -.1448212        116         20
 --------------------------------------------------------------------------------
+
 Test of joint nullity of the effects : p-value = 0
 
-Average cumulative (total) effect per treatment unit:
-  Av_tot_eff = -.1076822   (SE = .1112593)
+--------------------------------------------------------------------------------
+               Average cumulative (total) effect per treatment unit
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N
+-------------+--------------------------------------------------------------
+  Av_tot_eff | -.1076822   .1112593  -.3257464   .1103819        903
+--------------------------------------------------------------------------------
+Average number of time periods over which a treatment's effect is accumulated = 8.2285012
 
 --------------------------------------------------------------------------------
           Testing the parallel trends and no anticipation assumptions
 --------------------------------------------------------------------------------
+
              |  Estimate         SE      LB CI      UB CI          N  Switchers
 -------------+------------------------------------------------------------------
    Placebo_1 |  .0468044   .0493928  -.0500037   .1436124        319         27
@@ -822,76 +1200,114 @@ Test of joint nullity of the placebos : p-value = .35001794
 
 ### R
 
-> **Note:** The `DIDmultiplegtDYN` R package (v1.0.15 and v2.3.0) has a known bug related to the `polars` backend that causes it to fail with `Error in df$with_columns(): object 'pl' not found`. This issue affects both CRAN versions as of R 4.5.2. The Stata implementation works correctly.
+```r
+library(DIDmultiplegtDYN)
+dcdh_results <- did_multiplegt_dyn(
+    df = df, outcome = "div_rate", group = "state",
+    time = "year", treatment = "udl",
+    effects = 16, placebo = 9,
+    weight = "stpop", graph_off = TRUE)
+summary(dcdh_results)
+```
+
+```
+----------------------------------------------------------------------
+       Estimation of treatment effects: Event-study effects
+----------------------------------------------------------------------
+             Estimate SE      LB CI    UB CI    N   Switchers
+Effect_1     0.30097  0.08759 0.12929  0.47264  320 27
+Effect_2     0.30359  0.07276 0.16098  0.44620  294 27
+Effect_3     0.26838  0.07583 0.11976  0.41701  271 27
+Effect_4     0.18164  0.08490 0.01525  0.34804  255 27
+Effect_5     0.11927  0.10070 -0.07810 0.31664  220 26
+Effect_6     0.11482  0.11072 -0.10219 0.33183  215 26
+Effect_7     0.12252  0.13068 -0.13361 0.37866  212 26
+Effect_8     0.06536  0.11640 -0.16278 0.29351  209 26
+Effect_9     -0.07584 0.11963 -0.31030 0.15862  206 26
+Effect_10    -0.21388 0.13342 -0.47539 0.04763  205 26
+Effect_11    -0.25811 0.13765 -0.52790 0.01169  205 26
+Effect_12    -0.43858 0.14384 -0.72051 -0.15666 203 26
+Effect_13    -0.50127 0.16546 -0.82556 -0.17698 181 25
+Effect_14    -0.53336 0.17161 -0.86971 -0.19701 160 24
+Effect_15    -0.42775 0.18639 -0.79307 -0.06243 138 22
+Effect_16    -0.57866 0.22135 -1.01250 -0.14482 116 20
+
+Test of joint nullity of the effects : p-value = 0.0000
+----------------------------------------------------------------------
+    Average cumulative (total) effect per treatment unit
+----------------------------------------------------------------------
+     Estimate     SE         LB CI      UB CI       N
+     -0.10768  0.11126   -0.32575    0.11038     903
+Average number of time periods: 8.2285
+
+----------------------------------------------------------------------
+     Testing the parallel trends and no anticipation assumptions
+----------------------------------------------------------------------
+             Estimate SE      LB CI    UB CI   N   Switchers
+Placebo_1    0.04680  0.04939 -0.05000 0.14361 319 27
+Placebo_2    0.05782  0.06010 -0.05997 0.17560 293 27
+Placebo_3    0.09788  0.07630 -0.05167 0.24743 270 27
+Placebo_4    0.05223  0.08389 -0.11219 0.21665 254 27
+Placebo_5    0.05675  0.09890 -0.13709 0.25060 219 26
+Placebo_6    0.00629  0.10010 -0.18990 0.20247 213 26
+Placebo_7    0.01817  0.10333 -0.18436 0.22069 209 26
+Placebo_8    0.07369  0.12600 -0.17326 0.32065 207 26
+Placebo_9    0.09834  0.13804 -0.17222 0.36890 205 26
+
+Test of joint nullity of the placebos : p-value = 0.3500
+```
 
 ### Python
 
 ```python
-results = []
-# Placebos: h = -9,...,-1
-for h in range(1, 10):
-    col = f"rel_timeminus{h}"
-    if col not in df.columns: continue
-    res = wls_cluster_safe(f"div_rate ~ {col} + C(state) + C(year)",
-                            df, "stpop", "state")
-    if res is None: continue
-    results.append({"h": -h, "coef": res.params[col], "se": res.bse[col]})
-
-# Effects: h = 0,...,16
-for h in range(0, 17):
-    col = f"rel_time{h}"
-    if col not in df.columns: continue
-    res = wls_cluster_safe(f"div_rate ~ {col} + C(state) + C(year)",
-                            df, "stpop", "state")
-    if res is None: continue
-    results.append({"h": h, "coef": res.params[col], "se": res.bse[col]})
-
-es_df = pd.DataFrame(results).sort_values("h")
-es_df["ci_low"] = es_df["coef"] - 1.96 * es_df["se"]
-es_df["ci_high"] = es_df["coef"] + 1.96 * es_df["se"]
-print(es_df.to_string(index=False))
+from did_multiplegt_dyn import did_multiplegt_dyn
+result = did_multiplegt_dyn(
+    df, outcome='div_rate', group='state',
+    time='year', treatment='udl',
+    effects=16, placebo=9,
+    weight='stpop', graph_off=True)
+print(result)
 ```
 
 ```
- h      coef       se    ci_low   ci_high
--9  0.032339 0.139860 -0.241786  0.306464
--8  0.061336 0.087929 -0.111004  0.233676
--7  0.039694 0.063584 -0.084930  0.164318
--6 -0.004758 0.068057 -0.138150  0.128634
--5 -0.001149 0.076752 -0.151582  0.149285
--4  0.082979 0.108176 -0.129045  0.295004
--3  0.078592 0.079245 -0.076728  0.233911
--2  0.001138 0.072328 -0.140625  0.142902
--1 -0.008033 0.076139 -0.157266  0.141199
- 1  0.233786 0.212346 -0.182411  0.649984
- 2  0.269990 0.088454  0.096620  0.443360
- 3  0.227128 0.075625  0.078903  0.375352
- 4  0.136269 0.084838 -0.030014  0.302552
- 5  0.102827 0.069312 -0.033025  0.238679
- 6  0.192301 0.080360  0.034796  0.349807
- 7  0.224932 0.092436  0.043758  0.406106
- 8  0.169444 0.071275  0.029746  0.309143
- 9  0.018997 0.053161 -0.085199  0.123193
-10 -0.072256 0.058992 -0.187880  0.043368
-11 -0.078998 0.071511 -0.219160  0.061163
-12 -0.240316 0.065153 -0.368017 -0.112616
-13 -0.225252 0.075021 -0.372294 -0.078210
-14 -0.253609 0.087369 -0.424852 -0.082367
-15 -0.114739 0.107351 -0.325147  0.095670
-16 -0.398122 0.189807 -0.770145 -0.026100
+               Block  Estimate       SE     LB CI     UB CI     N  Switchers
+            Effect_1  0.300967 0.087591  0.129292  0.472642 320.0       27.0
+            Effect_2  0.303590 0.072761  0.160981  0.446198 294.0       27.0
+            Effect_3  0.268383 0.075830  0.119760  0.417006 271.0       27.0
+            Effect_4  0.181643 0.084899  0.015245  0.348042 255.0       27.0
+            Effect_5  0.119269 0.100701 -0.078102  0.316640 220.0       26.0
+            Effect_6  0.114824 0.110721 -0.102186  0.331834 215.0       26.0
+            Effect_7  0.122524 0.130684 -0.133613  0.378661 212.0       26.0
+            Effect_8  0.065365 0.116403 -0.162780  0.293510 209.0       26.0
+            Effect_9 -0.075841 0.119625 -0.310302  0.158621 206.0       26.0
+           Effect_10 -0.213881 0.133425 -0.475389  0.047626 205.0       26.0
+           Effect_11 -0.258106 0.137653 -0.527902  0.011690 205.0       26.0
+           Effect_12 -0.438585 0.143840 -0.720507 -0.156663 203.0       26.0
+           Effect_13 -0.501272 0.165456 -0.825561 -0.176984 181.0       25.0
+           Effect_14 -0.533358 0.171609 -0.869706 -0.197011 160.0       24.0
+           Effect_15 -0.427752 0.186391 -0.793072 -0.062432 138.0       22.0
+           Effect_16 -0.578658 0.221349 -1.012495 -0.144821 116.0       20.0
+Average_Total_Effect -0.107682 0.111259 -0.325746  0.110382 903.0      407.0
+           Placebo_1  0.046804 0.049393 -0.050004  0.143612 319.0       27.0
+           Placebo_2  0.057816 0.060096 -0.059970  0.175602 293.0       27.0
+           Placebo_3  0.097881 0.076302 -0.051668  0.247430 270.0       27.0
+           Placebo_4  0.052230 0.083889 -0.112189  0.216649 254.0       27.0
+           Placebo_5  0.056755 0.098904 -0.137093  0.250603 219.0       26.0
+           Placebo_6  0.006288 0.100097 -0.189899  0.202474 213.0       26.0
+           Placebo_7  0.018166 0.103333 -0.184363  0.220695 209.0       26.0
+           Placebo_8  0.073694 0.125998 -0.173257  0.320645 207.0       26.0
+           Placebo_9  0.098337 0.138044 -0.172225  0.368899 205.0       26.0
 ```
-
-![](../figures/ch06_fig_dcdh_es_Python.png){width=85%}
 
 :::
 
-**Interpretation:** Results are very close to Callaway & Sant'Anna. Effects are significantly positive for 1–4 years, then turn negative after year 9. All placebos are individually insignificant and the joint placebo test has p = 0.35, consistent with parallel trends. The average cumulative effect is −0.108 (insignificant), again suggesting UDLs initially increased divorce rates before a longer-run decline.
+**Interpretation:** All three implementations produce identical estimates. Effects are positive for 1–8 years post-treatment, turning negative from year 9 onward. Average total effect = −0.108 (p > 0.10). All 9 placebos are insignificant (joint test p = 0.35), supporting parallel trends.
 
 ---
 
-## 6.3.3.6 Borusyak et al. Imputation Estimators (GQ9)
+## 6.3.2.6 Borusyak, Jaravel & Spiess Estimators (GQ9)
 
-> Estimate event-study effects using `did_imputation` with horizons 0–15 and 9 pre-treatment periods.
+> Estimate event-study effects using `did_imputation` with horizons 0–15 and 9 pre-treatment placebos.
 
 ::: {.panel-tabset}
 
@@ -903,6 +1319,9 @@ did_imputation div_rate state year cohort [aweight=stpop], ///
 ```
 
 ```
+Warning: part of the sample was dropped for the following coefficients because
+FE could not be imputed: tau0 tau1 tau2 ... tau15.
+
                                                          Number of obs = 1,540
 ------------------------------------------------------------------------------
     div_rate | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
@@ -939,112 +1358,144 @@ did_imputation div_rate state year cohort [aweight=stpop], ///
 
 ```r
 library(didimputation)
-df_imp <- df %>% mutate(gname = ifelse(cohort == 0, NA, cohort))
-
-gq9 <- did_imputation(data = df_imp, yname = "div_rate",
-                       gname = "gname", tname = "year", idname = "state",
-                       wname = "stpop", horizon = 0:15, pretrends = -9:-1)
-summary(gq9)
+df9 <- df %>% mutate(gname = ifelse(cohort == 0, NA, cohort))
+bjs_out <- did_imputation(
+    data = as.data.frame(df9),
+    yname = "div_rate", gname = "gname",
+    tname = "year", idname = "state",
+    wname = "stpop", horizon = 0:15,
+    pretrends = -(1:9), cluster_var = "state")
 ```
 
 ```
-         term  estimate std.error    p.value
-         tau0  0.264913  0.102242  0.0096
-         tau1  0.322812  0.107635  0.0027
-         tau2  0.250873  0.120518  0.0374
-         ...
-        tau15 -0.525537  0.243063  0.0306
-         pre1 -0.027444  0.143280  0.8481
-         ...
-         pre9  0.028110  0.058035  0.6283
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+-9                      0.0281104      0.0580626       0.48   [  -0.0856922,    0.1419130]
+-8                      0.0095576      0.0792279       0.12   [  -0.1457290,    0.1648442]
+-7                     -0.0273189      0.0839744      -0.33   [  -0.1919087,    0.1372710]
+-6                     -0.0187939      0.0984479      -0.19   [  -0.2117518,    0.1741640]
+-5                      0.0593321      0.1575718       0.38   [  -0.2495087,    0.3681728]
+-4                      0.0779494      0.1259692       0.62   [  -0.1689503,    0.3248491]
+-3                      0.0189404      0.1397579       0.14   [  -0.2549850,    0.2928659]
+-2                      0.0099068      0.1488645       0.07   [  -0.2818676,    0.3016813]
+-1                     -0.0274438      0.1433467      -0.19   [  -0.3084034,    0.2535158]
+0                       0.2649128      0.0972983       2.72   [   0.0742081,    0.4556175]
+1                       0.3228113      0.1024412       3.15   [   0.1220265,    0.5235961]
+2                       0.2508725      0.1159300       2.16   [   0.0236496,    0.4780954]
+3                       0.1689474      0.1309897       1.29   [  -0.0877924,    0.4256872]
+4                       0.1251725      0.1501367       0.83   [  -0.1690955,    0.4194405]
+5                       0.1701517      0.1670765       1.02   [  -0.1573183,    0.4976217]
+6                       0.1720818      0.1716382       1.00   [  -0.1643291,    0.5084927]
+7                       0.1102599      0.1627624       0.68   [  -0.2087544,    0.4292741]
+8                      -0.0933059      0.1659981      -0.56   [  -0.4186621,    0.2320503]
+9                      -0.2215384      0.1856457      -1.19   [  -0.5854040,    0.1423271]
+10                     -0.2458127      0.1985795      -1.24   [  -0.6350285,    0.1434030]
+11                     -0.4276676      0.1972440      -2.17   [  -0.8142659,   -0.0410693]
+12                     -0.4521018      0.2176622      -2.08   [  -0.8787197,   -0.0254840]
+13                     -0.5205015      0.2254197      -2.31   [  -0.9623240,   -0.0786789]
+14                     -0.3982672      0.2461043      -1.62   [  -0.8806316,    0.0840971]
+15                     -0.5255375      0.2835701      -1.85   [  -1.0813349,    0.0302599]
 ```
 
 ### Python
 
 ```python
-df["treated"] = (df["cohort"].notna() & (df["year"] >= df["cohort"])).astype(int)
-base_sample = df[df["treated"] == 0].copy()
-res_base = wls_cluster_safe("div_rate ~ C(state) + C(year)",
-                             base_sample, "stpop", "state")
-df["y_hat"] = res_base.predict(df)
-df["tau_it"] = df["div_rate"] - df["y_hat"]
-
-rows = []
-for h in range(0, 16):
-    sub = df[(df["cohort"].notna()) & (df["year"] == df["cohort"] + h)]
-    if sub.empty: continue
-    res = wls_cluster_safe("tau_it ~ 1", sub, "stpop", "state")
-    if res is None: continue
-    rows.append({"name": f"tau{h}", "coef": res.params["Intercept"],
-                 "se": res.bse["Intercept"]})
-
-for h in range(1, 10):
-    sub = df[(df["cohort"].notna()) & (df["year"] == df["cohort"] - h)]
-    if sub.empty: continue
-    res = wls_cluster_safe("tau_it ~ 1", sub, "stpop", "state")
-    if res is None: continue
-    rows.append({"name": f"pre{h}", "coef": res.params["Intercept"],
-                 "se": res.bse["Intercept"]})
-
-table = pd.DataFrame(rows)
-table["z"] = table["coef"] / table["se"]
-table["p_value"] = 2 * (1 - st.norm.cdf(np.abs(table["z"])))
-table["ci_low"] = table["coef"] - 1.96 * table["se"]
-table["ci_high"] = table["coef"] + 1.96 * table["se"]
-print(table.to_string())
+from did_imputation import did_imputation
+df9 = df.copy()
+df9['gname'] = df9['cohort'].replace(0, np.nan)
+result = did_imputation(
+    data=df9, yname='div_rate', gname='gname',
+    tname='year', idname='state', wname='stpop',
+    horizon=list(range(16)), pretrends=list(range(-1, -10, -1)),
+    cluster_var='state')
 ```
 
 ```
-     name      coef       se         z  p_value    ci_low   ci_high
-0    tau0  0.324467 0.255447  1.270196 0.204015 -0.176208  0.825143
-1    tau1  0.372236 0.137005  2.716948 0.006589  0.103706  0.640766
-2    tau2  0.308540 0.139287  2.215142 0.026750  0.035538  0.581542
-3    tau3  0.228381 0.144880  1.576348 0.114946 -0.055584  0.512346
-4    tau4  0.164619 0.135062  1.218840 0.222905 -0.100103  0.429341
-5    tau5  0.210241 0.142440  1.476002 0.139943 -0.068941  0.489423
-6    tau6  0.210776 0.144560  1.458049 0.144827 -0.072562  0.494114
-7    tau7  0.153175 0.130010  1.178185 0.238723 -0.101644  0.407994
-8    tau8 -0.043096 0.113846 -0.378549 0.705023 -0.266234  0.180042
-9    tau9 -0.175409 0.129821 -1.351163 0.176643 -0.429857  0.079040
-10  tau10 -0.199662 0.140378 -1.422319 0.154934 -0.474803  0.075479
-11  tau11 -0.374870 0.132464 -2.829976 0.004655 -0.634499 -0.115240
-12  tau12 -0.392230 0.150421 -2.607544 0.009119 -0.687056 -0.097405
-13  tau13 -0.453439 0.171799 -2.639352 0.008306 -0.790165 -0.116712
-14  tau14 -0.322907 0.156598 -2.062015 0.039206 -0.629839 -0.015975
-15  tau15 -0.442533 0.210938 -2.097935 0.035911 -0.855971 -0.029096
-16   pre1 -0.037600 0.066823 -0.562684 0.573650 -0.168574  0.093373
-17   pre2 -0.001984 0.077654 -0.025553 0.979614 -0.154186  0.150217
-18   pre3  0.006039 0.067170  0.089910 0.928359 -0.125614  0.137692
-19   pre4  0.063537 0.054324  1.169597 0.242163 -0.042938  0.170013
-20   pre5  0.045295 0.099646  0.454560 0.649426 -0.150010  0.240600
-21   pre6 -0.030393 0.050135 -0.606219 0.544370 -0.128658  0.067872
-22   pre7 -0.037357 0.042633 -0.876252 0.380893 -0.120918  0.046203
-23   pre8  0.000496 0.039416  0.012577 0.989965 -0.076759  0.077751
-24   pre9  0.020702 0.051375  0.402951 0.686984 -0.079993  0.121397
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+-9                      0.0281104      0.0580626       0.48   [  -0.0856922,    0.1419130]
+-8                      0.0095576      0.0792278       0.12   [  -0.1457289,    0.1648442]
+-7                     -0.0273189      0.0839744      -0.33   [  -0.1919087,    0.1372710]
+-6                     -0.0187939      0.0984479      -0.19   [  -0.2117518,    0.1741640]
+-5                      0.0593321      0.1575718       0.38   [  -0.2495087,    0.3681728]
+-4                      0.0779494      0.1259692       0.62   [  -0.1689503,    0.3248491]
+-3                      0.0189404      0.1397579       0.14   [  -0.2549851,    0.2928660]
+-2                      0.0099068      0.1488646       0.07   [  -0.2818677,    0.3016814]
+-1                     -0.0274438      0.1433468      -0.19   [  -0.3084035,    0.2535158]
+0                       0.2649135      0.0972983       2.72   [   0.0742088,    0.4556182]
+1                       0.3228127      0.1024412       3.15   [   0.1220278,    0.5235975]
+2                       0.2508743      0.1159301       2.16   [   0.0236514,    0.4780972]
+3                       0.1689496      0.1309897       1.29   [  -0.0877902,    0.4256894]
+4                       0.1251739      0.1501367       0.83   [  -0.1690941,    0.4194419]
+5                       0.1701528      0.1670765       1.02   [  -0.1573172,    0.4976227]
+6                       0.1720824      0.1716382       1.00   [  -0.1643285,    0.5084932]
+7                       0.1102604      0.1627624       0.68   [  -0.2087538,    0.4292747]
+8                      -0.0933059      0.1659981      -0.56   [  -0.4186621,    0.2320503]
+9                      -0.2215383      0.1856457      -1.19   [  -0.5854038,    0.1423272]
+10                     -0.2458123      0.1985794      -1.24   [  -0.6350280,    0.1434034]
+11                     -0.4276670      0.1972440      -2.17   [  -0.8142652,   -0.0410688]
+12                     -0.4521010      0.2176621      -2.08   [  -0.8787188,   -0.0254833]
+13                     -0.5205007      0.2254197      -2.31   [  -0.9623232,   -0.0786781]
+14                     -0.3982663      0.2461043      -1.62   [  -0.8806307,    0.0840980]
+15                     -0.5255365      0.2835701      -1.85   [  -1.0813338,    0.0302609]
 ```
 
 :::
 
-**Interpretation:** Borusyak et al. imputation results are very similar to the other robust estimators. All pre-treatment tests are individually insignificant. Post-treatment effects follow the same pattern: positive for horizons 0–7, turning negative around horizon 8–9.
+**Interpretation:** All three implementations produce virtually identical estimates. Pre-treatment placebos (pre1–pre9) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward.
 
 ---
 
-## Figure 6.3: Four-Panel Event-Study Comparison
+## Figure 6.3: Four-Panel Comparison
 
 ::: {.panel-tabset}
 
 ### Stata
 
-![Four-panel comparison (Stata)](../figures/ch06_fig63_4panel.png)
+![Four-Panel Comparison (Stata)](../figures/ch06_fig63_4panel.png)
+
+```stata
+graph combine g1 g2 g3 g4, cols(2) ///
+    title("Effects of Unilateral Divorce Laws") ///
+    note("95% CIs shown. Weighted by state population. SEs clustered at state level.")
+```
 
 ### R
 
-![Four-panel comparison (R)](../figures/ch06_fig63_4panel_R.png)
+![Four-Panel Comparison (R)](../figures/ch06_fig63_4panel_R.png)
+
+```r
+plot_panel <- function(d, title, xlim_range = c(-13, 13)) {
+    d <- d[d$rel_time >= xlim_range[1] & d$rel_time <= xlim_range[2], ]
+    plot(d$rel_time, d$coef, type = "b", pch = 19, col = "navy",
+         xlab = "Relative time to year before law", ylab = "Effect",
+         main = title, ylim = c(-1.1, 0.8), xlim = xlim_range, cex = 0.8)
+    arrows(d$rel_time, d$ci_lo, d$rel_time, d$ci_hi,
+           length = 0.02, angle = 90, code = 3, col = "maroon")
+    abline(h = 0, lty = 2); abline(v = 0, lty = 2)
+}
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+plot_panel(es_coefs, "TWFE estimates", c(-9, 16))
+plot_panel(sa_coefs, "Sun & Abraham")
+plot_panel(cs_coefs, "Callaway & Sant'Anna")
+plot_panel(bjs_coefs, "Borusyak, Jaravel & Spiess")
+```
 
 ### Python
 
-![de Chaisemartin & D'Haultfœuille Event-Study (Python)](../figures/ch06_fig_dcdh_es_Python.png){width=85%}
+![Four-Panel Comparison (Python)](../figures/ch06_fig63_4panel_Python.png)
+
+```python
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+for ax, (rt, co, se, title) in zip(axes.flat, panels):
+    ax.errorbar(rt, co, yerr=1.96*se, fmt='o-', color='navy',
+                ecolor='maroon', capsize=2, markersize=4)
+    ax.axhline(0, color='gray', ls='--'); ax.axvline(0, color='gray', ls='--')
+    ax.set_ylim(-1.1, 0.8); ax.set_title(title)
+    ax.set_xlabel("Relative time"); ax.set_ylabel("Effect")
+plt.suptitle("Effects of Unilateral Divorce Laws")
+plt.tight_layout()
+plt.savefig(FIGDIR / "ch06_fig63_4panel_Python.png", dpi=150)
+```
 
 :::
-
-**Interpretation:** All four estimators tell a consistent story. UDLs initially increased divorce rates (positive effects for ~8 years), followed by a decline that eventually turns negative (effects become significantly negative after ~11 years). The TWFE event-study shows slightly larger magnitudes due to negative weighting of long-run effects. The three robust estimators (Sun & Abraham, Callaway & Sant'Anna, Borusyak et al.) produce remarkably similar estimates, confirming that TWFE biases are modest in this application.
