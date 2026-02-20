@@ -450,21 +450,20 @@ year::1920             -0.1519845    0.0108909     -13.96      0.000 [-0.1733307
 year::1924             -0.1649369    0.0109407     -15.08      0.000 [-0.1863807, -0.1434932]
 year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688, -0.0890405]
 --------------------------------------------------------------------------------</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decomposition (manual implementation of twowayfeweights feTR)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> np.array(pf.feols(<span class="st">"numdailies ~ 1 | cnty90 + year"</span>, data<span class="op">=</span>df).resid())</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>D_vals <span class="op">=</span> df[<span class="st">'numdailies'</span>].astype(<span class="bu">float</span>).values</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(D_vals)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>denom_W <span class="op">=</span> np.mean(eps <span class="op">*</span> D_vals)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>weight <span class="op">=</span> eps <span class="op">*</span> D_vals <span class="op">/</span> (N <span class="op">*</span> denom_W)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>att <span class="op">=</span> D_vals <span class="op">&gt;</span> <span class="dv">0</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> att <span class="op">&amp;</span> (weight <span class="op">&gt;</span> <span class="fl">1e-9</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>neg <span class="op">=</span> att <span class="op">&amp;</span> (weight <span class="op">&lt;</span> <span class="op">-</span><span class="fl">1e-9</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Under the common trends assumption, beta estimates a weighted sum of 10378
-ATTs.
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"numdailies"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"feTR"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>Under the common trends assumption,
+beta estimates a weighted sum of 10378 ATTs.
 6180 ATTs receive a positive weight, and 4198 receive a negative weight.
-The sum of the positive weights is equal to 1.4740.
-The sum of the negative weights is equal to -0.4740.</code></pre>
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6180        1.4740
+Negative weights        4198        -0.4740
+------------------------------------------------
+Total                   10378       1.0000
+------------------------------------------------</code></pre>
 </div>
 </div>
 </div>
@@ -524,18 +523,21 @@ Total                     10342            1</code></pre>
 <pre><code>numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 (year and state-year FEs absorbed, not shown)</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decomposition with state-year controls</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>eps2 <span class="op">=</span> np.array(pf.feols(<span class="st">"numdailies ~ C(styr) | cnty90 + year"</span>,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                          data<span class="op">=</span>df, fixef_rm<span class="op">=</span><span class="st">"none"</span>).resid())</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>D_vals2 <span class="op">=</span> df[<span class="st">'numdailies'</span>].astype(<span class="bu">float</span>).values</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>N2 <span class="op">=</span> <span class="bu">len</span>(D_vals2)</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>denom_W2 <span class="op">=</span> np.mean(eps2 <span class="op">*</span> D_vals2)</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>weight2 <span class="op">=</span> eps2 <span class="op">*</span> D_vals2 <span class="op">/</span> (N2 <span class="op">*</span> denom_W2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Under the common trends assumption, beta estimates a weighted sum of 10342
-ATTs.
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>styr_cols <span class="op">=</span> <span class="bu">sorted</span>([c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c.startswith(<span class="st">"styr"</span>) <span class="kw">and</span> c <span class="op">!=</span> <span class="st">"styr"</span>])</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"numdailies"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"feTR"</span>, controls<span class="op">=</span>styr_cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>Under the common trends assumption,
+beta estimates a weighted sum of 10342 ATTs.
 6195 ATTs receive a positive weight, and 4147 receive a negative weight.
-36 observations receive a weight equal to 0.
-The sum of the positive weights is equal to 1.5331.
-The sum of the negative weights is equal to -0.5331.</code></pre>
+36 ATTs receive a weight equal to 0.
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6195        1.5331
+Negative weights        4147        -0.5331
+------------------------------------------------
+Total                   10342       1.0000
+------------------------------------------------</code></pre>
 </div>
 </div>
 </div>
@@ -634,52 +636,29 @@ Variable              Coefficient    Std. Err.          t      P&gt;|t|         
 changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580,  0.0044234]
 --------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># FD weight decomposition (fdTR type)</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>D0 <span class="op">=</span> df[<span class="st">'numdailies'</span>].astype(<span class="bu">float</span>).values</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(df)</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> <span class="op">~</span>df[<span class="st">'changedailies'</span>].isna()</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> np.zeros(N)</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>eps[mask] <span class="op">=</span> np.array(pf.feols(<span class="st">"changedailies ~ C(styr) | year"</span>,</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>                               data<span class="op">=</span>df[mask], fixef_rm<span class="op">=</span><span class="st">"none"</span>).resid())</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>yr2fn <span class="op">=</span> {y: i <span class="cf">for</span> i, y <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">sorted</span>(df[<span class="st">'year'</span>].unique()))}</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>work <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'G'</span>: df[<span class="st">'cnty90'</span>].values, <span class="st">'TFN'</span>: df[<span class="st">'year'</span>].<span class="bu">map</span>(yr2fn).values,</span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'D0'</span>: D0, <span class="st">'eps'</span>: eps</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>}).sort_values([<span class="st">'G'</span>, <span class="st">'TFN'</span>]).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>work[<span class="st">'w'</span>] <span class="op">=</span> np.where(</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    work[<span class="st">'TFN'</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">==</span> work.groupby(<span class="st">'G'</span>)[<span class="st">'TFN'</span>].shift(<span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>    work[<span class="st">'eps'</span>] <span class="op">-</span> work.groupby(<span class="st">'G'</span>)[<span class="st">'eps'</span>].shift(<span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    work[<span class="st">'eps'</span>])</span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>work[<span class="st">'w'</span>] <span class="op">=</span> work[<span class="st">'w'</span>].fillna(work[<span class="st">'eps'</span>])</span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>denom_W <span class="op">=</span> (work[<span class="st">'w'</span>] <span class="op">*</span> work[<span class="st">'D0'</span>]).mean()</span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>weight <span class="op">=</span> work[<span class="st">'w'</span>].values <span class="op">*</span> work[<span class="st">'D0'</span>].values <span class="op">/</span> (N <span class="op">*</span> denom_W)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Under the common trends assumption, beta estimates a weighted sum of 9876
-ATTs.
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>result3 <span class="op">=</span> twowayfeweights(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"changedailies"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"numdailies"</span>,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                           controls<span class="op">=</span>styr_cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>Under the common trends assumption,
+beta estimates a weighted sum of 9876 ATTs.
 5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-502 observations receive a weight equal to 0.
-The sum of the positive weights is equal to 2.4271.
-The sum of the negative weights is equal to -1.4271.</code></pre>
+502 ATTs receive a weight equal to 0.
+------------------------------------------------
+Treat. var: changedailies # ATTs     Σ weights
+------------------------------------------------
+Positive weights        5371        2.4271
+Negative weights        4505        -1.4271
+------------------------------------------------
+Total                   9876        1.0000
+------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test random weights (year)</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>mean_D0 <span class="op">=</span> work[<span class="st">'D0'</span>].mean()</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>mean_wD0 <span class="op">=</span> (work[<span class="st">'w'</span>] <span class="op">*</span> work[<span class="st">'D0'</span>]).mean()</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>work[<span class="st">'sigma'</span>] <span class="op">=</span> work[<span class="st">'w'</span>] <span class="op">*</span> mean_D0 <span class="op">/</span> mean_wD0</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> att <span class="op">&amp;</span> np.isfinite(work[<span class="st">'sigma'</span>].values)</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>reg_df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'year_val'</span>: work.loc[sub, <span class="st">'year_orig'</span>].values,</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sigma'</span>: work.loc[sub, <span class="st">'sigma'</span>].values,</span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nat_w'</span>: work.loc[sub, <span class="st">'D0'</span>].values,</span>
-<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'G'</span>: work.loc[sub, <span class="st">'G'</span>].astype(<span class="bu">str</span>).values</span>
-<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>reg_df[<span class="st">'nat_w'</span>] <span class="op">=</span> reg_df[<span class="st">'nat_w'</span>] <span class="op">/</span> reg_df[<span class="st">'nat_w'</span>].<span class="bu">sum</span>()</span>
-<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>rw_reg <span class="op">=</span> pf.feols(<span class="st">"year_val ~ sigma"</span>, data<span class="op">=</span>reg_df,</span>
-<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>                   weights<span class="op">=</span><span class="st">"nat_w"</span>, vcov<span class="op">=</span>{<span class="st">"CRV1"</span>: <span class="st">"G"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>The coefficient of year in the regression of the weights on year is:
-    Coef          SE         t       Corr(weights, year)
-  -0.1674271   0.0510117   -3.2821306       -0.0631614</code></pre>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>result3b <span class="op">=</span> twowayfeweights(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"changedailies"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"numdailies"</span>,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>                            controls<span class="op">=</span>styr_cols, test_random_weights<span class="op">=</span><span class="st">"year"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>Regression of variables possibly correlated with the treatment effect on the weights
+
+             Coef           SE       t-stat  Correlation
+year   -0.1674271    0.0510117   -3.2821306   -0.0631614</code></pre>
 </div>
 </div>
 </div>

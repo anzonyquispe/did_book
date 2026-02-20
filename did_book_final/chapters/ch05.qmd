@@ -245,24 +245,23 @@ year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688
 ```
 
 ```python
-# Decomposition (manual implementation of twowayfeweights feTR)
-eps = np.array(pf.feols("numdailies ~ 1 | cnty90 + year", data=df).resid())
-D_vals = df['numdailies'].astype(float).values
-N = len(D_vals)
-denom_W = np.mean(eps * D_vals)
-weight = eps * D_vals / (N * denom_W)
-
-att = D_vals > 0
-pos = att & (weight > 1e-9)
-neg = att & (weight < -1e-9)
+from twowayfeweights import twowayfeweights
+result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
+                          type="feTR")
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 10378
-ATTs.
+Under the common trends assumption,
+beta estimates a weighted sum of 10378 ATTs.
 6180 ATTs receive a positive weight, and 4198 receive a negative weight.
-The sum of the positive weights is equal to 1.4740.
-The sum of the negative weights is equal to -0.4740.
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6180        1.4740
+Negative weights        4198        -0.4740
+------------------------------------------------
+Total                   10378       1.0000
+------------------------------------------------
 ```
 
 :::
@@ -355,21 +354,24 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 
 ```python
 # Decomposition with state-year controls
-eps2 = np.array(pf.feols("numdailies ~ C(styr) | cnty90 + year",
-                          data=df, fixef_rm="none").resid())
-D_vals2 = df['numdailies'].astype(float).values
-N2 = len(D_vals2)
-denom_W2 = np.mean(eps2 * D_vals2)
-weight2 = eps2 * D_vals2 / (N2 * denom_W2)
+styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
+result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
+                          type="feTR", controls=styr_cols)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 10342
-ATTs.
+Under the common trends assumption,
+beta estimates a weighted sum of 10342 ATTs.
 6195 ATTs receive a positive weight, and 4147 receive a negative weight.
-36 observations receive a weight equal to 0.
-The sum of the positive weights is equal to 1.5331.
-The sum of the negative weights is equal to -0.5331.
+36 ATTs receive a weight equal to 0.
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        6195        1.5331
+Negative weights        4147        -0.5331
+------------------------------------------------
+Total                   10342       1.0000
+------------------------------------------------
 ```
 
 :::
@@ -513,61 +515,38 @@ changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580
 
 ```python
 # FD weight decomposition (fdTR type)
-D0 = df['numdailies'].astype(float).values
-N = len(df)
-mask = ~df['changedailies'].isna()
-eps = np.zeros(N)
-eps[mask] = np.array(pf.feols("changedailies ~ C(styr) | year",
-                               data=df[mask], fixef_rm="none").resid())
-
-yr2fn = {y: i for i, y in enumerate(sorted(df['year'].unique()))}
-work = pd.DataFrame({
-    'G': df['cnty90'].values, 'TFN': df['year'].map(yr2fn).values,
-    'D0': D0, 'eps': eps
-}).sort_values(['G', 'TFN']).reset_index(drop=True)
-
-work['w'] = np.where(
-    work['TFN'] + 1 == work.groupby('G')['TFN'].shift(-1),
-    work['eps'] - work.groupby('G')['eps'].shift(-1),
-    work['eps'])
-work['w'] = work['w'].fillna(work['eps'])
-
-denom_W = (work['w'] * work['D0']).mean()
-weight = work['w'].values * work['D0'].values / (N * denom_W)
+result3 = twowayfeweights(df, "changeprestout", "cnty90", "year",
+                           "changedailies", type="fdTR", D0="numdailies",
+                           controls=styr_cols)
 ```
 
 ```
-Under the common trends assumption, beta estimates a weighted sum of 9876
-ATTs.
+Under the common trends assumption,
+beta estimates a weighted sum of 9876 ATTs.
 5371 ATTs receive a positive weight, and 4505 receive a negative weight.
-502 observations receive a weight equal to 0.
-The sum of the positive weights is equal to 2.4271.
-The sum of the negative weights is equal to -1.4271.
+502 ATTs receive a weight equal to 0.
+------------------------------------------------
+Treat. var: changedailies # ATTs     Σ weights
+------------------------------------------------
+Positive weights        5371        2.4271
+Negative weights        4505        -1.4271
+------------------------------------------------
+Total                   9876        1.0000
+------------------------------------------------
 ```
 
 ```python
 # Test random weights (year)
-mean_D0 = work['D0'].mean()
-mean_wD0 = (work['w'] * work['D0']).mean()
-work['sigma'] = work['w'] * mean_D0 / mean_wD0
-
-sub = att & np.isfinite(work['sigma'].values)
-reg_df = pd.DataFrame({
-    'year_val': work.loc[sub, 'year_orig'].values,
-    'sigma': work.loc[sub, 'sigma'].values,
-    'nat_w': work.loc[sub, 'D0'].values,
-    'G': work.loc[sub, 'G'].astype(str).values
-})
-reg_df['nat_w'] = reg_df['nat_w'] / reg_df['nat_w'].sum()
-
-rw_reg = pf.feols("year_val ~ sigma", data=reg_df,
-                   weights="nat_w", vcov={"CRV1": "G"})
+result3b = twowayfeweights(df, "changeprestout", "cnty90", "year",
+                            "changedailies", type="fdTR", D0="numdailies",
+                            controls=styr_cols, test_random_weights="year")
 ```
 
 ```
-The coefficient of year in the regression of the weights on year is:
-    Coef          SE         t       Corr(weights, year)
-  -0.1674271   0.0510117   -3.2821306       -0.0631614
+Regression of variables possibly correlated with the treatment effect on the weights
+
+             Coef           SE       t-stat  Correlation
+year   -0.1674271    0.0510117   -3.2821306   -0.0631614
 ```
 
 :::

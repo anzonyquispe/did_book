@@ -520,23 +520,51 @@ N = 15,629
  Other treatment: 4,933 pos (Σ = 1.3558) | 5,123 neg (Σ = -1.3558)</code></pre>
 </div>
 <div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TWFE via iterative demeaning (Frisch-Waugh-Lovell, 50 iterations)</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">'prestout'</span>,<span class="st">'numdailies'</span>,<span class="st">'lag_numdailies'</span>]</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> df.dropna(subset<span class="op">=</span>cols).copy()</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> sub[cols].copy()</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">50</span>):</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> v <span class="kw">in</span> cols:</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        dem[v] <span class="op">-=</span> dem.groupby(sub[<span class="st">'cnty90'</span>])[v].transform(<span class="st">'mean'</span>)</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        dem[v] <span class="op">-=</span> dem.groupby(sub[<span class="st">'year'</span>])[v].transform(<span class="st">'mean'</span>)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> sm.OLS(dem[<span class="st">'prestout'</span>], dem[[<span class="st">'numdailies'</span>,<span class="st">'lag_numdailies'</span>]]).fit(</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    cov_type<span class="op">=</span><span class="st">'cluster'</span>, cov_kwds<span class="op">=</span>{<span class="st">'groups'</span>: sub[<span class="st">'cnty90'</span>]})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TWFE with county and year FEs</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>m8 <span class="op">=</span> pf.feols(<span class="st">"prestout ~ numdailies + lag_numdailies + C(year) | cnty90"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>              data<span class="op">=</span>df, vcov<span class="op">=</span>{<span class="st">"CRV1"</span>: <span class="st">"cnty90"</span>},</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>              ssc<span class="op">=</span>pf.ssc(adj<span class="op">=</span><span class="va">True</span>, fixef_k<span class="op">=</span><span class="st">"full"</span>, cluster_adj<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Decomposition</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>res_a <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"numdailies"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>                         <span class="bu">type</span><span class="op">=</span><span class="st">"feTR"</span>, other_treatments<span class="op">=</span><span class="st">"lag_numdailies"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>res_b <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"lag_numdailies"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                         <span class="bu">type</span><span class="op">=</span><span class="st">"feTR"</span>, other_treatments<span class="op">=</span><span class="st">"numdailies"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>  Variable                          Coef      Std.Err          t      P&gt;|t|
-  numdailies                  -0.0007962    0.0013850     -0.575     0.5654
-  lag_numdailies               0.0050348    0.0014458      3.482     0.0005
+  numdailies                  -0.0007962    0.0014419     -0.552     0.5810
+  lag_numdailies               0.0050348    0.0015052      3.345     0.0008
   N = 15,629
 
-  twowayfeweights with other_treatments not available in Python.
-  See Stata/R tabs for weight decomposition.</code></pre>
+Decomposition of beta on numdailies:
+------------------------------------------------
+Treat. var: numdailies  # ATTs      Σ weights
+------------------------------------------------
+Positive weights        5754        1.8541
+Negative weights        4302        -0.8541
+------------------------------------------------
+Total                   10056       1.0000
+------------------------------------------------
+
+Other treat.: lag_numdailies
+Positive weights        4721        1.2137
+Negative weights        4618        -1.2137
+Total                   9339        0.0000
+
+Decomposition of beta on lag_numdailies:
+------------------------------------------------
+Treat. var: lag_numdailies # ATTs   Σ weights
+------------------------------------------------
+Positive weights        5273        1.7820
+Negative weights        4066        -0.7820
+------------------------------------------------
+Total                   9339        1.0000
+------------------------------------------------
+
+Other treat.: numdailies
+Positive weights        4933        1.3558
+Negative weights        5123        -1.3558
+Total                   10056       0.0000</code></pre>
 </div>
 </div>
 </div>

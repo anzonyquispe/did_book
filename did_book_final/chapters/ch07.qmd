@@ -233,13 +233,25 @@ Summary Measures:
 ### Python
 
 ```python
-# twowayfeweights type=fdTR not fully supported in Python.
-# See Stata/R tabs for verified results.
+from twowayfeweights import twowayfeweights
+df["cons"] = 1
+df["ntrgap_D0"] = df["ntrgap"]
+result = twowayfeweights(df, "delta2001", "indusid", "cons", "ntrgap",
+                          type="fdTR", D0="ntrgap_D0")
 ```
 
 ```
-NOTE: twowayfeweights type=fdTR not fully supported in Python.
-See Stata/R tabs for verified results.
+Under the common trends assumption,
+beta estimates a weighted sum of 103 ATTs.
+62 ATTs receive a positive weight, and 41 receive a negative weight.
+------------------------------------------------
+Treat. var: ntrgap      # ATTs      Σ weights
+------------------------------------------------
+Positive weights        62          1.3190
+Negative weights        41          -0.3190
+------------------------------------------------
+Total                   103         1.0000
+------------------------------------------------
 ```
 
 :::

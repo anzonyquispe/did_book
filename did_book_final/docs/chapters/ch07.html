@@ -503,10 +503,22 @@ Summary Measures:
   min σ(Δ) compatible with opposite sign: 0.0642</code></pre>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># twowayfeweights type=fdTR not fully supported in Python.</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># See Stata/R tabs for verified results.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>NOTE: twowayfeweights type=fdTR not fully supported in Python.
-See Stata/R tabs for verified results.</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"cons"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"ntrgap_D0"</span>] <span class="op">=</span> df[<span class="st">"ntrgap"</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"delta2001"</span>, <span class="st">"indusid"</span>, <span class="st">"cons"</span>, <span class="st">"ntrgap"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"ntrgap_D0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>Under the common trends assumption,
+beta estimates a weighted sum of 103 ATTs.
+62 ATTs receive a positive weight, and 41 receive a negative weight.
+------------------------------------------------
+Treat. var: ntrgap      # ATTs      Σ weights
+------------------------------------------------
+Positive weights        62          1.3190
+Negative weights        41          -0.3190
+------------------------------------------------
+Total                   103         1.0000
+------------------------------------------------</code></pre>
 </div>
 </div>
 </div>
