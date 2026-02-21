@@ -289,6 +289,48 @@ print(m3.summary())
 
 > Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that $\hat{\beta}_1^{fe}$ equals the DID from equation (3.7).
 
+First, construct the event-study dummies. The reference period is 1918 (the last pre-treatment year). For treated subclasses, `reltimeminus_l` equals 1 at $l$ years before 1918, and `reltimeplus_l` equals 1 at $l$ years after 1918.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+* Generate event-study dummies (reference period: 1918)
+forvalues l = 1/18 {
+    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
+}
+forvalues l = 1/21 {
+    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
+}
+```
+
+### R
+
+```r
+# Generate event-study dummies (reference period: 1918)
+for (l in 1:18) {
+    df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
+}
+for (l in 1:21) {
+    df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
+}
+```
+
+### Python
+
+```python
+# Generate event-study dummies (reference period: 1918)
+for l in range(1, 19):
+    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
+for l in range(1, 22):
+    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
+```
+
+:::
+
+Now estimate the event-study TWFE regression:
+
 ::: {.panel-tabset}
 
 ### Stata
@@ -555,34 +597,29 @@ Slope for 50% power (numpre=6): 0.009796021
 ### Python
 
 ```python
-from scipy import optimize
+from pretrends import slope_for_power
 
-short_minus = [f"reltimeminus{i}" for i in range(1, 7)]
-fml_pre = "patents ~ " + " + ".join(short_minus + plus_vars) + " | treatmentgroup + year"
-m6 = pf.feols(fml_pre, data=df, vcov={"CRV1": "subclass"})
-coefs_pre = m6.coef()
-vcov_pre = pd.DataFrame(m6._vcov, index=coefs_pre.index, columns=coefs_pre.index)
-pre6 = [v for v in short_minus if v in coefs_pre.index]
-V_pre6 = vcov_pre.loc[pre6, pre6].values
-n_pre = len(pre6); dfd = df["subclass"].nunique() - 1
+# Full model (matches Stata: reghdfe patents reltimeminus* reltimeplus*)
+fml6 = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | treatmentgroup + year"
+m6 = pf.feols(fml6, data=df, vcov={"CRV1": "subclass"})
 
-def power_at_slope(slope):
-    mu = np.array([slope * (-int(v.replace("reltimeminus", ""))) for v in pre6])
-    ncp = mu @ np.linalg.inv(V_pre6) @ mu
-    cv = stats.f.ppf(0.95, n_pre, dfd)
-    return 1 - stats.ncf.cdf(cv, n_pre, dfd, ncp)
+# Extract vcov for 6 closest pre-periods
+pre6 = [f"reltimeminus{i}" for i in range(1, 7)]
+vcov6 = pd.DataFrame(m6._vcov, index=m6.coef().index,
+                      columns=m6.coef().index).loc[pre6, pre6].values
 
-slope_50 = optimize.brentq(lambda s: power_at_slope(s) - 0.5, 0.0001, 1.0)
-print(f"Slope for 50% power (numpre=6): {slope_50:.6f}")
+slope50 = slope_for_power(vcov6, target_power=0.5,
+                           t_vec=[-6, -5, -4, -3, -2, -1])
+print(f"Slope for 50% power (numpre=6): {slope50:.7f}")
 ```
 
 ```
-Slope for 50% power (numpre=6): 0.008878
+Slope for 50% power (numpre=6): 0.0098252
 ```
 
 :::
 
-**Note:** Stata and R use the official `pretrends` package (Roth 2022) and give ≈0.0098. Python uses a manual F-test-based implementation and gives ≈0.0089. The difference is due to the underlying distributional assumptions (multivariate normal vs. non-central F).
+**Note:** All three platforms give essentially identical results: Stata ≈ 0.0098235, R ≈ 0.009796, Python ≈ 0.0098252. The Python `pretrends` package (based on Roth 2022) uses the exact multivariate normal CDF, matching Stata and R.
 
 ---
 
