@@ -524,20 +524,6 @@ eventstudyweights rel_time1-rel_time16 rel_timeminus1-rel_timeminus9 ///
 
 Note: `eventstudyweights` produces a large weight matrix (396 × 27) showing how each cohort-by-period cell contributes to the TWFE event-study coefficients. Due to its size, the full output is omitted here. The command confirms that TWFE event-study coefficients can be expressed as weighted averages of cohort-specific effects, with weights that may be negative — motivating the use of robust estimators like Sun & Abraham (2021).
 
-### R
-
-```r
-# No direct R equivalent of eventstudyweights.
-# See Stata tab or use twowayfeweights (GQ5 below) for decomposition.
-```
-
-### Python
-
-```python
-# No Python equivalent of eventstudyweights.
-# See Stata tab or use twowayfeweights (GQ5 below) for decomposition.
-```
-
 :::
 
 ---

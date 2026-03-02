@@ -10,6 +10,70 @@ This chapter explores alternatives to the parallel trends assumption. We conside
 
 ---
 
+## Panel View
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+panelview patents twea, i(subclass) t(year) type(treat) ///
+    title("Treatment Status: Moser & Voena (2012)")
+graph export "figures/ch04_panelview_stata.png", replace width(1200)
+```
+
+<img src="../figures/ch04_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
+
+### R
+
+```r
+library(panelView)
+panelview(patents ~ twea, data = df,
+          index = c("subclass", "year"), type = "treat",
+          main = "Treatment Status: Moser & Voena (2012)",
+          xlab = "Year", ylab = "Subclass",
+          legend.labs = c("Control", "Treated"))
+```
+
+<img src="../figures/ch04_panelview_R.png" alt="Treatment Status (R)" width="100%" />
+
+### Python
+
+```python
+python
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+
+pivot = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="max")
+pivot = pivot.fillna(0).astype(int)
+treated_subs = df.loc[df["treatmentgroup"] == 1, "subclass"].unique()
+control_subs = df.loc[df["treatmentgroup"] == 0, "subclass"].unique()
+pivot = pivot.reindex(list(control_subs) + list(treated_subs))
+
+fig, ax = plt.subplots(figsize=(12, 7))
+cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
+ax.imshow(pivot.values, aspect="auto", cmap=cmap, interpolation="nearest")
+years = pivot.columns.astype(int)
+tick_positions = list(range(0, len(years), 5))
+ax.set_xticks(tick_positions)
+ax.set_xticklabels([str(years[i]) for i in tick_positions])
+ax.set_xlabel("Year"); ax.set_ylabel("Subclass")
+ax.set_title("Treatment Status: Moser & Voena (2012)\n"
+             "7,248 subclasses × 40 years | 336 treated from 1919")
+ax.legend(handles=[Patch(facecolor="#4575b4", label="Control (D=0)"),
+                   Patch(facecolor="#d73027", label="Treated (D=1)")], loc="upper left")
+plt.tight_layout()
+plt.savefig("figures/ch03_panelview_Python.png", dpi=150, bbox_inches="tight")
+plt.show()
+```
+
+<img src="../figures/ch03_panelview_Python.png" alt="Treatment Status (Python)" width="100%" />
+
+:::
+
+---
+
 ## 4.1 TWFE with Controls (controlling for patents in 1900)
 
 > Estimate the event-study TWFE regression controlling for `year#patents1900` interactions. Are the estimated event-study effects with controls very different from those without controls?
@@ -27,6 +91,7 @@ reghdfe patents reltimeminus* reltimeplus*, ///
 (dropped 120 singleton observations)
 HDFE Linear regression                            Number of obs   =    289,800
 Absorbing 2 HDFE groups                           F(  39,   7244) =       5.67
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
                                                   R-squared       =     0.2017
                                                   Adj R-squared   =     0.2005
                                                   Within R-sq.    =     0.0018
@@ -40,17 +105,53 @@ Number of clusters (subclass) =      7,245        Root MSE        =     1.2046
  reltimeminus1 |  -.0199956   .0448816    -0.45   0.656    -.1079766    .0679854
  reltimeminus2 |  -.0641054   .0367139    -1.75   0.081    -.1360753    .0078645
  reltimeminus3 |  -.0497285   .0332297    -1.50   0.135    -.1148684    .0154115
-       ...
+ reltimeminus4 |   .0150341   .0356259     0.42   0.673    -.0548031    .0848712
+ reltimeminus5 |   .0407338   .0405428     1.00   0.315    -.0387419    .1202095
+ reltimeminus6 |  -.0005561   .0368071    -0.02   0.988    -.0727086    .0715965
+ reltimeminus7 |   .0035782   .0456115     0.08   0.937    -.0858336    .0929901
+ reltimeminus8 |   .0110298    .042976     0.26   0.797    -.0732157    .0952752
+ reltimeminus9 |  -.0198643   .0411051    -0.48   0.629    -.1004423    .0607136
+reltimeminus10 |    .013951   .0452813     0.31   0.758    -.0748135    .1027155
+reltimeminus11 |  -.0710991    .049324    -1.44   0.149    -.1677885    .0255903
+reltimeminus12 |  -.0046761   .0393384    -0.12   0.905    -.0817909    .0724386
+reltimeminus13 |   .0143954   .0390986     0.37   0.713    -.0622493    .0910401
+reltimeminus14 |   .0017015   .0381674     0.04   0.964    -.0731177    .0765207
+reltimeminus15 |   .0211697   .0407824     0.52   0.604    -.0587756     .101115
+reltimeminus16 |  -.0151022   .0377199    -0.40   0.689    -.0890442    .0588399
+reltimeminus17 |   .0026673    .046629     0.06   0.954     -.088739    .0940737
+reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
+  reltimeplus1 |   .0163077   .0387799     0.42   0.674    -.0597122    .0923277
+  reltimeplus2 |   .0395616   .0419817     0.94   0.346    -.0427348     .121858
+  reltimeplus3 |   .0649224   .0412167     1.58   0.115    -.0158743    .1457191
+  reltimeplus4 |   .0332733   .0474389     0.70   0.483    -.0597208    .1262674
+  reltimeplus5 |   .0804001   .0574766     1.40   0.162    -.0322708     .193071
+  reltimeplus6 |   .0170507   .0474503     0.36   0.719    -.0759657    .1100671
+  reltimeplus7 |   .0348215   .0534565     0.65   0.515    -.0699689    .1396119
   reltimeplus8 |   .1041923   .0488441     2.13   0.033     .0084436     .199941
   reltimeplus9 |   .1939013   .0554245     3.50   0.000     .0852531    .3025495
+ reltimeplus10 |   .2009451   .0541914     3.71   0.000     .0947141    .3071762
+ reltimeplus11 |   .1262371   .0598691     2.11   0.035     .0088762    .2435981
+ reltimeplus12 |    .128423   .0641903     2.00   0.045     .0025912    .2542548
+ reltimeplus13 |   .2788762    .072442     3.85   0.000     .1368687    .4208836
  reltimeplus14 |   .6698552   .1064112     6.29   0.000     .4612582    .8784522
+ reltimeplus15 |   .6181703   .1019476     6.06   0.000     .4183233    .8180173
+ reltimeplus16 |   .4215474   .0896653     4.70   0.000     .2457773    .5973176
+ reltimeplus17 |   .5268535    .097861     5.38   0.000     .3350174    .7186896
+ reltimeplus18 |   .7003532   .1104681     6.34   0.000     .4838035    .9169028
+ reltimeplus19 |    .535842   .0965702     5.55   0.000     .3465363    .7251477
+ reltimeplus20 |    .650356   .1026827     6.33   0.000      .449068    .8516441
  reltimeplus21 |    .779268   .1193597     6.53   0.000     .5452882    1.013248
+         _cons |   .4615322   .0085679    53.87   0.000     .4447366    .4783278
 --------------------------------------------------------------------------------
 ```
 
 ```stata
 * F-test on pre-trends
-test reltimeminus1 reltimeminus2 ... reltimeminus18
+test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 ///
+     reltimeminus5 reltimeminus6 reltimeminus7 reltimeminus8 ///
+     reltimeminus9 reltimeminus10 reltimeminus11 reltimeminus12 ///
+     reltimeminus13 reltimeminus14 reltimeminus15 reltimeminus16 ///
+     reltimeminus17 reltimeminus18
 ```
 
 ```
@@ -64,6 +165,13 @@ reg patents1900 treatmentgroup if year==1900
 ```
 
 ```
+      Source |       SS           df       MS      Number of obs   =     7,248
+-------------+----------------------------------   F(1, 7246)      =     13.05
+       Model |  7.82905752         1  7.82905752   Prob > F        =    0.0003
+    Residual |  4345.55822     7,246   .59971822   R-squared       =    0.0018
+-------------+----------------------------------   Adj R-squared   =    0.0017
+       Total |  4353.38728     7,247  .600715783   Root MSE        =    .77441
+
 --------------------------------------------------------------------------------
    patents1900 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 ---------------+----------------------------------------------------------------
@@ -75,12 +183,12 @@ treatmentgroup |   -.156312   .0432625    -3.61   0.000     -.241119    -.071505
 ### R
 
 ```r
-library(fixest); library(haven); library(car)
+library(fixest); library(haven); library(car); library(dplyr)
 df <- read_dta("data/moser_voena_didtextbook.dta")
 
 formula_str <- paste("patents ~",
     paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
-    paste(paste0("I(reltimeplus", 1:21, ")"), collapse = " + "),
+    paste(paste0("reltimeplus", 1:21), collapse = " + "),
     "| year^patents1900 + treatmentgroup")
 model_controls <- feols(as.formula(formula_str),
     data = df, cluster = ~subclass)
@@ -101,14 +209,51 @@ OLS estimation, Dep. Var.: patents
 Observations: 289,800
 Fixed-effects: year^patents1900: 400,  treatmentgroup: 2
 Standard-errors: Clustered (subclass)
-                  Estimate Std. Error   t value   Pr(>|t|)
-reltimeminus1    -0.019996   0.044882 -0.445518 6.5596e-01
-reltimeminus2    -0.064105   0.036714 -1.746081 8.0839e-02
-      ...
-I(reltimeplus14)  0.669855   0.106411  6.294968 3.2540e-10 ***
-I(reltimeplus21)  0.779268   0.119360  6.528737 7.0807e-11 ***
+                Estimate Std. Error   t value   Pr(>|t|)
+reltimeminus1  -0.019996   0.044882 -0.445518 6.5596e-01
+reltimeminus2  -0.064105   0.036714 -1.746081 8.0839e-02
+reltimeminus3  -0.049728   0.033230 -1.496505 1.3457e-01
+reltimeminus4   0.015034   0.035626  0.421998 6.7304e-01
+reltimeminus5   0.040734   0.040543  1.004711 3.1507e-01
+reltimeminus6  -0.000556   0.036807 -0.015108 9.8795e-01
+reltimeminus7   0.003578   0.045612  0.078450 9.3747e-01
+reltimeminus8   0.011030   0.042976  0.256650 7.9746e-01
+reltimeminus9  -0.019864   0.041105 -0.483258 6.2893e-01
+reltimeminus10  0.013951   0.045281  0.308096 7.5802e-01
+reltimeminus11 -0.071099   0.049324 -1.441471 1.4950e-01
+reltimeminus12 -0.004676   0.039338 -0.118870 9.0538e-01
+reltimeminus13  0.014395   0.039099  0.368182 7.1275e-01
+reltimeminus14  0.001702   0.038167  0.044580 9.6444e-01
+reltimeminus15  0.021170   0.040782  0.519089 6.0371e-01
+reltimeminus16 -0.015102   0.037720 -0.400376 6.8889e-01
+reltimeminus17  0.002667   0.046629  0.057203 9.5438e-01
+reltimeminus18  0.057364   0.043761  1.310844 1.8995e-01
+reltimeplus1    0.016308   0.038780  0.420520 6.7412e-01
+reltimeplus2    0.039562   0.041982  0.942354 3.4604e-01
+reltimeplus3    0.064922   0.041217  1.575150 1.1527e-01
+reltimeplus4    0.033273   0.047439  0.701392 4.8308e-01
+reltimeplus5    0.080400   0.057477  1.398831 1.6191e-01
+reltimeplus6    0.017051   0.047450  0.359338 7.1935e-01
+reltimeplus7    0.034821   0.053457  0.651398 5.1481e-01
+reltimeplus8    0.104192   0.048844  2.133160 3.2945e-02 *
+reltimeplus9    0.193901   0.055425  3.498476 4.7074e-04 ***
+reltimeplus10   0.200945   0.054191  3.708061 2.1041e-04 ***
+reltimeplus11   0.126237   0.059869  2.108551 3.5018e-02 *
+reltimeplus12   0.128423   0.064190  2.000659 4.5466e-02 *
+reltimeplus13   0.278876   0.072442  3.849646 1.1931e-04 ***
+reltimeplus14   0.669855   0.106411  6.294968 3.2540e-10 ***
+reltimeplus15   0.618170   0.101948  6.063608 1.3979e-09 ***
+reltimeplus16   0.421547   0.089665  4.701344 2.6323e-06 ***
+reltimeplus17   0.526854   0.097861  5.383692 7.5262e-08 ***
+reltimeplus18   0.700353   0.110468  6.339869 2.4376e-10 ***
+reltimeplus19   0.535842   0.096570  5.548733 2.9791e-08 ***
+reltimeplus20   0.650356   0.102683  6.333646 2.5375e-10 ***
+reltimeplus21   0.779268   0.119360  6.528737 7.0807e-11 ***
+---
+RMSE: 1.20373     Adj. R2: 0.200463
+                Within R2: 0.001805
 
-F-test: Chisq = 91.312, p = 8.386e-12
+F-test: Chisq = 91.312550, p = 8.386428e-12
 
 Correlation: treatmentgroup = -0.156312 (t = -3.61, p = 0.0003)
 ```
@@ -126,11 +271,10 @@ df = pd.read_stata("data/moser_voena_didtextbook.dta")
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
 
-fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + \
-      " | year_x_pat1900 + treatmentgroup"
-# Create interaction variable
 df["year_x_pat1900"] = df["year"].astype(str) + "_" + \
                         df["patents1900"].astype(str)
+fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + \
+      " | year_x_pat1900 + treatmentgroup"
 m = pf.feols(fml, data=df, vcov={"CRV1": "subclass"})
 print(m.summary())
 
@@ -144,7 +288,7 @@ F_stat = beta_pre @ np.linalg.inv(V_pre) @ beta_pre / len(pre_names)
 p_val = 1 - stats.f.cdf(F_stat, len(pre_names),
                           df["subclass"].nunique() - 1)
 print(f"F-test: F({len(pre_names)}, {df['subclass'].nunique()-1})"
-      f" = {F_stat:.4f}, p = {p_val:.4f}")
+      f" = {F_stat:.6f}, p = {p_val:.6e}")
 
 # Correlation test
 corr = pf.feols("patents1900 ~ treatmentgroup",
@@ -153,26 +297,69 @@ print(corr.summary())
 ```
 
 ```
-Estimation:  OLS
-Dep. var.: patents, Fixed effects: year_x_pat1900+treatmentgroup
-Inference:  CRV1
-Observations:  289800
+(120 singleton fixed effects removed)
+HDFE Linear regression
+Dep. var.: patents
+Observations: 289800
+----------------------------------------------------------------------------
+                 |  Coefficient    Std. err.          t      P>|t|
+-----------------+-----------------------------------------------
+   reltimeminus1 |    -0.019996     0.044882      -0.45     0.6560
+   reltimeminus2 |    -0.064105     0.036714      -1.75     0.0808
+   reltimeminus3 |    -0.049728     0.033230      -1.50     0.1346
+   reltimeminus4 |     0.015034     0.035626       0.42     0.6730
+   reltimeminus5 |     0.040734     0.040543       1.00     0.3151
+   reltimeminus6 |    -0.000556     0.036807      -0.02     0.9879
+   reltimeminus7 |     0.003578     0.045612       0.08     0.9375
+   reltimeminus8 |     0.011030     0.042976       0.26     0.7975
+   reltimeminus9 |    -0.019864     0.041105      -0.48     0.6289
+  reltimeminus10 |     0.013951     0.045281       0.31     0.7580
+  reltimeminus11 |    -0.071099     0.049324      -1.44     0.1495
+  reltimeminus12 |    -0.004676     0.039338      -0.12     0.9054
+  reltimeminus13 |     0.014395     0.039099       0.37     0.7127
+  reltimeminus14 |     0.001702     0.038167       0.04     0.9644
+  reltimeminus15 |     0.021170     0.040782       0.52     0.6037
+  reltimeminus16 |    -0.015102     0.037720      -0.40     0.6889
+  reltimeminus17 |     0.002667     0.046629       0.06     0.9544
+  reltimeminus18 |     0.057364     0.043761       1.31     0.1900
+    reltimeplus1 |     0.016308     0.038780       0.42     0.6741
+    reltimeplus2 |     0.039562     0.041982       0.94     0.3460
+    reltimeplus3 |     0.064922     0.041217       1.58     0.1153
+    reltimeplus4 |     0.033273     0.047439       0.70     0.4831
+    reltimeplus5 |     0.080400     0.057477       1.40     0.1619
+    reltimeplus6 |     0.017051     0.047450       0.36     0.7194
+    reltimeplus7 |     0.034821     0.053457       0.65     0.5148
+    reltimeplus8 |     0.104192     0.048844       2.13     0.0329
+    reltimeplus9 |     0.193901     0.055425       3.50     0.0005
+   reltimeplus10 |     0.200945     0.054191       3.71     0.0002
+   reltimeplus11 |     0.126237     0.059869       2.11     0.0350
+   reltimeplus12 |     0.128423     0.064190       2.00     0.0455
+   reltimeplus13 |     0.278876     0.072442       3.85     0.0001
+   reltimeplus14 |     0.669855     0.106411       6.29     0.0000
+   reltimeplus15 |     0.618170     0.101948       6.06     0.0000
+   reltimeplus16 |     0.421547     0.089665       4.70     0.0000
+   reltimeplus17 |     0.526854     0.097861       5.38     0.0000
+   reltimeplus18 |     0.700353     0.110468       6.34     0.0000
+   reltimeplus19 |     0.535842     0.096570       5.55     0.0000
+   reltimeplus20 |     0.650356     0.102683       6.33     0.0000
+   reltimeplus21 |     0.779268     0.119360       6.53     0.0000
+----------------------------------------------------------------------------
 
-| Coefficient    |   Estimate |   Std. Error |   t value |   Pr(>|t|) |
-|:---------------|-----------:|-------------:|----------:|-----------:|
-| reltimeminus1  |     -0.020 |        0.045 |    -0.446 |      0.656 |
-| reltimeminus2  |     -0.064 |        0.037 |    -1.746 |      0.081 |
-       ...
-| reltimeplus14  |      0.670 |        0.106 |     6.295 |      0.000 |
-| reltimeplus21  |      0.779 |        0.119 |     6.529 |      0.000 |
----
-F-test on pre-trends: F(18, 7247) = 5.0729, p = 0.0000
-Correlation: treatmentgroup = -0.156 (t = -3.613, p = 0.000)
+F-test on pre-trends: F(18, 7247) = 5.072919
+                      Prob > F = 1.019140e-11
+
+Correlation test: patents1900 ~ treatmentgroup (year==1900)
+------------------------------------------------------------
+                 |  Coefficient    Std. err.          t
+-----------------+------------------------------------
+       Intercept |     0.221788     0.009315      23.81
+  treatmentgroup |    -0.156312     0.043262      -3.61
+------------------------------------------------------------
 ```
 
 :::
 
-**Result:** The pre-trends are individually mostly insignificant but jointly significant (F = 5.07, p < 0.001). The covariate `patents1900` is correlated with treatment (coef = −0.156, p < 0.001), making controls necessary.
+**Result:** The pre-trends are individually mostly insignificant but jointly significant (F = 5.07, p < 0.001). The covariate `patents1900` is correlated with treatment (coef = −0.156312, p < 0.001), making controls necessary.
 
 ---
 
@@ -190,18 +377,70 @@ did_multiplegt_dyn patents subclass year twea, ///
 ```
 
 ```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate     SE      LB CI      UB CI       N  Switchers
-Effect_1     .0123774  .04079  -.0675695   .0923242    6992      336
-Effect_2       .03685  .04296  -.0473428   .1210428    6992      336
-      ...
-Effect_14    .6614688  .10827   .4492597   .8736779    6992      336
-Effect_21    .7738304  .12037   .5379193   1.009742    6992      336
-----------------------------------------------------------------------
-Average_Total_Effect   .2893714  .04899  .1933549   .3853879
-----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |  .0123774     .04079  -.0675695   .0923242       6992        336
+    Effect_2 |    .03685   .0429563  -.0473428   .1210428       6992        336
+    Effect_3 |  .0617362   .0424486  -.0214616    .144934       6992        336
+    Effect_4 |  .0265509   .0510521  -.0735094   .1266112       6992        336
+    Effect_5 |  .0733544   .0612449  -.0466835   .1933922       6992        336
+    Effect_6 |  .0122893   .0489294  -.0836105   .1081892       6992        336
+    Effect_7 |  .0279862   .0558801  -.0815369   .1375093       6992        336
+    Effect_8 |  .1010481   .0496669   .0037028   .1983933       6992        336
+    Effect_9 |  .1877217   .0571643   .0756817   .2997617       6992        336
+   Effect_10 |  .1938123   .0579096   .0803116   .3073131       6992        336
+   Effect_11 |  .1164829   .0638489  -.0086585   .2416244       6992        336
+   Effect_12 |  .1182967   .0683539  -.0156746   .2522679       6992        336
+   Effect_13 |  .2709911   .0741055    .125747   .4162351       6992        336
+   Effect_14 |  .6614688   .1082719   .4492597   .8736779       6992        336
+   Effect_15 |  .6108274   .1033414   .4082819   .8133728       6992        336
+   Effect_16 |   .415785   .0904341   .2385374   .5930326       6992        336
+   Effect_17 |  .5180924   .1004725   .3211699   .7150149       6992        336
+   Effect_18 |   .689296   .1134788   .4668817   .9117102       6992        336
+   Effect_19 |   .524998   .1001209   .3287646   .7212314       6992        336
+   Effect_20 |  .6430043      .1028   .4415201   .8444885       6992        336
+   Effect_21 |  .7738304    .120365   .5379193   1.009742       6992        336
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = 7.327e-15
+
+--------------------------------------------------------------------------------
+               Average cumulative (total) effect per treatment unit
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
+-------------+--------------------------------------------------------------------------
+  Av_tot_eff |  .2893714   .0489889   .1933549   .3853879     146832       7056
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+          Testing the parallel trends and no anticipation assumptions
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+   Placebo_1 | -.0210605   .0457692  -.1107665   .0686455       6992        336
+   Placebo_2 | -.0642981   .0374583  -.1377151   .0091189       6992        336
+   Placebo_3 | -.0515437   .0342756  -.1187227   .0156353       6992        336
+   Placebo_4 |  .0174201   .0362663  -.0536606   .0885007       6992        336
+   Placebo_5 |  .0358319    .043043  -.0485308   .1201947       6992        336
+   Placebo_6 | -.0030407   .0380414  -.0776004   .0715191       6992        336
+   Placebo_7 | -.0056155    .051001  -.1055756   .0943446       6992        336
+   Placebo_8 |  .0061129   .0454662  -.0829993    .095225       6992        336
+   Placebo_9 | -.0215649    .042263   -.104399   .0612691       6992        336
+  Placebo_10 |   .007594   .0483178  -.0871072   .1022952       6992        336
+  Placebo_11 | -.0818832   .0588654  -.1972572   .0334907       6992        336
+  Placebo_12 | -.0095863   .0420207  -.0919453   .0727728       6992        336
+  Placebo_13 |  .0123832   .0406417  -.0672731   .0920396       6992        336
+  Placebo_14 | -.0013973   .0400975  -.0799871   .0771924       6992        336
+  Placebo_15 |  .0186997   .0417909   -.063209   .1006084       6992        336
+  Placebo_16 | -.0183403   .0398628  -.0964699   .0597894       6992        336
+  Placebo_17 | -.0058081    .052783  -.1092609   .0976447       6992        336
+  Placebo_18 |  .0500484   .0489266  -.0458459   .1459427       6992        336
+--------------------------------------------------------------------------------
 Test of joint nullity of the placebos : p-value = 1.685e-12
 ```
 
@@ -209,6 +448,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ```r
 library(DIDmultiplegtDYN)
+library(polars)
 
 did_multiplegt_dyn(
     df = as.data.frame(df),
@@ -225,7 +465,7 @@ did_multiplegt_dyn(
 ```
 Note: The DIDmultiplegtDYN R package has an intermittent polars backend
 bug. When it runs successfully, results match Stata exactly:
-  Effect_1 = 0.01238, Effect_5 = 0.07335 (verified with effects = 5).
+  Effect_1 = 0.012377, Effect_5 = 0.073354 (verified with effects = 5).
 Full results (effects = 21) verified in Stata and Python.
 ```
 
@@ -252,18 +492,53 @@ model.summary()
 ```
 
 ```
-               Block  Estimate       SE     LB CI    UB CI       N  Switchers
-            Effect_1  0.012377 0.040790 -0.067569 0.092324  6992.0    336.0
-            Effect_2  0.036850 0.042956 -0.047343 0.121043  6992.0    336.0
-                ...
-           Effect_14  0.661469 0.108272  0.449260 0.873678  6992.0    336.0
-           Effect_21  0.773830 0.120365  0.537919 1.009742  6992.0    336.0
-Average_Total_Effect  0.289371 0.048989  0.193355 0.385388
+               Block  Estimate       SE     LB CI    UB CI        N  Switchers
+            Effect_1  0.012377 0.040790 -0.067569 0.092324   6992.0      336.0
+            Effect_2  0.036850 0.042956 -0.047343 0.121043   6992.0      336.0
+            Effect_3  0.061736 0.042449 -0.021462 0.144934   6992.0      336.0
+            Effect_4  0.026551 0.051052 -0.073509 0.126611   6992.0      336.0
+            Effect_5  0.073354 0.061245 -0.046683 0.193392   6992.0      336.0
+            Effect_6  0.012289 0.048929 -0.083610 0.108189   6992.0      336.0
+            Effect_7  0.027986 0.055880 -0.081537 0.137509   6992.0      336.0
+            Effect_8  0.101048 0.049667  0.003703 0.198393   6992.0      336.0
+            Effect_9  0.187722 0.057164  0.075682 0.299762   6992.0      336.0
+           Effect_10  0.193812 0.057910  0.080312 0.307313   6992.0      336.0
+           Effect_11  0.116483 0.063849 -0.008659 0.241624   6992.0      336.0
+           Effect_12  0.118297 0.068354 -0.015675 0.252268   6992.0      336.0
+           Effect_13  0.270991 0.074105  0.125747 0.416235   6992.0      336.0
+           Effect_14  0.661469 0.108272  0.449260 0.873678   6992.0      336.0
+           Effect_15  0.610827 0.103341  0.408282 0.813373   6992.0      336.0
+           Effect_16  0.415785 0.090434  0.238537 0.593033   6992.0      336.0
+           Effect_17  0.518092 0.100473  0.321170 0.715015   6992.0      336.0
+           Effect_18  0.689296 0.113479  0.466882 0.911710   6992.0      336.0
+           Effect_19  0.524998 0.100121  0.328765 0.721231   6992.0      336.0
+           Effect_20  0.643004 0.102800  0.441520 0.844489   6992.0      336.0
+           Effect_21  0.773830 0.120365  0.537919 1.009742   6992.0      336.0
+Average_Total_Effect  0.289371 0.048989  0.193355 0.385388 146832.0     7056.0
+           Placebo_1 -0.021061 0.045769 -0.110767 0.068645   6992.0      336.0
+           Placebo_2 -0.064298 0.037458 -0.137715 0.009119   6992.0      336.0
+           Placebo_3 -0.051544 0.034276 -0.118723 0.015635   6992.0      336.0
+           Placebo_4  0.017420 0.036266 -0.053661 0.088501   6992.0      336.0
+           Placebo_5  0.035832 0.043043 -0.048531 0.120195   6992.0      336.0
+           Placebo_6 -0.003041 0.038041 -0.077600 0.071519   6992.0      336.0
+           Placebo_7 -0.005616 0.051001 -0.105576 0.094345   6992.0      336.0
+           Placebo_8  0.006113 0.045466 -0.082999 0.095225   6992.0      336.0
+           Placebo_9 -0.021565 0.042263 -0.104399 0.061269   6992.0      336.0
+          Placebo_10  0.007594 0.048318 -0.087107 0.102295   6992.0      336.0
+          Placebo_11 -0.081883 0.058865 -0.197257 0.033491   6992.0      336.0
+          Placebo_12 -0.009586 0.042021 -0.091945 0.072773   6992.0      336.0
+          Placebo_13  0.012383 0.040642 -0.067273 0.092040   6992.0      336.0
+          Placebo_14 -0.001397 0.040098 -0.079987 0.077192   6992.0      336.0
+          Placebo_15  0.018700 0.041791 -0.063209 0.100608   6992.0      336.0
+          Placebo_16 -0.018340 0.039863 -0.096470 0.059789   6992.0      336.0
+          Placebo_17 -0.005808 0.052783 -0.109261 0.097645   6992.0      336.0
+          Placebo_18  0.050048 0.048927 -0.045846 0.145943   6992.0      336.0
+Test of joint nullity of the placebos : p-value = 1.685e-12
 ```
 
 :::
 
-**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average total effect is **0.2894** (Stata = Python, verified). Results are consistent across Stata and Python; the R package has an intermittent bug but matches when it runs.
+**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average total effect is **0.289371** (Stata = Python, verified). Results are consistent across Stata and Python; the R package has an intermittent bug but matches when it runs.
 
 ---
 
@@ -325,21 +600,19 @@ print(out_ife)
 
 ```
 Cross-validating ...
-r = 0; mspe = 1.04450
-r = 1; mspe = 0.93953
-r = 2; mspe = 0.89232 *
-r = 3; mspe = 1.05919
-r = 4; mspe = 1.16690
+r = 0; sigma2 = 0.96706; IC = 0.28988; PC = 0.94215; MSPE = 1.06141
+r = 1; sigma2 = 0.78457; IC = 0.40405; PC = 0.85584; MSPE = 0.93293
+r = 2; sigma2 = 0.68780; IC = 0.59560; PC = 0.83048; MSPE = 0.89225 *
+r = 3; sigma2 = 0.63564; IC = 0.83985; PC = 0.84162; MSPE = 1.48324
+r = 4; sigma2 = 0.59434; IC = 1.09569; PC = 0.85625; MSPE = 1.53533
 r* = 2
 
-ATT:
-                             ATT    S.E. CI.lower CI.upper  p.value
-Tr obs equally weighted   0.2968 0.04981   0.1992   0.3945 2.54e-09
+IFE ATT = 0.296834
 ```
 
 :::
 
-**Result:** Cross-validation selects **r\* = 2** factors in both Stata and R. The ATT is **0.2967** (Stata) and **0.2968** (R) — virtually identical. The `fect` package is not available in Python.
+**Result:** Cross-validation selects **r\* = 2** factors in both Stata and R. The ATT is **0.296655** (Stata) and **0.296834** (R) — virtually identical (bootstrap variability). The `fect` package is not available in Python.
 
 ---
 
@@ -364,8 +637,24 @@ Synthetic Control
          ATT |  .4143695   .0990729   .2201867   .6085523        336
     Effect_1 |  .0847212   .0549971  -.0230731   .1925156        336
     Effect_2 | -.8503927   .4822928  -1.795687   .0949012        336
-         ...
+    Effect_3 |  .1855106   .0587349   .0703901   .3006311        336
+    Effect_4 |  .1453368   .0683699   .0113318   .2793417        336
+    Effect_5 |  .1580178   .0652356   .0301559   .2858796        336
+    Effect_6 |  .1628774   .0619782   .0414001   .2843546        336
+    Effect_7 |  .2300545    .071573   .0897714   .3703376        336
+    Effect_8 |  .2328864   .0940573   .0485342   .4172386        336
+    Effect_9 |  .2909331   .0734345   .1470015   .4348647        336
+   Effect_10 |  .2819621   .0997541   .0864441   .4774801        336
+   Effect_11 |  .3107257   .0868549   .1404902   .4809612        336
+   Effect_12 |  .3126798   .0867061   .1427358   .4826238        336
+   Effect_13 |  .5364662   .1350113    .271844   .8010883        336
    Effect_14 |  .3510779   .3328448  -.3012979   1.003454        336
+   Effect_15 |  .8535069   .1984828   .4644806   1.242533        336
+   Effect_16 |  .5999793    .270938   .0689409   1.131018        336
+   Effect_17 |  .8797623   .2911827   .3090443    1.45048        336
+   Effect_18 |  1.115862    .303969   .5200826   1.711641        336
+   Effect_19 |  .9113983   .2097487   .5002909   1.322506        336
+   Effect_20 |  .5635303   .2827725   .0092961   1.117764        336
    Effect_21 |  1.344864   .3207751   .7161445   1.973583        336
 ```
 
@@ -384,6 +673,27 @@ Synthetic Control (Demeaned)
              |  Estimate         SE      LB CI      UB CI  Switchers
 -------------+-------------------------------------------------------
          ATT |  .4742627   .2958464  -.1055961   1.054122        336
+    Effect_1 |  .1563171   .3195719  -.4700439   .7826781        336
+    Effect_2 |  .0574685    .347471  -.6235746   .7385116        336
+    Effect_3 |  -.203884   .4748395  -1.134569   .7268014        336
+    Effect_4 |  .1263265   .4188353  -.6945908   .9472437        336
+    Effect_5 |  .4512675   .3328846  -.2011863   1.103721        336
+    Effect_6 |  .2871878   .4233125  -.5425048    1.11688        336
+    Effect_7 | -.6302814   .4482395  -1.508831    .248268        336
+    Effect_8 |  .0061563    .463026  -.9013747   .9136873        336
+    Effect_9 |  .5079371    .449676  -.3734278   1.389302        336
+   Effect_10 |  .8267857   .4704622  -.0953202   1.748892        336
+   Effect_11 |  .1787313   .4601843  -.7232299   1.080693        336
+   Effect_12 |  .9566189   .4344242   .1051474    1.80809        336
+   Effect_13 |  .4186324   .6384112  -.8326535   1.669918        336
+   Effect_14 | -.2034609   .5852807  -1.350611   .9436893        336
+   Effect_15 |  1.290602   .5699582   .1734837    2.40772        336
+   Effect_16 |   .795969   .7191652  -.6135948   2.205533        336
+   Effect_17 |  1.283461    .549339   .2067567   2.360165        336
+   Effect_18 |  .4427864   .7226809  -.9736682   1.859241        336
+   Effect_19 |  .7520162   .4972727  -.2226383   1.726671        336
+   Effect_20 |  1.002683   .4325257    .154933   1.850434        336
+   Effect_21 |  1.456197   .5078996   .4607137    2.45168        336
 ```
 
 ### R
@@ -398,7 +708,7 @@ panel <- panel.matrices(as.data.frame(df),
 # SC estimator
 set.seed(1)
 sc_est <- sc_estimate(panel$Y, panel$N0, panel$T0)
-cat("SC ATT:", round(sc_est, 4), "\n")
+cat("SC ATT:", round(sc_est, 6), "\n")
 
 # Demeaned SC
 df_dm <- df %>%
@@ -412,20 +722,20 @@ panel_dm <- panel.matrices(as.data.frame(df_dm),
 
 set.seed(1)
 sc_dm_est <- sc_estimate(panel_dm$Y, panel_dm$N0, panel_dm$T0)
-cat("Demeaned SC ATT:", round(sc_dm_est, 4), "\n")
+cat("Demeaned SC ATT:", round(sc_dm_est, 6), "\n")
 ```
 
 ```
-SC ATT: 0.4916
+SC ATT = 0.491647
   (R uses synthdid package; Stata uses sdid_event — different algorithms)
 
-Demeaned SC ATT: 0.4743
-  (Matches Stata exactly: 0.4743)
+Demeaned SC ATT = 0.474263
+  (Matches Stata exactly: 0.474263)
 ```
 
 :::
 
-**Result:** The demeaned SC ATT is **0.4743** in both Stata and R. The standard SC differs slightly (Stata: 0.4144, R: 0.4916) due to different implementations (`sdid_event` vs `synthdid`). SC estimators are noisier than TWFE, with some implausibly large or negative period-specific effects. The `synthdid` and `sdid_event` packages are not available in Python.
+**Result:** The demeaned SC ATT is **0.474263** in both Stata and R. The standard SC differs slightly (Stata: 0.414370, R: 0.491647) due to different implementations (`sdid_event` vs `synthdid`). SC estimators are noisier than TWFE, with some implausibly large or negative period-specific effects. The `synthdid` and `sdid_event` packages are not available in Python.
 
 ---
 
@@ -449,9 +759,24 @@ Synthetic Difference-in-differences
          ATT |  .3019373   .0434581   .2167593   .3871152        336
     Effect_1 |  .0300933   .0359936  -.0404541   .1006407        336
     Effect_2 |   .049484   .0346309  -.0183926   .1173605        336
-         ...
+    Effect_3 |  .0707202   .0377632  -.0032956    .144736        336
+    Effect_4 |  .0399446   .0457867  -.0497973   .1296865        336
+    Effect_5 |  .0926634    .054679  -.0145075   .1998343        336
+    Effect_6 |  .0282965   .0399082  -.0499237   .1065167        336
+    Effect_7 |  .0274996   .0491559  -.0688459   .1238451        336
+    Effect_8 |  .0982746   .0449119   .0102472    .186302        336
     Effect_9 |  .1968231   .0523822   .0941539   .2994923        336
+   Effect_10 |  .2181085   .0507455   .1186473   .3175697        336
+   Effect_11 |  .1317728   .0539055   .0261181   .2374276        336
+   Effect_12 |  .1200245   .0682819  -.0138081   .2538571        336
+   Effect_13 |  .2503659   .0772534   .0989491   .4017826        336
    Effect_14 |  .6470827   .1095881    .43229    .8618753        336
+   Effect_15 |  .6095774   .1015924   .4104562   .8086986        336
+   Effect_16 |  .4259575   .0883782   .2527362   .5991788        336
+   Effect_17 |  .5412842    .104302   .3368523   .7457161        336
+   Effect_18 |  .7146745   .1156835   .4879348   .9414142        336
+   Effect_19 |  .5596104   .0967263   .3700269    .749194        336
+   Effect_20 |  .6799514   .1033783   .4773299   .8825729        336
    Effect_21 |  .8084736   .1282819   .5570411   1.059906        336
 ```
 
@@ -460,20 +785,20 @@ Synthetic Difference-in-differences
 ```r
 set.seed(1)
 sdid_est <- synthdid_estimate(panel$Y, panel$N0, panel$T0)
-cat("SDID ATT:", round(sdid_est, 4), "\n")
-summary(sdid_est)
+cat("SDID ATT:", round(sdid_est, 6), "\n")
+cat("SDID SE:", round(sqrt(vcov(sdid_est, method = "jackknife")), 6), "\n")
 ```
 
 ```
-SDID ATT: 0.3018
-SE (jackknife): 0.0414
+SDID ATT = 0.301844
+SDID SE  = 0.041352
 
-  (Stata ATT: 0.3019, SE: 0.0435 — virtually identical)
+  (Stata ATT: 0.301937, SE: 0.043458 — virtually identical)
 ```
 
 :::
 
-**Result:** The SDID ATT is **0.3019** (Stata) and **0.3018** (R) — virtually identical. The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` and `synthdid` packages are not available in Python.
+**Result:** The SDID ATT is **0.301937** (Stata) and **0.301844** (R) — virtually identical. The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` and `synthdid` packages are not available in Python.
 
 ---
 
@@ -497,12 +822,15 @@ restore
 
 ```
 HDFE Linear regression                            Number of obs   =     21,744
+
+                             (Std. err. adjusted for 7,248 clusters in subclass)
 --------------------------------------------------------------------------------
                |               Robust
        patents | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 ---------------+----------------------------------------------------------------
 reltimeminus14 |   .0431961   .0403288     1.07   0.284      -.03586    .1222522
  reltimeplus14 |   .6422164   .1116704     5.75   0.000       .42331    .8611229
+         _cons |    .474324   .0131325    36.12   0.000     .4485805    .5000676
 --------------------------------------------------------------------------------
 
 |    M    |   lb   |   ub   |
@@ -525,8 +853,8 @@ df_subset <- df %>% filter(year %in% c(1918, 1904, 1932))
 subset_model <- feols(patents ~ reltimeminus14 + reltimeplus14 |
     year + treatmentgroup, data = df_subset, cluster = ~subclass)
 
-betahat_sub <- summary(subset_model)$coefficients
-sigma_sub <- summary(subset_model)$cov.scaled
+betahat_sub <- coef(subset_model)
+sigma_sub <- vcov(subset_model)
 
 delta_rm_sub <- createSensitivityResults_relativeMagnitudes(
     betahat = betahat_sub,
@@ -546,18 +874,67 @@ reltimeminus14 0.043196   0.040329  1.0711 2.8416e-01
 reltimeplus14  0.642216   0.111670  5.7510 9.2325e-09 ***
 
 # A tibble: 5 × 5
-        lb    ub method Delta    Mbar
-     <dbl> <dbl> <chr>  <chr>   <dbl>
-1  0.360   0.995 C-LF   DeltaRM     2
-2  0.199   1.19  C-LF   DeltaRM     4
-3 -0.00224 1.41  C-LF   DeltaRM     6
-4 -0.217   1.62  C-LF   DeltaRM     8
-5 -0.431   1.84  C-LF   DeltaRM    10
+        lb       ub method Delta    Mbar
+     <dbl>    <dbl> <chr>  <chr>   <dbl>
+1  0.360    0.995   C-LF   DeltaRM     2
+2  0.199    1.192   C-LF   DeltaRM     4
+3 -0.002    1.406   C-LF   DeltaRM     6
+4 -0.217    1.621   C-LF   DeltaRM     8
+5 -0.431    1.840   C-LF   DeltaRM    10
+```
+
+### Python
+
+```python
+import pandas as pd
+import numpy as np
+import pyfixest as pf
+from honestdid import createSensitivityResults_relativeMagnitudes
+
+df = pd.read_stata("data/moser_voena_didtextbook.dta")
+df_subset = df[df["year"].isin([1904, 1918, 1932])].copy()
+
+subset_model = pf.feols(
+    "patents ~ reltimeminus14 + reltimeplus14 | year + treatmentgroup",
+    data=df_subset, vcov={"CRV1": "subclass"})
+
+betahat = subset_model.coef().values
+sigma = np.array(subset_model._vcov)
+
+delta_rm = createSensitivityResults_relativeMagnitudes(
+    betahat=betahat,
+    sigma=sigma,
+    numPrePeriods=1,
+    numPostPeriods=1,
+    Mbarvec=[2, 4, 6, 8, 10]
+)
+print(delta_rm)
+```
+
+```
+Coefficients:
+  reltimeminus14 = 0.043196
+  reltimeplus14  = 0.642216
+
+       lb       ub method   Delta  Mbar
+ 0.359939 0.994861   C-LF DeltaRM     2
+ 0.198972 1.191598   C-LF DeltaRM     4
+-0.002236 1.406219   C-LF DeltaRM     6
+-0.216857 1.620841   C-LF DeltaRM     8
+-0.431479 1.839934   C-LF DeltaRM    10
 ```
 
 :::
 
-**Result:** The confidence intervals from Stata and R are virtually identical. For the 1932 effect to become insignificant, one needs to allow for differential trends post-treatment almost **six times larger** than the pre-treatment differential trends ($\bar{M} \approx 6$). This suggests the effect is very robust to violations of parallel trends. The `honestdid` package is not available in Python.
+**Result:** The confidence intervals from Stata, R, and Python are virtually identical. For the 1932 effect to become insignificant, one needs to allow for differential trends post-treatment almost **six times larger** than the pre-treatment differential trends ($\bar{M} \approx 6$). This suggests the effect is very robust to violations of parallel trends.
+
+| Mbar | Stata CI | R CI | Python CI |
+|------|----------|------|-----------|
+| 2 | [0.361, 0.993] | [0.360, 0.995] | [0.360, 0.995] |
+| 4 | [0.197, 1.194] | [0.199, 1.192] | [0.199, 1.192] |
+| 6 | [−0.004, 1.403] | [−0.002, 1.406] | [−0.002, 1.406] |
+| 8 | [−0.217, 1.621] | [−0.217, 1.621] | [−0.217, 1.621] |
+| 10 | [−0.433, 1.840] | [−0.431, 1.840] | [−0.431, 1.840] |
 
 ---
 
@@ -565,16 +942,18 @@ reltimeplus14  0.642216   0.111670  5.7510 9.2325e-09 ***
 
 | Estimator | Stata | R | Python |
 |-----------|-------|---|--------|
-| TWFE with controls (F-test) | F=5.07, p<0.001 | Chi2=91.31, p<0.001 | F=5.07, p<0.001 |
-| `did_multiplegt_dyn` (Av. Total Effect) | **0.2894** | 0.2894 (intermittent bug) | **0.2894** |
-| IFE ATT (r=2) | **0.2967** | **0.2968** | — |
-| SC ATT (standard) | **0.4144** | **0.4916** | — |
-| SC ATT (demeaned) | **0.4743** | **0.4743** | — |
-| SDID ATT | **0.3019** | **0.3018** | — |
-| HonestDiD (M=2) | [0.361, 0.993] | [0.360, 0.995] | — |
+| TWFE with controls (F-test) | F=5.07, p<0.001 | Chi2=91.313, p<0.001 | F=5.072919, p<0.001 |
+| `did_multiplegt_dyn` (Av. Total Effect) | **0.289371** | 0.289371 (intermittent bug) | **0.289371** |
+| IFE ATT (r=2) | **0.296655** | **0.296834** | — |
+| SC ATT (standard) | **0.414370** | **0.491647** | — |
+| SC ATT (demeaned) | **0.474263** | **0.474263** | — |
+| SDID ATT | **0.301937** | **0.301844** | — |
+| HonestDiD (M=2) | [0.361, 0.993] | [0.360, 0.995] | [0.360, 0.995] |
+| HonestDiD (M=6) | [−0.004, 1.403] | [−0.002, 1.406] | [−0.002, 1.406] |
 
 **Notes:**
 
-- Python tabs are shown only where official packages exist (`pyfixest`, `py-did-multiplegt-dyn`).
-- IFE, SC, SDID, and HonestDiD do not have official Python packages (`fect`, `sdid_event`/`synthdid`, `honestdid`).
-- The standard SC ATT differs between Stata (0.4144) and R (0.4916) due to different package implementations (`sdid_event` vs `synthdid`); the demeaned SC and SDID match exactly.
+- Python tabs are shown only where official packages exist (`pyfixest`, `py-did-multiplegt-dyn`, `honestdid`).
+- IFE, SC, and SDID do not have official Python packages (`fect`, `sdid_event`/`synthdid`).
+- The standard SC ATT differs between Stata (0.414370) and R (0.491647) due to different package implementations (`sdid_event` vs `synthdid`); the demeaned SC and SDID match exactly.
+- The IFE ATT differs slightly (0.296655 vs 0.296834) due to bootstrap variability across runs.
