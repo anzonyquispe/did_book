@@ -22,11 +22,13 @@ No event-study plots in this chapter — only numerical outputs from regressions
 
 ```stata
 * ssc install panelview, replace
+use "gentzkowetal_didtextbook.dta", clear
 gen has_newspaper = (numdailies > 0) if numdailies != .
 
 panelview prestout has_newspaper, i(cnty90) t(year) type(treat) ///
     title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)") ///
-    legend(label(1 "No newspaper") label(2 "Has newspaper"))
+    legend(label(1 "No newspaper") label(2 "Has newspaper")) ///
+    ylabel(none) ytitle("")
 graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ```
 
@@ -35,11 +37,12 @@ graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ### R
 
 ```r
-library(panelView)
+library(haven); library(panelView)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 panelview(prestout ~ numdailies, data = df,
           index = c("cnty90", "year"), type = "treat",
           main = "Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)",
-          xlab = "Year", ylab = "County")
+          xlab = "Year", ylab = "")
 ```
 
 <img src="../figures/ch05_panelview_R.png" alt="Treatment Status (R)" width="100%" />
@@ -47,36 +50,28 @@ panelview(prestout ~ numdailies, data = df,
 ### Python
 
 ```python
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-pivot = df.pivot_table(index="cnty90", columns="year",
-                       values="numdailies", aggfunc="max").fillna(0)
-pivot_bin = (pivot > 0).astype(int)
-
-ever_treated = pivot_bin.max(axis=1)
-order = list(ever_treated[ever_treated == 0].index) + \
-        list(ever_treated[ever_treated == 1].index)
-pivot_bin = pivot_bin.reindex(order)
-
-fig, ax = plt.subplots(figsize=(12, 7))
-cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
-ax.imshow(pivot_bin.values, aspect="auto", cmap=cmap, interpolation="nearest")
-
-years = pivot_bin.columns.astype(int)
-tick_pos = list(range(0, len(years), 2))
-ax.set_xticks(tick_pos)
-ax.set_xticklabels([str(years[i]) for i in tick_pos], fontsize=9, rotation=45)
-ax.set_xlabel("Year", fontsize=12)
-ax.set_ylabel("County", fontsize=11)
-ax.set_title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)\n"
-             f"{len(pivot_bin)} counties × {len(years)} elections | "
-             f"D = has ≥1 daily newspaper", fontsize=13)
-
-legend_elements = [Patch(facecolor="#4575b4", label="No newspaper (D=0)"),
-                   Patch(facecolor="#d73027", label="Has newspaper (D≥1)")]
-ax.legend(handles=legend_elements, loc="upper left", fontsize=10)
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df["has_newspaper"] = (df["numdailies"] > 0).astype(int)
+pv = df.pivot_table(index="cnty90", columns="year", values="has_newspaper", aggfunc="first")
+pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
+cmap = mcolors.ListedColormap(["#D4E6F1", "#2171B5"])
+fig, ax = plt.subplots(figsize=(12, 10))
+ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
+for i in range(0, len(pv_sorted), 10):
+    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
+ax.set_xticks(range(0, len(pv_sorted.columns), 2))
+ax.set_xticklabels([int(c) for c in pv_sorted.columns[::2]], rotation=45, ha="right", fontsize=8)
+ax.set_yticks([])
+ax.set_xlabel("year")
+ax.set_title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)", fontsize=16)
+ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="No newspaper"),
+                   Patch(facecolor="#2171B5", edgecolor="gray", label="Has newspaper")],
+          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
 plt.tight_layout()
 plt.savefig("figures/ch05_panelview_Python.png", dpi=150, bbox_inches="tight")
 plt.show()
@@ -97,6 +92,7 @@ Regress turnout on number of newspapers and county and year FEs, clustering stan
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 areg prestout i.year numdailies, absorb(cnty90) cluster(cnty90)
 ```
 
@@ -137,6 +133,8 @@ Absorbed variable: cnty90                           No. of categories =  1,195
 ```
 
 ```stata
+* ssc install twowayfeweights, replace
+use "gentzkowetal_didtextbook.dta", clear
 twowayfeweights prestout cnty90 year numdailies, type(feTR)
 ```
 
@@ -157,7 +155,8 @@ Total                   10378       1.0000
 ### R
 
 ```r
-library(fixest)
+library(haven); library(fixest)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 model1 <- feols(prestout ~ numdailies + i(year) | cnty90,
                 data = df, cluster = ~cnty90,
                 ssc = ssc(fixef.K = "full"))
@@ -188,7 +187,8 @@ year::1928                  -0.1102546    0.0108236     -10.19      0.000   -0.1
 ```
 
 ```r
-library(TwoWayFEWeights)
+library(haven); library(TwoWayFEWeights)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 decomp1 <- twowayfeweights(df, "prestout", "cnty90", "year",
                             "numdailies", type = "feTR")
 ```
@@ -207,8 +207,9 @@ Total                     10378            1
 ### Python
 
 ```python
+import pandas as pd
 import pyfixest as pf
-
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 m1 = pf.feols(
     "prestout ~ numdailies + C(year) | cnty90",
     data=df,
@@ -245,7 +246,9 @@ year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688
 ```
 
 ```python
+import pandas as pd
 from twowayfeweights import twowayfeweights
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
                           type="feTR")
 ```
@@ -277,6 +280,7 @@ Regress turnout on number of newspapers and county, year, and state-year FEs. Th
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 qui tab styr, gen(styr)
 qui areg prestout i.year i.styr numdailies, absorb(cnty90) cluster(cnty90)
 display "numdailies:  coef = " %12.7f _b[numdailies] ///
@@ -288,6 +292,8 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```stata
+* ssc install twowayfeweights, replace
+use "gentzkowetal_didtextbook.dta", clear
 twowayfeweights prestout cnty90 year numdailies, type(feTR) controls(styr1-styr683)
 ```
 
@@ -309,6 +315,8 @@ Total                   10342       1.0000
 ### R
 
 ```r
+library(haven)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 model2 <- feols(prestout ~ numdailies + i(year) + i(styr) | cnty90,
                 data = df, cluster = ~cnty90,
                 ssc = ssc(fixef.K = "full"))
@@ -319,6 +327,8 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```r
+library(haven)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 decomp2 <- twowayfeweights(df, "prestout", "cnty90", "year",
                             "numdailies", type = "feTR",
                             controls = styr_cols)
@@ -339,6 +349,8 @@ Total                     10342            1
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 m2 = pf.feols(
     "prestout ~ numdailies + C(year) + C(styr) | cnty90",
     data=df,
@@ -353,6 +365,8 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # Decomposition with state-year controls
 styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
 result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
@@ -387,6 +401,7 @@ Regress the change in turnout on the change in number of newspapers and state-ye
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 areg changeprestout changedailies, absorb(styr) cluster(cnty90)
 ```
 
@@ -410,6 +425,8 @@ changedailies |   .0025907   .0009351     2.77   0.006     .0007561    .0044252
 ```
 
 ```stata
+* ssc install twowayfeweights, replace
+use "gentzkowetal_didtextbook.dta", clear
 twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
     type(fdTR) controls(styr1-styr683)
 ```
@@ -430,6 +447,8 @@ Total                      9876        1.0000
 ```
 
 ```stata
+* ssc install twowayfeweights, replace
+use "gentzkowetal_didtextbook.dta", clear
 twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
     type(fdTR) controls(styr1-styr683) test_random_weights(year)
 ```
@@ -444,6 +463,8 @@ year    -.1674271    .05101171   -3.2821307    -.0631614
 ### R
 
 ```r
+library(haven)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 model3 <- feols(changeprestout ~ changedailies | styr,
                 data = df, cluster = ~cnty90,
                 ssc = ssc(fixef.K = "full"))
@@ -459,6 +480,8 @@ changedailies                0.0025907    0.0009345       2.77     0.0057    0.0
 ```
 
 ```r
+library(haven)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 decomp3 <- twowayfeweights(df, "changeprestout", "cnty90", "year",
                             "changedailies", D0 = "numdailies",
                             type = "fdTR", controls = styr_cols)
@@ -477,6 +500,8 @@ Total                        9876            1
 ```
 
 ```r
+library(haven)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 decomp3_test <- twowayfeweights(df, "changeprestout", "cnty90", "year",
                                  "changedailies", D0 = "numdailies",
                                  type = "fdTR", controls = styr_cols,
@@ -492,6 +517,8 @@ RW_year -0.1674271 0.05101171 -3.282131  -0.0631614
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 m3 = pf.feols(
     "changeprestout ~ changedailies | styr",
     data=df,
@@ -514,6 +541,8 @@ changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580
 ```
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # FD weight decomposition (fdTR type)
 result3 = twowayfeweights(df, "changeprestout", "cnty90", "year",
                            "changedailies", type="fdTR", D0="numdailies",
@@ -536,6 +565,8 @@ Total                   9876        1.0000
 ```
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # Test random weights (year)
 result3b = twowayfeweights(df, "changeprestout", "cnty90", "year",
                             "changedailies", type="fdTR", D0="numdailies",

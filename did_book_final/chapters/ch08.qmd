@@ -40,34 +40,60 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 ### Stata
 
 ```stata
+* ssc install panelview, replace
+use "gentzkowetal_didtextbook.dta", clear
 panelview prestout numdailies, i(cnty90) t(year) type(treat) ///
-    title("Treatment Status: Gentzkow et al. (2011)") legend(off)
-graph export "$FIGDIR\ch08_panelview_stata.png", replace width(1200)
+    title("Treatment Status: Gentzkow et al. (2011)") legend(off) ///
+    ylabel(none) ytitle("")
+graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ```
 
-![Stata PanelView](../figures/ch08_panelview_stata.png)
+![Stata PanelView](../figures/ch05_panelview_stata.png)
 
 ### R
 
 ```r
-library(panelView)
+library(haven); library(panelView)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 panelview(prestout ~ numdailies, data = df,
           index = c("cnty90", "year"), type = "treat",
-          main = "Treatment Status: Gentzkow et al. (2011)")
+          main = "Treatment Status: Gentzkow et al. (2011)",
+          ylab = "")
 ```
 
-![R PanelView](../figures/ch08_panelview_R.png)
+![R PanelView](../figures/ch05_panelview_R.png)
 
 ### Python
 
 ```python
-pv = df.pivot_table(index='cnty90', columns='year',
-                    values='numdailies', aggfunc='first')
-pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=True).index]
-# Heatmap with Blues colormap, sorted by mean treatment intensity
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df["has_newspaper"] = (df["numdailies"] > 0).astype(int)
+pv = df.pivot_table(index="cnty90", columns="year", values="has_newspaper", aggfunc="first")
+pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
+cmap = mcolors.ListedColormap(["#D4E6F1", "#2171B5"])
+fig, ax = plt.subplots(figsize=(12, 10))
+ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
+for i in range(0, len(pv_sorted), 10):
+    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
+ax.set_xticks(range(0, len(pv_sorted.columns), 2))
+ax.set_xticklabels([int(c) for c in pv_sorted.columns[::2]], rotation=45, ha="right", fontsize=8)
+ax.set_yticks([])
+ax.set_xlabel("Year")
+ax.set_title("Treatment Status: Gentzkow et al. (2011)", fontsize=16)
+ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="No newspaper"),
+                   Patch(facecolor="#2171B5", edgecolor="gray", label="Has newspaper")],
+          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
+plt.tight_layout()
+plt.savefig("figures/ch05_panelview_Python.png", dpi=150, bbox_inches="tight")
+plt.show()
 ```
 
-![Python PanelView](../figures/ch08_panelview_Python.png)
+![Python PanelView](../figures/ch05_panelview_Python.png)
 
 :::
 
@@ -82,6 +108,7 @@ pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=True).index]
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 reg changedailies lag_numdailies, cluster(cnty90)
 ```
 
@@ -100,7 +127,8 @@ N = 15,627
 ### R
 
 ```r
-library(lmtest); library(sandwich)
+library(haven); library(lmtest); library(sandwich)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 gq1 <- lm(changedailies ~ lag_numdailies, data = df)
 coeftest(gq1, vcov = vcovCL(gq1, cluster = ~cnty90))
 ```
@@ -115,7 +143,9 @@ N = 15,627
 ### Python
 
 ```python
+import pandas as pd
 import statsmodels.api as sm
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 sub = df.dropna(subset=['changedailies','lag_numdailies'])
 y = sub['changedailies']; X = sm.add_constant(sub['lag_numdailies'])
 res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
@@ -143,6 +173,7 @@ res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 reg changedailies lag_ishare_urb, cluster(cnty90)
 ```
 
@@ -161,6 +192,8 @@ N = 15,292
 ### R
 
 ```r
+library(haven); library(lmtest); library(sandwich)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 gq2 <- lm(changedailies ~ lag_ishare_urb, data = df)
 coeftest(gq2, vcov = vcovCL(gq2, cluster = ~cnty90))
 ```
@@ -175,6 +208,9 @@ N = 15,292
 ### Python
 
 ```python
+import pandas as pd
+import statsmodels.api as sm
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 sub = df.dropna(subset=['changedailies','lag_ishare_urb'])
 y = sub['changedailies']; X = sm.add_constant(sub['lag_ishare_urb'])
 res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
@@ -202,6 +238,7 @@ res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
 ### Stata
 
 ```stata
+use "gentzkowetal_didtextbook.dta", clear
 areg prestout i.year numdailies lag_numdailies, absorb(cnty90) cluster(cnty90)
 ```
 
@@ -218,6 +255,8 @@ N = 15,629
 ```
 
 ```stata
+* ssc install twowayfeweights, replace
+use "gentzkowetal_didtextbook.dta", clear
 * Decompose beta on numdailies
 twowayfeweights prestout cnty90 year numdailies, ///
     other_treatments(lag_numdailies) type(feTR)
@@ -246,7 +285,8 @@ Under the common trends assumption, beta estimates a weighted sum of 9,339 ATTs.
 ### R
 
 ```r
-library(fixest); library(TwoWayFEWeights)
+library(haven); library(fixest); library(TwoWayFEWeights)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 gq3 <- feols(prestout ~ numdailies + lag_numdailies | cnty90 + year,
              data = df, cluster = ~cnty90)
 summary(gq3)
@@ -277,13 +317,16 @@ N = 15,629
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
+from twowayfeweights import twowayfeweights
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # TWFE with county and year FEs
 m8 = pf.feols("prestout ~ numdailies + lag_numdailies + C(year) | cnty90",
               data=df, vcov={"CRV1": "cnty90"},
               ssc=pf.ssc(adj=True, fixef_k="full", cluster_adj=True))
 
 # Decomposition
-from twowayfeweights import twowayfeweights
 res_a = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
                          type="feTR", other_treatments="lag_numdailies")
 res_b = twowayfeweights(df, "prestout", "cnty90", "year", "lag_numdailies",
@@ -342,6 +385,8 @@ Total                   10056       0.0000
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_dyn, replace
+use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(4) placebo(4) cluster(cnty90)
 graph export "$FIGDIR\ch08_fig81_nonnormalized_es.png", replace width(1200)
@@ -383,7 +428,8 @@ Test of joint nullity of the placebos : p-value = 0.9922
 ### R
 
 ```r
-library(DIDmultiplegtDYN); library(ggplot2)
+library(haven); library(DIDmultiplegtDYN)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 gq4 <- did_multiplegt_dyn(
     df = df, outcome = "prestout", group = "cnty90",
     time = "year", treatment = "numdailies",
@@ -415,8 +461,10 @@ Joint nullity of placebos : p = 0.9922
 ### Python
 
 ```python
+import pandas as pd
 from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
 import polars as pl
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 df_pl = pl.from_pandas(df)
 gq4 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4, cluster="cnty90")
@@ -459,6 +507,8 @@ SE and N/Switchers match Stata/R. See Stata/R tabs for full results.
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_dyn, replace
+use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(1) design(0.8,console) graph_off
 
@@ -490,6 +540,8 @@ did_multiplegt_dyn prestout cnty90 year numdailies, ///
 ### R
 
 ```r
+library(haven); library(DIDmultiplegtDYN)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 # design() triggers a data.table join bug in DIDmultiplegtDYN (R):
 # Error: "columns to join by must be specified using 'on=' argument"
 # Workaround: run without design() to verify effects match Stata.
@@ -520,6 +572,11 @@ which is Stata-only due to the R data.table bug.
 ### Python
 
 ```python
+import pandas as pd
+import polars as pl
+from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df_pl = pl.from_pandas(df)
 # design() option not available in py-did-multiplegt-dyn.
 # Run effects(1), effects(2), effects(4) without design paths.
 for ell in [1, 2, 4]:
@@ -553,6 +610,8 @@ Stata/R. Treatment path tables are Stata-only.
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_dyn, replace
+use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(4) placebo(4) normalized effects_equal(all) cluster(cnty90)
 graph export "$FIGDIR\ch08_fig82_normalized_es.png", replace width(1200)
@@ -597,6 +656,8 @@ Test of joint nullity of the placebos : p-value = 0.9922
 ### R
 
 ```r
+library(haven); library(DIDmultiplegtDYN)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 gq6 <- did_multiplegt_dyn(
     df = df, outcome = "prestout", group = "cnty90",
     time = "year", treatment = "numdailies",
@@ -630,6 +691,11 @@ Joint nullity of placebos : p = 0.9922
 ### Python
 
 ```python
+import pandas as pd
+import polars as pl
+from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df_pl = pl.from_pandas(df)
 gq6 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4,
     normalized=True, effects_equal=True, cluster="cnty90")
@@ -672,6 +738,8 @@ SE and N/Switchers match Stata/R. See Stata/R tabs for full results.
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_stat, replace
+use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_stat prestout cnty90 year numdailies, ///
     placebo(1) exact_match
 ```
@@ -714,7 +782,8 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 ### R
 
 ```r
-library(DIDmultiplegtSTAT)
+library(haven); library(DIDmultiplegtSTAT)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 # devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)
 gq7 <- did_multiplegt_stat(
     df = as.data.frame(df),
@@ -734,26 +803,26 @@ Common Support   =   Exact Matching
 ----------------------------------------------------------------------
                     Estimation of AOSS(s)
 ----------------------------------------------------------------------
-     Estimate SE      LB CI   UB CI   Switchers Stayers
-AOSS 0.00624  0.00143 0.00343 0.00904 4,423     11,043
+     Estimate    SE      LB CI   UB CI   Switchers Stayers
+AOSS 0.0062363 0.0014311 0.0034312 0.0090413 4,423     11,043
 
 ----------------------------------------------------------------------
                Estimation of AOSS(s) - Placebo
 ----------------------------------------------------------------------
-     Estimate SE      LB CI    UB CI   Switchers Stayers
-AOSS -0.00092 0.00147 -0.00381 0.00196 2,287     7,743
+      Estimate    SE      LB CI    UB CI   Switchers Stayers
+AOSS -0.0009239 0.0014709 -0.0038067 0.0019590 2,287     7,743
 
 ----------------------------------------------------------------------
                     Estimation of WAOSS(s)
 ----------------------------------------------------------------------
-      Estimate SE      LB CI   UB CI   Switchers Stayers
-WAOSS 0.00590  0.00130 0.00335 0.00846 4,423     11,043
+      Estimate    SE      LB CI   UB CI   Switchers Stayers
+WAOSS 0.0059026 0.0013034 0.0033480 0.0084572 4,423     11,043
 
 ----------------------------------------------------------------------
                Estimation of WAOSS(s) - Placebo
 ----------------------------------------------------------------------
-      Estimate SE      LB CI    UB CI   Switchers Stayers
-WAOSS 0.00022  0.00134 -0.00241 0.00284 2,287     7,743
+      Estimate    SE      LB CI    UB CI   Switchers Stayers
+WAOSS 0.0002176 0.0013382 -0.0024053 0.0028404 2,287     7,743
 
 203 switchers dropped | 43 stayers dropped
 ```
@@ -761,6 +830,8 @@ WAOSS 0.00022  0.00134 -0.00241 0.00284 2,287     7,743
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # py_did_multiplegt_stat (local notebook-based translation)
 # Located at: C:\...\py_did_multiplegt_stat\stat_python
 res = did_multiplegt_stat(
@@ -780,34 +851,31 @@ Common Support   =   Exact Matching
 ----------------------------------------------------------------------
                     Estimation of AOSS(s)
 ----------------------------------------------------------------------
-       Estimate         SE       LB CI      UB CI Switchers Stayers
-AOSS  0.0013877  0.0017021  -0.0019483  0.0047238     4,423  11,043
+       Estimate         SE      LB CI      UB CI Switchers Stayers
+AOSS  0.0061034  0.0016286  0.0029113  0.0092954     4,423  11,043
 
 ----------------------------------------------------------------------
-               Estimation of AOSS(s) - Placebo
+               Estimation of AOSS(s) - Placebo(s)
 ----------------------------------------------------------------------
-        Estimate         SE       LB CI      UB CI Switchers Stayers
-AOSS  -0.0002455  0.0017037  -0.0035848  0.0030938     2,287   7,743
+             Estimate         SE       LB CI      UB CI Switchers Stayers
+Placebo_1  -0.0011280  0.0025056  -0.0060389  0.0037829     2,287   7,743
 
 ----------------------------------------------------------------------
                     Estimation of WAOSS(s)
 ----------------------------------------------------------------------
         Estimate         SE      LB CI      UB CI Switchers Stayers
-WAOSS  0.0053390  0.0015438  0.0023132  0.0083648     4,423  11,043
+WAOSS  0.0057527  0.0014895  0.0028333  0.0086721     4,423  11,043
 
 ----------------------------------------------------------------------
-               Estimation of WAOSS(s) - Placebo
+               Estimation of WAOSS(s) - Placebo(s)
 ----------------------------------------------------------------------
-         Estimate         SE       LB CI      UB CI Switchers Stayers
-WAOSS  -0.0002959  0.0015641  -0.0033616  0.0027698     2,287   7,743
-
-Note: AOSS differs from Stata/R; WAOSS closer. Implementation differences
-in matching/weighting algorithms across platforms. See Stata tab as reference.
+                   Estimate         SE       LB CI      UB CI Switchers Stayers
+Placebo_1_waoss  -0.0000125  0.0022931  -0.0045070  0.0044820     2,287   7,743
 ```
 
 :::
 
-**Interpretation:** Both ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive in Stata and R. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response: the average effect per unit of treatment change is smaller when computed across all switcher magnitudes.
+**Interpretation:** Both ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive across all three platforms. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response: the average effect per unit of treatment change is smaller when computed across all switcher magnitudes.
 
 Note: Stata, R, and Python point estimates differ slightly due to internal implementation variations (matching algorithms, variance formulas). N, switchers, and stayers are identical across all three.
 
@@ -822,6 +890,8 @@ Note: Stata, R, and Python point estimates differ slightly due to internal imple
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_dyn, replace
+use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies ///
     if year<=first_change | same_treat_after_first_change==1, ///
     effects(2) effects_equal(all) same_switchers graph_off
@@ -841,6 +911,8 @@ Test of equality of the effects : p-value = 0.8301
 ### R
 
 ```r
+library(haven); library(DIDmultiplegtDYN)
+df <- read_dta("gentzkowetal_didtextbook.dta")
 df_sub <- subset(df, year <= first_change | same_treat_after_first_change == 1)
 bonus <- did_multiplegt_dyn(
     df = df_sub, outcome = "prestout", group = "cnty90",
@@ -860,6 +932,8 @@ Test of equality of the effects : p-value = 0.8301
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("gentzkowetal_didtextbook.dta")
 # Python did_multiplegt_dyn returns NaN for point estimates in v0.1.4.
 # Stata/R results shown for reference.
 ```

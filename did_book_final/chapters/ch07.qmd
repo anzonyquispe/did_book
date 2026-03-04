@@ -17,13 +17,7 @@ This chapter applies the **Heterogeneous Adoption Design (HAD)** framework to st
 | Stute linearity test | `stute_test` (GitHub) | `StuteTest` (GitHub) | Manual implementation |
 | Treatment visualization | `panelview` (SSC) | `panelView` (CRAN) | `matplotlib` (manual) |
 | F-test | `test` (built-in) | `car::linearHypothesis` | `scipy` + `f_test` |
-
-**R installation notes:**
-
-- `StuteTest`: `remotes::install_github("chaisemartinPackages/stute_test/R")`
-- Stata `stute_test`: `net install stute_test, from("https://raw.githubusercontent.com/chaisemartinPackages/stute_test/main/Stata/dist/git")`
-
-**Note on Stute test p-values:** CvM test statistics are identical across Stata, R, and Python (closed-form computation). Bootstrap p-values differ slightly across platforms due to different random number generators, even with the same seed. This is expected and does not affect qualitative conclusions.
+| HAD event-study | `did_had` (SSC) + `nprobust` (GitHub) + `gtools` (SSC) | `DIDHAD` (GitHub) + `nprobust` (CRAN) | Not available |
 
 ---
 
@@ -34,6 +28,8 @@ This chapter applies the **Heterogeneous Adoption Design (HAD)** framework to st
 ### Stata
 
 ```stata
+* ssc install panelview, replace
+use "pierce_schott_didtextbook.dta", clear
 preserve
 reshape long delta deltalintrend, i(indusid) j(year)
 panelview delta ntrgap, i(indusid) t(year) type(treat) ///
@@ -47,7 +43,8 @@ restore
 ### R
 
 ```r
-library(panelView)
+library(haven); library(panelView)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 df_long$treated <- ifelse(df_long$year >= 2001, 1, 0)
 panelview(delta ~ treated, data = df_long,
           index = c("indusid", "year"), type = "treat",
@@ -59,9 +56,10 @@ panelview(delta ~ treated, data = df_long,
 ### Python
 
 ```python
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 cmap = plt.cm.Blues
 norm = mcolors.Normalize(vmin=0, vmax=df['ntrgap'].max() * 1.1)
 # Heatmap: each row = industry (sorted by ntrgap), each column = year
@@ -83,6 +81,7 @@ norm = mcolors.Normalize(vmin=0, vmax=df['ntrgap'].max() * 1.1)
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 reg delta2001 ntrgap, vce(hc2)
 reg delta2002 ntrgap, vce(hc2)
 reg delta2004 ntrgap, vce(hc2)
@@ -114,7 +113,7 @@ reg delta2005 ntrgap, vce(hc2)
 
 ```r
 library(haven); library(sandwich); library(lmtest)
-df <- as.data.frame(read_dta("data/pierce_schott_didtextbook.dta"))
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(2001, 2002, 2004, 2005)) {
     fit <- lm(as.formula(paste0("delta", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -143,7 +142,9 @@ ntrgap      -0.5317591  0.1666765 -3.1904   0.0019
 ### Python
 
 ```python
+import pandas as pd
 import statsmodels.api as sm
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [2001, 2002, 2004, 2005]:
     y = df[f'delta{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -184,6 +185,8 @@ for year in [2001, 2002, 2004, 2005]:
 ### Stata
 
 ```stata
+* ssc install twowayfeweights, replace
+use "pierce_schott_didtextbook.dta", clear
 twowayfeweights delta2001 indusid cons ntrgap ntrgap, type(fdTR)
 ```
 
@@ -204,7 +207,8 @@ Total                   103         1.0000
 ### R
 
 ```r
-library(TwoWayFEWeights)
+library(haven); library(TwoWayFEWeights)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 # Workaround: fdTR with constant time variable crashes in R.
 # Create a 2-period panel and use feTR (equivalent with T=2).
 df_panel <- rbind(
@@ -233,7 +237,9 @@ Summary Measures:
 ### Python
 
 ```python
+import pandas as pd
 from twowayfeweights import twowayfeweights
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 df["cons"] = 1
 df["ntrgap_D0"] = df["ntrgap"]
 result = twowayfeweights(df, "delta2001", "indusid", "cons", "ntrgap",
@@ -269,6 +275,7 @@ Total                   103         1.0000
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 reg ntrgap lemp1997 lemp1998 lemp1999 lemp2000, vce(hc2)
 test lemp1997 lemp1998 lemp1999 lemp2000
 ```
@@ -289,7 +296,8 @@ F(4, 98) = 2.39     Prob > F = 0.0560
 ### R
 
 ```r
-library(car)
+library(haven); library(car)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 m3 <- lm(ntrgap ~ lemp1997 + lemp1998 + lemp1999 + lemp2000, data = df)
 coeftest(m3, vcov = vcovHC(m3, type = "HC2"))
 linearHypothesis(m3, c("lemp1997=0","lemp1998=0","lemp1999=0","lemp2000=0"),
@@ -310,6 +318,8 @@ F(4, 98) = 2.3901     Pr(>F) = 0.05597
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 X_vars = ['lemp1997', 'lemp1998', 'lemp1999', 'lemp2000']
 y = df['ntrgap']; X = sm.add_constant(df[X_vars])
 res = sm.OLS(y, X).fit(cov_type='HC2')
@@ -342,6 +352,7 @@ F(4, 98) = 2.3901     Prob > F = 0.0560
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 stute_test delta2001 ntrgap, seed(1)
 stute_test delta2002 ntrgap, seed(1)
 stute_test delta2004 ntrgap, seed(1)
@@ -373,7 +384,8 @@ Joint Stute test: 0.0089 (0.5400)
 ### R
 
 ```r
-library(StuteTest)
+library(haven); library(StuteTest)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(2001, 2002, 2004, 2005))
     stute_test(df = df, Y = paste0("delta", yr), D = "ntrgap", seed = 1)
 
@@ -403,6 +415,8 @@ Joint Stute test: 0.0089 (0.5500)
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 # Manual CvM implementation (stute_test_cvm)
 for year in [2001, 2002, 2004, 2005]:
     stat, pv = stute_test_cvm(f'delta{year}', 'ntrgap', df, order=1, seed=1)
@@ -441,6 +455,7 @@ Joint        |  0.0088542      0.547
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 reg delta1999 ntrgap, vce(hc2)
 reg delta1998 ntrgap, vce(hc2)
 reg delta1997 ntrgap, vce(hc2)
@@ -463,6 +478,8 @@ reg delta1997 ntrgap, vce(hc2)
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(1999, 1998, 1997)) {
     fit <- lm(as.formula(paste0("delta", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -486,6 +503,8 @@ ntrgap       0.1625066  0.0712845  2.2797   0.0247
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [1999, 1998, 1997]:
     y = df[f'delta{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -521,6 +540,7 @@ for year in [1999, 1998, 1997]:
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 reg deltalintrend1998 ntrgap, vce(hc2)
 reg deltalintrend1997 ntrgap, vce(hc2)
 ```
@@ -538,6 +558,8 @@ reg deltalintrend1997 ntrgap, vce(hc2)
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(1998, 1997)) {
     fit <- lm(as.formula(paste0("deltalintrend", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -557,6 +579,8 @@ ntrgap      -0.0463651  0.0444009 -1.0442   0.2989
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [1998, 1997]:
     y = df[f'deltalintrend{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -588,6 +612,7 @@ for year in [1998, 1997]:
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 stute_test deltalintrend1998 ntrgap, order(0) seed(1)
 stute_test deltalintrend1997 ntrgap, order(0) seed(1)
 
@@ -612,6 +637,8 @@ Joint Stute test: 0.0012 (0.4720)
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 stute_test(df = df, Y = "deltalintrend1998", D = "ntrgap", order = 0, seed = 1)
 stute_test(df = df, Y = "deltalintrend1997", D = "ntrgap", order = 0, seed = 1)
 # Panel joint test
@@ -634,6 +661,8 @@ Joint Stute test: 0.0012 (0.4660)
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [1998, 1997]:
     stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df, order=0, seed=1)
 # Panel joint test via stute_test_panel()
@@ -666,6 +695,7 @@ Joint        |  0.0011769      0.530
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 reg deltalintrend2001 ntrgap, vce(hc2)
 reg deltalintrend2002 ntrgap, vce(hc2)
 reg deltalintrend2004 ntrgap, vce(hc2)
@@ -693,6 +723,8 @@ reg deltalintrend2005 ntrgap, vce(hc2)
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(2001, 2002, 2004, 2005)) {
     fit <- lm(as.formula(paste0("deltalintrend", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -720,6 +752,8 @@ ntrgap      -0.2414053  0.1675180 -1.4411   0.1527
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [2001, 2002, 2004, 2005]:
     y = df[f'deltalintrend{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -759,6 +793,7 @@ for year in [2001, 2002, 2004, 2005]:
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 stute_test deltalintrend2001 ntrgap, seed(1)
 stute_test deltalintrend2002 ntrgap, seed(1)
 stute_test deltalintrend2004 ntrgap, seed(1)
@@ -789,6 +824,8 @@ Joint Stute test: 0.0119 (0.4020)
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 for (yr in c(2001, 2002, 2004, 2005))
     stute_test(df = df, Y = paste0("deltalintrend", yr), D = "ntrgap", seed = 1)
 # Panel joint test
@@ -815,6 +852,8 @@ Joint Stute test: 0.0119 (0.3640)
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 for year in [2001, 2002, 2004, 2005]:
     stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df, order=1, seed=1)
 # Panel joint test via stute_test_panel()
@@ -851,6 +890,7 @@ Joint        |  0.0119463      0.431
 ### Stata
 
 ```stata
+use "pierce_schott_didtextbook.dta", clear
 sort ntrgap
 display "D(1) = " ntrgap[1]
 display "D(2) = " ntrgap[2]
@@ -866,6 +906,8 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 ### R
 
 ```r
+library(haven)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
 ntrgap_sorted <- sort(df$ntrgap)
 d1 <- ntrgap_sorted[1]; d2 <- ntrgap_sorted[2]
 QS <- d1 / (d2 - d1)
@@ -880,6 +922,8 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("pierce_schott_didtextbook.dta")
 ntrgap_sorted = np.sort(df['ntrgap'].values)
 d1, d2 = ntrgap_sorted[0], ntrgap_sorted[1]
 qs = d1 / (d2 - d1)
@@ -894,3 +938,230 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 :::
 
 **Interpretation:** $QS = 6.15 < 19 = 1/\alpha - 1$ at $\alpha = 0.05$, so we **fail to reject** the null that quasi-stayers exist. This supports the use of the HAD framework: the industry with the smallest NTR gap (0.020) can plausibly serve as a quasi-control group.
+
+---
+
+## Computing Commands (§7.3.2.2): `contdid` and `did_multiplegt_stat` Syntax
+
+> This section documents the syntax of the commands for estimating $CAS(d_2)$, $ATT$, and $WATT$ in heterogeneous adoption designs **with stayers**. These commands are not applied to the Pierce & Schott data (which has no stayers), but their syntax is provided here for reference as shown in the textbook.
+
+::: {.panel-tabset}
+
+### Stata
+
+**`did_multiplegt_stat`** estimates the ATT (via the Average Slope, AS) and WATT (via the Weighted Average Slope, WAS) in designs with a continuous treatment and stayers. The syntax from the textbook (p. 342) is:
+
+```stata
+* ssc install did_multiplegt_stat, replace
+use "pierce_schott_didtextbook.dta", clear
+did_multiplegt_stat outcome groupid timeid treatment, estimator(as was) exact_match
+```
+
+Key options: `estimator(as was)` estimates both AS and WAS; `exact_match` compares switchers and stayers with the same baseline treatment; `estimation_method(dr)` for doubly-robust estimation; `order(#)` for polynomial order; `placebo` for placebo estimates; `noextrapolation` to restrict to the support of stayers' treatment.
+
+### R
+
+**`contdid`** (Callaway, Goodman-Bacon & Sant'Anna, 2025) estimates the dose-response function $d_2 \mapsto CAS(d_2)$:
+
+```r
+library(haven); library(contdid)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+cd_res <- cont_did(
+  yname = "outcome", tname = "timeid", idname = "groupid",
+  dname = "treatment", gname = "cohort", data = df,
+  target_parameter = "slope", aggregation = "dose"
+)
+summary(cd_res)
+```
+
+**`did_multiplegt_stat`** (de Chaisemartin, Ciccia, D'Haultfœuille, Knau & Sow, 2024) estimates ATT and WATT:
+
+```r
+library(haven); library(DIDmultiplegtSTAT)
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+result <- did_multiplegt_stat(
+  df = df, Y = "outcome", ID = "groupid", Time = "timeid",
+  D = "treatment", estimator = c("aoss", "waoss"),
+  estimation_method = "dr", exact_match = TRUE
+)
+summary(result)
+```
+
+### Python
+
+**`did_multiplegt_stat`** is available as a Python translation (`did_multiplegt_stat.py`):
+
+```python
+import pandas as pd
+from did_multiplegt_stat import did_multiplegt_stat, summary_did_multiplegt_stat
+df = pd.read_stata("pierce_schott_didtextbook.dta")
+result = did_multiplegt_stat(
+    df = df, Y = "outcome", ID = "groupid", Time = "timeid",
+    D = "treatment", estimator = ["aoss", "waoss"],
+    estimation_method = "dr", exact_match = True
+)
+summary_did_multiplegt_stat(result)
+```
+
+`contdid` is not available in Python.
+
+:::
+
+**Note:** These commands require **stayers** (groups with $D_{g,2} = 0$). The Pierce & Schott (2016) dataset has no stayers, so these commands cannot be applied here.
+
+---
+
+## GQ10 (§7.3.5): `did_had` Event-Study Estimates
+
+> Using the `pierce_schott_didtextbook` dataset, transform the data into a panel at the industry $\times$ year level, with industries' log-employment and NTR gap treatment from 1997 to 2005. Then, use `did_had` to compute four event-study estimates and three pre-trend estimates.
+
+**Stata `nprobust` note:** The current `nprobust` `.mo` files on GitHub are compiled with Stata 18. If you are using Stata 17 or earlier, `did_had` will fail with the error `nprobust_lp_mse_dpi() not found`. To fix this, run once per session:
+
+```stata
+use "pierce_schott_didtextbook.dta", clear
+do "https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_functions.do"
+```
+
+**Cross-platform note:** The Stata version of `did_had` (v. 05.08.2025) computes a separate optimal bandwidth for each event-study effect via `lprobust`, while the R version (`DIDHAD` 2.0.0) uses a single bandwidth across all effects. This leads to differences in point estimates. Both implementations give the same quasi-stayer test statistic ($T = 6.1499$, $p = 0.1399$) and qualitatively identical conclusions. The results shown in the PDF textbook ($h^*_G = 0.147$, $N = 21$) match the R output.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+* --- Load data ----------------------------------------------------------------
+use "pierce_schott_didtextbook.dta", clear
+
+* --- Construct lemp for post-treatment years ----------------------------------
+* The dataset has lemp1997-lemp2000 and delta2001, delta2002, delta2004, delta2005.
+* delta20XX = lemp20XX - lemp2000, so lemp20XX = lemp2000 + delta20XX.
+gen lemp2001 = lemp2000 + delta2001
+gen lemp2002 = lemp2000 + delta2002
+gen lemp2004 = lemp2000 + delta2004
+gen lemp2005 = lemp2000 + delta2005
+
+* --- Reshape to panel (industry × year) ---------------------------------------
+reshape long lemp, i(indusid) j(year)
+replace ntrgap = 0 if year <= 2000
+
+* --- If using Stata 17 or earlier, compile nprobust from source (once) --------
+* do "https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_functions.do"
+
+* --- Run did_had with triangular kernel ---------------------------------------
+did_had lemp indusid year ntrgap, effects(4) placebo(3) kernel(triangular)
+```
+
+**Effect Estimates:**
+
+```
+----------------------------------------------------------------------------------------------------------------
+                                    Effect Estimates                                              QUG* Test
+------------------------------------------------------------------------------------------ ---------------------
+
+             |  Estimate         SE      LB CI      UB CI          N         BW    N in BW          T      p-val 
+-------------+---------------------------------------------------------------------------------------------------
+    Effect_1 | -.0375279   .0902184  -.1911976   .1624520        103   .1154996         11   6.149888   .1398623 
+    Effect_2 | -.2536751   .1789953  -.7355104  -.0338618        103   .0940192          9   6.149888   .1398623 
+    Effect_3 |  .0701249   .5633524  -1.433308   .7749930        103   .1688616         22   6.149888   .1398623 
+    Effect_4 |  .0256076   .5919349  -1.763432   .5569105        103   .1627251         22   6.149888   .1398623 
+----------------------------------------------------------------------------------------------------------------
+                                                                                          *Quasi-untreated group
+```
+
+**Placebo Estimates:**
+
+```
+------------------------------------------------------------------------------------------
+                                    Placebo Estimates
+------------------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N         BW    N in BW 
+-------------+-----------------------------------------------------------------------------
+   Placebo_1 | -.0240233   .1220233  -.3353964   .1429263        103   .1680702         22 
+   Placebo_2 | -.0536926   .2453933  -.4238379   .5380862        103   .1550189         21 
+   Placebo_3 | -.0694788   .2668673  -.6043572   .4417436        103   .1044157         10 
+------------------------------------------------------------------------------------------
+```
+
+### R
+
+```r
+library(haven)
+library(tidyr)
+library(dplyr)
+library(DIDHAD)    # devtools::install_github("chaisemartinPackages/did_had/R")
+library(nprobust)  # install.packages("nprobust")
+
+df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+
+# --- Construct lemp for post-treatment years ----------------------------------
+df$lemp2001 <- df$lemp2000 + df$delta2001
+df$lemp2002 <- df$lemp2000 + df$delta2002
+df$lemp2004 <- df$lemp2000 + df$delta2004
+df$lemp2005 <- df$lemp2000 + df$delta2005
+
+# --- Reshape to panel (industry × year) ---------------------------------------
+lemp_cols <- grep("^lemp[0-9]+$", names(df), value = TRUE)
+
+df_long <- df %>%
+  select(indusid, ntrgap, all_of(lemp_cols)) %>%
+  pivot_longer(
+    cols = all_of(lemp_cols),
+    names_to = "year", names_prefix = "lemp",
+    values_to = "lemp"
+  ) %>%
+  mutate(
+    year = as.integer(year),
+    ntrgap = ifelse(year <= 2000, 0, ntrgap)
+  ) %>%
+  as.data.frame()
+
+# --- Run did_had with triangular kernel ---------------------------------------
+options(digits = 7)
+result <- did_had(
+  df         = df_long,
+  outcome    = "lemp",
+  group      = "indusid",
+  time       = "year",
+  treatment  = "ntrgap",
+  effects    = 4,
+  placebo    = 3,
+  kernel     = "tri",
+  graph_off  = TRUE
+)
+summary(result)
+```
+
+**Effect Estimates:**
+
+```
+-----------------------------------------------------------------------------
+                           Effect Estimates                       QUG* Test
+         ---------------------------------------------------- ---------------
+         Estimate SE       LB.CI    UB.CI    N   BW      N.BW T       p.val  
+Effect_1  0.0072700  0.0787500 -0.2387000  0.0700000 103 0.1465400 21   6.1498900 0.1398600
+Effect_2 -0.1336100  0.1250000 -0.5803500 -0.0903400 103 0.1465400 21   6.1498900 0.1398600
+Effect_3  0.0350700  0.5934600 -1.6035300  0.7227800 103 0.1465400 21   6.1498900 0.1398600
+Effect_4 -0.0217300  0.6140600 -1.8985800  0.5085100 103 0.1465400 21   6.1498900 0.1398600
+*Quasi-Untreated Group
+```
+
+**Placebo Estimates:**
+
+```
+------------------------------------------------------------
+                          Placebo Estimates
+          --------------------------------------------------
+          Estimate    SE        LB.CI      UB.CI     N   BW        N.BW
+Placebo_1 -0.0266300  0.1328800 -0.3772700  0.1436200 103 0.1506800 21  
+Placebo_2 -0.0474400  0.2568500 -0.4426400  0.5641900 103 0.1465400 21  
+Placebo_3 -0.1147700  0.1851600 -0.3988900  0.3269400 103 0.1465400 21  
+```
+
+### Python
+
+`did_had` is not available in Python.
+
+:::
+
+**Interpretation:** The quasi-stayer test is not rejected ($T = 6.15$, $p = 0.140$): 21 industries with an NTR gap below 14.7 percentage points serve as quasi-controls. The R output shows the optimal bandwidth $h^*_G = 0.147$, matching the PDF textbook. The estimated event-study effect at 2002 (Effect_2) is negative and significant in both platforms, while the remaining effects and all three pre-trends are insignificant. Confidence intervals are wide: with only 103 industries, the non-parametric estimator $\widehat{WATT}^{qs}_{h^*_G}$ is imprecise. Pre-trends are not significant, but they are also imprecise — by extrapolating a linear trend from the upper bound of the 1999 pre-trend CI to the origin, differential trends could account for the estimated effects.

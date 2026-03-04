@@ -18,8 +18,10 @@ The Trading with the Enemy Act (TWEA) allowed US firms to use German-owned paten
 
 ```stata
 * ssc install panelview, replace
+use "moser_voena_didtextbook.dta", clear
 panelview patents twea, i(subclass) t(year) type(treat) ///
-    title("Treatment Status: Moser & Voena (2012)")
+    title("Treatment Status: Moser & Voena (2012)") ///
+    ylabel(none) ytitle("")
 graph export "figures/ch03_panelview_stata.png", replace width(1200)
 ```
 
@@ -28,12 +30,29 @@ graph export "figures/ch03_panelview_stata.png", replace width(1200)
 ### R
 
 ```r
-library(panelView)
-panelview(patents ~ twea, data = df,
-          index = c("subclass", "year"), type = "treat",
-          main = "Treatment Status: Moser & Voena (2012)",
-          xlab = "Year", ylab = "Subclass",
-          legend.labs = c("Control", "Treated"))
+library(haven); library(ggplot2)
+df <- read_dta("moser_voena_didtextbook.dta")
+treat_yr <- aggregate(year ~ subclass, data = df[df$twea == 1,], FUN = min)
+names(treat_yr)[2] <- "first_treat"
+df <- merge(df, treat_yr, by = "subclass", all.x = TRUE)
+df$first_treat[is.na(df$first_treat)] <- 9999
+df$subclass_rank <- rank(df$first_treat * 10000 + df$subclass, ties.method = "first")
+df$subclass_rank <- ave(df$subclass_rank, df$subclass, FUN = min)
+png("figures/ch03_panelview_R.png", width = 1200, height = 1000)
+ggplot(df, aes(x = year, y = reorder(factor(subclass), -subclass_rank),
+               fill = factor(twea))) +
+    geom_tile(height = 0.8) +
+    scale_fill_manual(values = c("0" = "#D4E6F1", "1" = "#00AAAA"),
+                      labels = c("Control", "Treated")) +
+    scale_x_continuous(breaks = 1900:1939) +
+    labs(title = "Treatment Status: Moser & Voena (2012)",
+         x = "year", y = "", fill = "") +
+    theme_minimal() +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+          panel.grid = element_blank(), legend.position = "bottom",
+          plot.title = element_text(size = 18, hjust = 0.5))
+dev.off()
 ```
 
 <img src="../figures/ch03_panelview_R.png" alt="Treatment Status (R)" width="100%" />
@@ -41,28 +60,27 @@ panelview(patents ~ twea, data = df,
 ### Python
 
 ```python
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-pivot = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="max")
-pivot = pivot.fillna(0).astype(int)
-treated_subs = df.loc[df["treatmentgroup"] == 1, "subclass"].unique()
-control_subs = df.loc[df["treatmentgroup"] == 0, "subclass"].unique()
-pivot = pivot.reindex(list(control_subs) + list(treated_subs))
-
-fig, ax = plt.subplots(figsize=(12, 7))
-cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
-ax.imshow(pivot.values, aspect="auto", cmap=cmap, interpolation="nearest")
-years = pivot.columns.astype(int)
-tick_positions = list(range(0, len(years), 5))
-ax.set_xticks(tick_positions)
-ax.set_xticklabels([str(years[i]) for i in tick_positions])
-ax.set_xlabel("Year"); ax.set_ylabel("Subclass")
-ax.set_title("Treatment Status: Moser & Voena (2012)\n"
-             "7,248 subclasses × 40 years | 336 treated from 1919")
-ax.legend(handles=[Patch(facecolor="#4575b4", label="Control (D=0)"),
-                   Patch(facecolor="#d73027", label="Treated (D=1)")], loc="upper left")
+df = pd.read_stata("moser_voena_didtextbook.dta")
+pv = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="first")
+pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
+cmap = mcolors.ListedColormap(["#D4E6F1", "#00AAAA"])
+fig, ax = plt.subplots(figsize=(12, 10))
+ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
+for i in range(0, len(pv_sorted), 10):
+    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
+ax.set_xticks(range(0, len(pv_sorted.columns), 1))
+ax.set_xticklabels([int(c) for c in pv_sorted.columns], rotation=45, ha="right", fontsize=8)
+ax.set_yticks([])
+ax.set_xlabel("year")
+ax.set_title("Treatment Status: Moser & Voena (2012)", fontsize=16)
+ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="Control"),
+                   Patch(facecolor="#00AAAA", edgecolor="gray", label="Treated")],
+          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
 plt.tight_layout()
 plt.savefig("figures/ch03_panelview_Python.png", dpi=150, bbox_inches="tight")
 plt.show()
@@ -83,6 +101,8 @@ plt.show()
 ### Stata
 
 ```stata
+* ssc install reghdfe, replace
+use "moser_voena_didtextbook.dta", clear
 reghdfe patents twea, absorb(subclass year) cluster(subclass)
 ```
 
@@ -106,7 +126,7 @@ Number of clusters (subclass) =      7,248        Root MSE        =     0.9904
 library(fixest)
 library(haven)
 
-df <- read_dta("data/moser_voena_didtextbook.dta")
+df <- read_dta("moser_voena_didtextbook.dta")
 model1 <- feols(patents ~ twea | subclass + year,
                 data = df, cluster = ~subclass)
 summary(model1)
@@ -130,7 +150,7 @@ RMSE: 0.977862   Adj. R2: 0.465316
 import pandas as pd
 import pyfixest as pf
 
-df = pd.read_stata("data/moser_voena_didtextbook.dta")
+df = pd.read_stata("moser_voena_didtextbook.dta")
 m1 = pf.feols("patents ~ twea | subclass + year",
               data=df, vcov={"CRV1": "subclass"})
 print(m1.summary())
@@ -164,6 +184,7 @@ RMSE: 0.978 R2: 0.479 R2 Within: 0.001
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 reg patents treatmentgroup post twea, cluster(subclass)
 ```
 
@@ -183,6 +204,8 @@ treatmentgroup |  -.1780874   .0338152    -5.27   0.000    -.2443751   -.1117996
 ### R
 
 ```r
+library(haven); library(fixest)
+df <- read_dta("moser_voena_didtextbook.dta")
 model2 <- feols(patents ~ treatmentgroup + post + twea,
                 data = df, cluster = ~subclass)
 summary(model2)
@@ -202,6 +225,10 @@ twea            0.288262   0.038885  7.41326 1.3721e-13 ***
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
 m2 = pf.feols("patents ~ treatmentgroup + post + twea",
               data=df, vcov={"CRV1": "subclass"})
 print(m2.summary())
@@ -231,6 +258,7 @@ print(m2.summary())
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 reg patents treatmentgroup if year<=1918, cluster(subclass)
 ```
 
@@ -248,7 +276,8 @@ treatmentgroup |  -.1780874   .0338152    -5.27   0.000     -.244375   -.1117997
 ### R
 
 ```r
-library(dplyr)
+library(haven); library(fixest); library(dplyr)
+df <- read_dta("moser_voena_didtextbook.dta")
 model3 <- feols(patents ~ treatmentgroup,
                 data = df %>% filter(year <= 1918), cluster = ~subclass)
 summary(model3)
@@ -266,6 +295,10 @@ treatmentgroup -0.178087   0.033815 -5.26649 1.4306e-07 ***
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
 df_pre = df[df["year"] <= 1918].copy()
 m3 = pf.feols("patents ~ treatmentgroup",
               data=df_pre, vcov={"CRV1": "subclass"})
@@ -296,6 +329,7 @@ First, construct the event-study dummies. The reference period is 1918 (the last
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 * Generate event-study dummies (reference period: 1918)
 forvalues l = 1/18 {
     gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
@@ -308,6 +342,8 @@ forvalues l = 1/21 {
 ### R
 
 ```r
+library(haven)
+df <- read_dta("moser_voena_didtextbook.dta")
 # Generate event-study dummies (reference period: 1918)
 for (l in 1:18) {
     df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
@@ -320,6 +356,8 @@ for (l in 1:21) {
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("moser_voena_didtextbook.dta")
 # Generate event-study dummies (reference period: 1918)
 for l in range(1, 19):
     df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
@@ -336,6 +374,13 @@ Now estimate the event-study TWFE regression:
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
+forvalues l = 1/18 {
+    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
+}
+forvalues l = 1/21 {
+    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
+}
 reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
 
 * F-test on pre-trends
@@ -348,7 +393,7 @@ test reltimeminus1 reltimeminus2 ... reltimeminus18
 ```
 
 ```stata
-* Verify equation (3.7) for l=1
+* Verify equation (3.7) for l=1 (continues from above)
 quietly summarize patents if year==1919 & treatmentgroup==1
 scalar m1 = r(mean)
 quietly summarize patents if year==1918 & treatmentgroup==1
@@ -367,6 +412,11 @@ DID manual (eq 3.7, l=1) = .02352017
 ### R
 
 ```r
+library(haven); library(fixest); library(car)
+df <- read_dta("moser_voena_didtextbook.dta")
+for (l in 1:18) df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
+for (l in 1:21) df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
+
 event_formula <- as.formula(paste(
   "patents ~ i(year) + treatmentgroup +",
   paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
@@ -395,8 +445,16 @@ reltimeplus1 coef:         0.02352017
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
 import numpy as np
 from scipy import stats
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
+for l in range(1, 19):
+    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
+for l in range(1, 22):
+    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
 
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars  = [f"reltimeplus{i}"  for i in range(1, 22)]
@@ -446,6 +504,10 @@ reltimeplus1 coef:        0.02352017
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
+forvalues l = 1/21 {
+    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
+}
 reg patents i.yearpost treatmentgroup reltimeplus*, cluster(subclass)
 ```
 
@@ -484,6 +546,10 @@ treatmentgroup |  -.1780874   .0338176    -5.27   0.000    -.2443797   -.1117951
 ### R
 
 ```r
+library(haven); library(fixest)
+df <- read_dta("moser_voena_didtextbook.dta")
+for (l in 1:21) df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
+
 post_formula <- as.formula(paste(
   "patents ~ i(yearpost) + treatmentgroup +",
   paste(paste0("reltimeplus", 1:21), collapse = " + ")))
@@ -522,6 +588,14 @@ RMSE: 1.33696   Adj. R2: 0.025481
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
+for l in range(1, 22):
+    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
+
+plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
 fml5 = "patents ~ " + " + ".join(plus_vars) + " + treatmentgroup | yearpost"
 m5 = pf.feols(fml5, data=df, vcov={"CRV1": "subclass"})
 print(m5.summary())
@@ -569,6 +643,14 @@ RMSE: 1.337 R2: 0.026 R2 Within: 0.001
 ### Stata
 
 ```stata
+* ssc install pretrends, replace
+use "moser_voena_didtextbook.dta", clear
+forvalues l = 1/18 {
+    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
+}
+forvalues l = 1/21 {
+    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
+}
 reghdfe patents reltimeminus* reltimeplus*, absorb(treatmentgroup year) cluster(subclass)
 pretrends power 0.5, numpre(6)
 ```
@@ -580,7 +662,16 @@ Slope for 50% power =  .0098235
 ### R
 
 ```r
-library(pretrends)
+library(haven); library(fixest); library(pretrends)
+df <- read_dta("moser_voena_didtextbook.dta")
+for (l in 1:18) df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
+for (l in 1:21) df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
+
+model6 <- feols(as.formula(paste(
+  "patents ~", paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
+  paste(paste0("reltimeplus", 1:21), collapse = " + "), "| treatmentgroup + year")),
+  data = df, cluster = ~subclass)
+
 # Extract coefficients and vcov for first 6 pre-periods
 pretrend_coefs_6 <- paste0("reltimeminus", 1:6)
 beta <- coef(model6)[pretrend_coefs_6]
@@ -597,7 +688,18 @@ Slope for 50% power (numpre=6): 0.009796021
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
 from pretrends import slope_for_power
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
+for l in range(1, 19):
+    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
+for l in range(1, 22):
+    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
+
+minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
+plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
 
 # Full model (matches Stata: reghdfe patents reltimeminus* reltimeplus*)
 fml6 = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | treatmentgroup + year"
@@ -632,6 +734,7 @@ Slope for 50% power (numpre=6): 0.0098252
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 sdtest diffpatentswrt1918 if year==1932, by(treatmentgroup)
 
 scalar sd_effects = r(sd_2) - r(sd_1)
@@ -658,6 +761,8 @@ CI: [.17358476, 1.1108481]
 ### R
 
 ```r
+library(haven); library(dplyr)
+df <- read_dta("moser_voena_didtextbook.dta")
 df_1932 <- df %>% filter(year == 1932)
 var_test <- var.test(diffpatentswrt1918 ~ treatmentgroup, data = df_1932)
 print(var_test)
@@ -682,6 +787,11 @@ CI: [ 0.1735848 , 1.110848 ]
 ### Python
 
 ```python
+import pandas as pd
+import pyfixest as pf
+from scipy import stats
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
 df_1932 = df[df["year"] == 1932]
 g0 = df_1932.loc[df_1932["treatmentgroup"] == 0, "diffpatentswrt1918"].dropna()
 g1 = df_1932.loc[df_1932["treatmentgroup"] == 1, "diffpatentswrt1918"].dropna()
@@ -722,6 +832,7 @@ CI: [0.173812, 1.110620]
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 forvalues i = 1900/1939 {
     quietly sdtest diffpatentswrt1918 if year==`i', by(treatmentgroup)
     display "Year `i': F = " %6.4f r(F) "  p = " %6.4f r(p)
@@ -774,6 +885,8 @@ Year 1939: F = 0.7569  p = 0.0002
 ### R
 
 ```r
+library(haven); library(dplyr)
+df <- read_dta("moser_voena_didtextbook.dta")
 for (yr in 1900:1939) {
   df_yr <- df %>% filter(year == yr)
   test <- var.test(diffpatentswrt1918 ~ treatmentgroup, data = df_yr)
@@ -827,6 +940,10 @@ Year 1939: F = 0.7569, p = 0.0002
 ### Python
 
 ```python
+import pandas as pd
+from scipy import stats
+
+df = pd.read_stata("moser_voena_didtextbook.dta")
 for yr in range(1900, 1940):
     dfy = df[df["year"] == yr]
     g0y = dfy.loc[dfy["treatmentgroup"] == 0, "diffpatentswrt1918"].dropna()

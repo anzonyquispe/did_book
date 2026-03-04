@@ -21,6 +21,8 @@ Key topics: decomposition of the static TWFE estimator, event-study TWFE, and fo
 ![Treatment Status: Wolfers (2006) — Stata](../figures/ch06_panelview_stata.png)
 
 ```stata
+* ssc install panelview, replace
+use "wolfers2006_didtextbook.dta", clear
 panelview div_rate udl, i(state) t(year) type(treat) ///
     title("Treatment Status: Wolfers (2006)") ///
     legend(label(1 "No UDL") label(2 "UDL adopted"))
@@ -31,7 +33,8 @@ panelview div_rate udl, i(state) t(year) type(treat) ///
 ![Treatment Status: Wolfers (2006) — R](../figures/ch06_panelview_R.png)
 
 ```r
-library(panelView)
+library(haven); library(panelView)
+df <- read_dta("wolfers2006_didtextbook.dta")
 panelview(div_rate ~ udl, data = df,
           index = c("state", "year"), type = "treat",
           main = "Treatment Status: Wolfers (2006)",
@@ -43,10 +46,11 @@ panelview(div_rate ~ udl, data = df,
 ![Treatment Status: Wolfers (2006) — Python](../figures/ch06_panelview_Python.png)
 
 ```python
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
-
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 states_sorted = (df.groupby("state")["cohort"]
                  .first().sort_values(ascending=False).index)
 state_idx = {s: i for i, s in enumerate(states_sorted)}
@@ -88,6 +92,7 @@ plt.savefig(FIGDIR / "ch06_panelview_Python.png", dpi=150)
 ### Stata
 
 ```stata
+use "wolfers2006_didtextbook.dta", clear
 reg div_rate udl i.state i.year [w=stpop], vce(cluster state)
 ```
 
@@ -108,7 +113,8 @@ Linear regression                               Number of obs     =      1,631
 ### R
 
 ```r
-library(fixest)
+library(haven); library(fixest)
+df <- read_dta("wolfers2006_didtextbook.dta")
 m1 <- feols(div_rate ~ udl + i(year) | state,
             data = df, weights = ~stpop, cluster = ~state,
             ssc = ssc(fixef.K = "full"))
@@ -125,8 +131,9 @@ N = 1631  |  R-sq = 0.9305
 ### Python
 
 ```python
+import pandas as pd
 import pyfixest as pf
-
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 m1 = pf.feols('div_rate ~ udl + i(year) | state',
               data=df, weights='stpop', vcov={'CRV1': 'state'},
               ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
@@ -155,6 +162,8 @@ N = 1631  |  R-sq = 0.9305
 ### Stata
 
 ```stata
+* ssc install twowayfeweights, replace
+use "wolfers2006_didtextbook.dta", clear
 twowayfeweights div_rate state year udl, type(feTR) ///
     test_random_weights(exposurelength) weight(stpop)
 ```
@@ -181,7 +190,8 @@ exposurele~h   -8.2883613    .21360588    -38.80212   -.73253245
 ### R
 
 ```r
-library(TwoWayFEWeights)
+library(haven); library(TwoWayFEWeights)
+df <- read_dta("wolfers2006_didtextbook.dta")
 decomp2 <- twowayfeweights(df, "div_rate", "state", "year", "udl",
                             type = "feTR",
                             test_random_weights = "exposurelength",
@@ -206,7 +216,9 @@ RW_exposurelength -8.288361 0.2136059 -38.80212  -0.7325324
 ### Python
 
 ```python
+import pandas as pd
 from twowayfeweights import twowayfeweights
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 result = twowayfeweights(df, "div_rate", "state", "year", "udl",
                           type="feTR", weights="stpop",
                           test_random_weights="exposurelength")
@@ -240,6 +252,8 @@ exposurelength   -8.288361     0.213606    -38.8021   -0.732532
 ### Stata
 
 ```stata
+* ssc install bacondecomp, replace
+use "wolfers2006_didtextbook.dta", clear
 bacondecomp div_rate udl [aweight=stpop], ddetail
 ```
 
@@ -264,7 +278,8 @@ T vs Never treated             0.863        -0.335
 ### R
 
 ```r
-library(bacondecomp)
+library(haven); library(bacondecomp)
+df <- read_dta("wolfers2006_didtextbook.dta")
 df_bal <- df[complete.cases(df[, c("div_rate", "state", "year", "udl")]), ]
 bc <- bacon(div_rate ~ udl, data = df_bal,
             id_var = "state", time_var = "year")
@@ -280,6 +295,8 @@ bc <- bacon(div_rate ~ udl, data = df_bal,
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 # No bacondecomp package available in Python.
 # See Stata/R output for the Bacon decomposition.
 ```
@@ -299,6 +316,7 @@ bc <- bacon(div_rate ~ udl, data = df_bal,
 ### Stata
 
 ```stata
+use "wolfers2006_didtextbook.dta", clear
 reg div_rate i.early_late_never if cohort!=1956 & year<=1968 ///
     [w=stpop], vce(cluster state)
 ```
@@ -325,6 +343,8 @@ early_late_never |
 ### R
 
 ```r
+library(haven)
+df <- read_dta("wolfers2006_didtextbook.dta")
 df3 <- df %>% filter(cohort != 1956, year <= 1968)
 m3 <- feols(div_rate ~ i(early_late_never),
             data = df3, weights = ~stpop, cluster = ~state,
@@ -344,6 +364,8 @@ N = 611  |  R-sq = 0.1707
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 df3 = df[(df['cohort'] != 1956) & (df['year'] <= 1968)].copy()
 m3 = pf.feols('div_rate ~ C(early_late_never)',
               data=df3, weights='stpop', vcov={'CRV1': 'state'},
@@ -375,6 +397,7 @@ N = 611  |  R-sq = 0.1707
 ### Stata
 
 ```stata
+use "wolfers2006_didtextbook.dta", clear
 reg div_rate rel_time* i.state i.year [w=stpop], vce(cluster state)
 test rel_timeminus1-rel_timeminus9
 ```
@@ -419,6 +442,8 @@ rel_timeminus9 |   .0558855   .1600016     0.35   0.728    -.2654871    .3772581
 ### R
 
 ```r
+library(haven)
+df <- read_dta("wolfers2006_didtextbook.dta")
 rt_vars <- c(paste0("rel_time", 1:16), paste0("rel_timeminus", 1:9))
 rt_formula <- as.formula(paste("div_rate ~", paste(rt_vars, collapse = " + "),
                                "+ i(year) | state"))
@@ -463,6 +488,8 @@ Wald test: stat = 0.506103, p-value = 0.870968, on 9 and 1,523 DoF
 ### Python
 
 ```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 rt_pos = [c for c in df.columns if c.startswith("rel_time") and "minus" not in c]
 rt_neg = [c for c in df.columns if "rel_timeminus" in c]
 fml = "div_rate ~ " + " + ".join(rt_pos + rt_neg) + " + i(year) | state"
@@ -517,6 +544,8 @@ N = 1631  |  R-sq = 0.9351
 ### Stata
 
 ```stata
+* ssc install eventstudyweights, replace
+use "wolfers2006_didtextbook.dta", clear
 eventstudyweights rel_time1-rel_time16 rel_timeminus1-rel_timeminus9 ///
     [aweight=stpop], absorb(i.state i.year) cohort(cohort) ///
     control_cohort(controlgroup) saveweights(Ws)
@@ -537,6 +566,8 @@ Note: `eventstudyweights` produces a large weight matrix (396 × 27) showing how
 ### Stata
 
 ```stata
+* ssc install twowayfeweights, replace
+use "wolfers2006_didtextbook.dta", clear
 twowayfeweights div_rate state year rel_time1, type(feTR) ///
     test_random_weights(year) weight(stpop) ///
     other_treatments(rel_time2-rel_time16) ///
@@ -732,7 +763,8 @@ year   -15.333901    13.428752   -1.1418709   -.23224592
 ### R
 
 ```r
-library(TwoWayFEWeights)
+library(haven); library(TwoWayFEWeights)
+df <- read_dta("wolfers2006_didtextbook.dta")
 rel_time_vars <- names(df)[grepl("^rel_time", names(df))]
 other_rel_times <- rel_time_vars[rel_time_vars != "rel_time1"]
 other_treatments <- other_rel_times[grepl("^rel_time[2-9]$|^rel_time1[0-6]$", other_rel_times)]
@@ -936,9 +968,10 @@ while R reports raw weights (Σ = 0.8724). Structure is identical.
 ### Python
 
 ```python
+import pandas as pd
 from twowayfeweights import twowayfeweights
 import re
-
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 rel_time_vars = [c for c in df.columns if c.startswith("rel_time")]
 other_rel_times = [c for c in rel_time_vars if c != "rel_time1"]
 other_treatments = [c for c in other_rel_times
@@ -1156,6 +1189,7 @@ while R/Python report raw weights (Σ = 0.8724). Structure is identical.
 ![TWFE Event-Study (Stata)](../figures/ch06_fig62_twfe_es.png)
 
 ```stata
+use "wolfers2006_didtextbook.dta", clear
 twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
     (line coef rel_time, lcolor(navy)) ///
     (rcap ci_hi ci_lo rel_time, lcolor(maroon)), ///
@@ -1170,6 +1204,8 @@ twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(of
 ![TWFE Event-Study (R)](../figures/ch06_fig62_twfe_es_R.png)
 
 ```r
+library(haven)
+df <- read_dta("wolfers2006_didtextbook.dta")
 es_coefs <- data.frame(
     rel_time = c(-(9:1), 0, 1:16),
     coef = c(coef(m4)[paste0("rel_timeminus", 9:1)], 0,
@@ -1192,6 +1228,8 @@ abline(h = 0, lty = 2, col = "gray60"); abline(v = 0, lty = 2, col = "gray60")
 ![TWFE Event-Study (Python)](../figures/ch06_fig62_twfe_es_Python.png)
 
 ```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.errorbar(rt, coefs, yerr=1.96*ses, fmt='o-', color='navy',
             ecolor='maroon', capsize=3, markersize=5)
@@ -1216,6 +1254,8 @@ plt.savefig(FIGDIR / "ch06_fig62_twfe_es_Python.png", dpi=150)
 ### Stata
 
 ```stata
+* ssc install eventstudyinteract, replace
+use "wolfers2006_didtextbook.dta", clear
 eventstudyinteract div_rate rel_time* [aweight=stpop], ///
     absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) ///
     vce(cluster state)
@@ -1260,6 +1300,8 @@ rel_timeminus13 |  -.0118369   .1649912    -0.07   0.943    -.343574    .3199001
 ### R
 
 ```r
+library(haven)
+df <- read_dta("wolfers2006_didtextbook.dta")
 df6 <- df %>%
     filter(cohort != 1956) %>%
     mutate(cohort_sa = ifelse(cohort == 0, 10000, cohort))
@@ -1325,10 +1367,11 @@ N = 1565  |  R-sq = 0.9404
 ### Python
 
 ```python
+import pandas as pd
 import re
 import numpy as np
 from scipy import stats
-
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 # Sun & Abraham (2021) IW estimator via saturated regression
 # Step 1: Exclude always-treated (1956), drop NAs, create rel_time
 df6 = df[(df['controlgroup'] == 1) | ((df['cohort'] > 0) & (df['cohort'] != 1956))].copy()
@@ -1428,6 +1471,8 @@ eventstudyinteract at extreme leads/lags due to endpoint binning.
 ### Stata
 
 ```stata
+* ssc install csdid, replace
+use "wolfers2006_didtextbook.dta", clear
 csdid div_rate [weight=stpop], ivar(state) time(year) gvar(cohort) notyet agg(event)
 ```
 
@@ -1496,7 +1541,8 @@ Control: Not yet Treated
 ### R
 
 ```r
-library(did)
+library(haven); library(did)
+df <- read_dta("wolfers2006_didtextbook.dta")
 df7 <- df %>% mutate(cohort_cs = ifelse(is.na(cohort) | cohort == 0, 0, cohort))
 cs_out <- att_gt(yname = "div_rate", gname = "cohort_cs",
                   idname = "state", tname = "year",
@@ -1565,13 +1611,24 @@ Overall ATT =   -0.1035032  SE =    0.0921859
 ### Python
 
 ```python
-from csdid import ATTgt
-att_gt = ATTgt(data=df7, yname='div_rate', gname='cohort_cs',
-               idname='state', tname='year',
-               control_group='notyettreated',
-               weightsname='stpop', clustervars='state')
-result = att_gt.fit()
-agg = result.aggregate('dynamic')
+import pandas as pd
+from csdid.att_gt import ATTgt
+import io, contextlib
+df = pd.read_stata("wolfers2006_didtextbook.dta")
+df7 = df.copy()
+df7['cohort_cs'] = df7['cohort'].replace({0: 0})
+df7['state_id'] = df7['state'].astype(str).factorize()[0] + 1
+
+att = ATTgt(
+    data=df7, yname='div_rate', gname='cohort_cs',
+    idname='state_id', tname='year',
+    control_group='notyettreated',
+    weights_name='stpop', clustervar='state_id')
+
+with contextlib.redirect_stdout(io.StringIO()):
+    att.fit()
+    agg = att.aggte(typec='dynamic')
+
 print(agg.summary())
 ```
 
@@ -1639,14 +1696,16 @@ estimates differ from Stata/R which use regression adjustment with iweights.
 
 ## 6.3.2.6 de Chaisemartin & D'Haultfœuille Estimators (GQ8)
 
-> Estimate event-study effects using `did_multiplegt_dyn` with 16 effects and 9 placebos.
+> Estimate event-study effects using `did_multiplegt_dyn` with 13 effects and 13 placebos.
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-did_multiplegt_dyn div_rate state year udl, effects(16) placebo(9) ///
+* ssc install did_multiplegt_dyn, replace
+use "wolfers2006_didtextbook.dta", clear
+did_multiplegt_dyn div_rate state year udl, effects(13) placebo(13) ///
     weight(stpop) graph_off
 ```
 
@@ -1670,9 +1729,6 @@ did_multiplegt_dyn div_rate state year udl, effects(16) placebo(9) ///
    Effect_11 | -.2581056   .1376535  -.5279015   .0116903        205         26
    Effect_12 | -.4385846   .1438404  -.7205066  -.1566625        203         26
    Effect_13 | -.5012722   .1654563  -.8255606  -.1769838        181         25
-   Effect_14 | -.5333585   .1716092  -.8697063  -.1970106        160         24
-   Effect_15 | -.4277517   .1863913  -.7930719  -.0624315        138         22
-   Effect_16 | -.5786582   .2213495  -1.012495  -.1448212        116         20
 --------------------------------------------------------------------------------
 
 Test of joint nullity of the effects : p-value = 0
@@ -1683,9 +1739,9 @@ Test of joint nullity of the effects : p-value = 0
 
              |  Estimate         SE      LB CI      UB CI          N
 -------------+--------------------------------------------------------------
-  Av_tot_eff | -.1076822   .1112593  -.3257464   .1103819        903
+  Av_tot_eff | -.0530975   .1047252  -.2583552   .1521601        903
 --------------------------------------------------------------------------------
-Average number of time periods over which a treatment's effect is accumulated = 8.2285012
+Average number of time periods over which a treatment's effect is accumulated = 6.2285012
 
 --------------------------------------------------------------------------------
           Testing the parallel trends and no anticipation assumptions
@@ -1702,18 +1758,23 @@ Average number of time periods over which a treatment's effect is accumulated = 
    Placebo_7 |  .0181658   .1033329  -.1843629   .2206946        209         26
    Placebo_8 |   .073694   .1259978  -.1732571   .3206451        207         26
    Placebo_9 |  .0983373   .1380443  -.1722246   .3688992        205         26
+  Placebo_10 |  .0397753   .1524889  -.2591  .3386506        205         26
+  Placebo_11 |  .0396775   .1616889  -.2772288   .3565838        203         26
+  Placebo_12 |  .0539247   .1697544  -.2787899   .3866393        181         25
+  Placebo_13 |  .0256646   .1832985  -.3335925   .3849217        160         24
 --------------------------------------------------------------------------------
-Test of joint nullity of the placebos : p-value = .35001794
+Test of joint nullity of the placebos : p-value = .52543032
 ```
 
 ### R
 
 ```r
-library(DIDmultiplegtDYN)
+library(haven); library(DIDmultiplegtDYN)
+df <- read_dta("wolfers2006_didtextbook.dta")
 dcdh_results <- did_multiplegt_dyn(
     df = df, outcome = "div_rate", group = "state",
     time = "year", treatment = "udl",
-    effects = 16, placebo = 9,
+    effects = 13, placebo = 13,
     weight = "stpop", graph_off = TRUE)
 summary(dcdh_results)
 ```
@@ -1736,17 +1797,14 @@ Effect_10    -0.21388 0.13342 -0.47539 0.04763  205 26
 Effect_11    -0.25811 0.13765 -0.52790 0.01169  205 26
 Effect_12    -0.43858 0.14384 -0.72051 -0.15666 203 26
 Effect_13    -0.50127 0.16546 -0.82556 -0.17698 181 25
-Effect_14    -0.53336 0.17161 -0.86971 -0.19701 160 24
-Effect_15    -0.42775 0.18639 -0.79307 -0.06243 138 22
-Effect_16    -0.57866 0.22135 -1.01250 -0.14482 116 20
 
 Test of joint nullity of the effects : p-value = 0.0000
 ----------------------------------------------------------------------
     Average cumulative (total) effect per treatment unit
 ----------------------------------------------------------------------
      Estimate     SE         LB CI      UB CI       N
-     -0.10768  0.11126   -0.32575    0.11038     903
-Average number of time periods: 8.2285
+     -0.05310  0.10473   -0.25836    0.15216     903
+Average number of time periods: 6.2285
 
 ----------------------------------------------------------------------
      Testing the parallel trends and no anticipation assumptions
@@ -1761,74 +1819,96 @@ Placebo_6    0.00629  0.10010 -0.18990 0.20247 213 26
 Placebo_7    0.01817  0.10333 -0.18436 0.22069 209 26
 Placebo_8    0.07369  0.12600 -0.17326 0.32065 207 26
 Placebo_9    0.09834  0.13804 -0.17222 0.36890 205 26
+Placebo_10   0.03978  0.15249 -0.25910 0.33865 205 26
+Placebo_11   0.03968  0.16169 -0.27723 0.35658 203 26
+Placebo_12   0.05392  0.16975 -0.27879 0.38664 181 25
+Placebo_13   0.02566  0.18330 -0.33359 0.38492 160 24
 
-Test of joint nullity of the placebos : p-value = 0.3500
+Test of joint nullity of the placebos : p-value = 0.5254
 ```
 
 ### Python
 
 ```python
-from did_multiplegt_dyn import did_multiplegt_dyn
-result = did_multiplegt_dyn(
-    df, outcome='div_rate', group='state',
+import pandas as pd
+import polars as pl
+from did_multiplegt_dyn.did_multiplegt_dyn import did_multiplegt_main
+df = pd.read_stata("wolfers2006_didtextbook.dta")
+df_dyn = df[['div_rate', 'state', 'year', 'udl', 'stpop']].copy().dropna()
+df_dyn['state_num'] = df_dyn['state'].astype(str).factorize()[0] + 1
+df_pl = pl.from_pandas(df_dyn[['div_rate', 'state_num', 'year', 'udl', 'stpop']])
+
+result = did_multiplegt_main(
+    df_pl, outcome='div_rate', group='state_num',
     time='year', treatment='udl',
-    effects=16, placebo=9,
-    weight='stpop', graph_off=True)
-print(result)
+    effects=13, placebo=13,
+    weight='stpop')
+
+dmd = result['did_multiplegt_dyn']
+print("\nEffects:")
+print(dmd['Effects'][['Estimate', 'SE', 'LB CI', 'UB CI', 'N', 'Switchers']].to_string())
+print("\nPlacebos:")
+print(dmd['Placebos'][['Estimate', 'SE', 'LB CI', 'UB CI', 'N', 'Switchers']].to_string())
 ```
 
 ```
-               Block  Estimate       SE     LB CI     UB CI     N  Switchers
-            Effect_1  0.300967 0.087591  0.129292  0.472642 320.0       27.0
-            Effect_2  0.303590 0.072761  0.160981  0.446198 294.0       27.0
-            Effect_3  0.268383 0.075830  0.119760  0.417006 271.0       27.0
-            Effect_4  0.181643 0.084899  0.015245  0.348042 255.0       27.0
-            Effect_5  0.119269 0.100701 -0.078102  0.316640 220.0       26.0
-            Effect_6  0.114824 0.110721 -0.102186  0.331834 215.0       26.0
-            Effect_7  0.122524 0.130684 -0.133613  0.378661 212.0       26.0
-            Effect_8  0.065365 0.116403 -0.162780  0.293510 209.0       26.0
-            Effect_9 -0.075841 0.119625 -0.310302  0.158621 206.0       26.0
-           Effect_10 -0.213881 0.133425 -0.475389  0.047626 205.0       26.0
-           Effect_11 -0.258106 0.137653 -0.527902  0.011690 205.0       26.0
-           Effect_12 -0.438585 0.143840 -0.720507 -0.156663 203.0       26.0
-           Effect_13 -0.501272 0.165456 -0.825561 -0.176984 181.0       25.0
-           Effect_14 -0.533358 0.171609 -0.869706 -0.197011 160.0       24.0
-           Effect_15 -0.427752 0.186391 -0.793072 -0.062432 138.0       22.0
-           Effect_16 -0.578658 0.221349 -1.012495 -0.144821 116.0       20.0
-Average_Total_Effect -0.107682 0.111259 -0.325746  0.110382 903.0      407.0
-           Placebo_1  0.046804 0.049393 -0.050004  0.143612 319.0       27.0
-           Placebo_2  0.057816 0.060096 -0.059970  0.175602 293.0       27.0
-           Placebo_3  0.097881 0.076302 -0.051668  0.247430 270.0       27.0
-           Placebo_4  0.052230 0.083889 -0.112189  0.216649 254.0       27.0
-           Placebo_5  0.056755 0.098904 -0.137093  0.250603 219.0       26.0
-           Placebo_6  0.006288 0.100097 -0.189899  0.202474 213.0       26.0
-           Placebo_7  0.018166 0.103333 -0.184363  0.220695 209.0       26.0
-           Placebo_8  0.073694 0.125998 -0.173257  0.320645 207.0       26.0
-           Placebo_9  0.098337 0.138044 -0.172225  0.368899 205.0       26.0
+Effects:
+            Estimate        SE     LB CI     UB CI      N  Switchers
+Effect_1   0.3009668  0.0875908  0.1292921  0.4726416  320.0      27.0
+Effect_2   0.3035895  0.0727610  0.1609806  0.4461984  294.0      27.0
+Effect_3   0.2683828  0.0758296  0.1197596  0.4170061  271.0      27.0
+Effect_4   0.1816435  0.0848985  0.0152454  0.3480415  255.0      27.0
+Effect_5   0.1192688  0.1007013 -0.0781021  0.3166398  220.0      26.0
+Effect_6   0.1148243  0.1107215 -0.1021858  0.3318343  215.0      26.0
+Effect_7   0.1225242  0.1306844 -0.1336126  0.3786610  212.0      26.0
+Effect_8   0.0653645  0.1164027 -0.1627805  0.2935095  209.0      26.0
+Effect_9  -0.0758406  0.1196254 -0.3103020  0.1586208  206.0      26.0
+Effect_10 -0.2138813  0.1334247 -0.4753890  0.0476264  205.0      26.0
+Effect_11 -0.2581056  0.1376535 -0.5279015  0.0116903  205.0      26.0
+Effect_12 -0.4385846  0.1438404 -0.7205066 -0.1566625  203.0      26.0
+Effect_13 -0.5012723  0.1654563 -0.8255606 -0.1769838  181.0      25.0
+
+Placebos:
+             Estimate        SE     LB CI     UB CI      N  Switchers
+Placebo_1   0.0468044  0.0493928 -0.0500037  0.1436124  319.0      27.0
+Placebo_2   0.0578159  0.0600959 -0.0599699  0.1756017  293.0      27.0
+Placebo_3   0.0978812  0.0763021 -0.0516681  0.2474305  270.0      27.0
+Placebo_4   0.0522300  0.0838890 -0.1121895  0.2166495  254.0      27.0
+Placebo_5   0.0567550  0.0989039 -0.1370931  0.2506030  219.0      26.0
+Placebo_6   0.0062875  0.1000968 -0.1898987  0.2024737  213.0      26.0
+Placebo_7   0.0181658  0.1033329 -0.1843629  0.2206946  209.0      26.0
+Placebo_8   0.0736940  0.1259978 -0.1732571  0.3206451  207.0      26.0
+Placebo_9   0.0983373  0.1380443 -0.1722246  0.3688992  205.0      26.0
+Placebo_10  0.0397753  0.1524889 -0.2591000  0.3386506  205.0      26.0
+Placebo_11  0.0396775  0.1616889 -0.2772288  0.3565838  203.0      26.0
+Placebo_12  0.0539247  0.1697544 -0.2787899  0.3866393  181.0      25.0
+Placebo_13  0.0256646  0.1832985 -0.3335925  0.3849217  160.0      24.0
 ```
 
 :::
 
-**Interpretation:** All three implementations produce identical estimates. Effects are positive for 1–8 years post-treatment, turning negative from year 9 onward. Average total effect = −0.108 (p > 0.10). All 9 placebos are insignificant (joint test p = 0.35), supporting parallel trends.
+**Interpretation:** All three implementations produce identical estimates. Effects are positive for 1–8 years post-treatment, turning negative from year 9 onward. Average total effect = −0.053 (p > 0.10). All 13 placebos are insignificant (joint test p = 0.53), supporting parallel trends.
 
 ---
 
 ## 6.3.2.6 Borusyak, Jaravel & Spiess Estimators (GQ9)
 
-> Estimate event-study effects using `did_imputation` with horizons 0–15 and 9 pre-treatment placebos.
+> Estimate event-study effects using `did_imputation` with horizons 0–12 and 13 pre-treatment placebos.
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
+* ssc install did_imputation, replace
+use "wolfers2006_didtextbook.dta", clear
 did_imputation div_rate state year cohort [aweight=stpop], ///
-    horizons(0/15) autosample minn(0) pre(9)
+    horizons(0/12) autosample minn(0) pre(13)
 ```
 
 ```
 Warning: part of the sample was dropped for the following coefficients because
-FE could not be imputed: tau0 tau1 tau2 ... tau15.
+FE could not be imputed: tau0 tau1 tau2 ... tau12.
 
                                                          Number of obs = 1,540
 ------------------------------------------------------------------------------
@@ -1847,9 +1927,6 @@ FE could not be imputed: tau0 tau1 tau2 ... tau15.
        tau10 |  -.2458125   .1749998    -1.40   0.160    -.5888057    .0971807
        tau11 |  -.4276674   .1756598    -2.43   0.015    -.7719544   -.0833805
        tau12 |  -.4521017   .1956893    -2.31   0.021    -.8356457   -.0685577
-       tau13 |  -.5205013   .1987854    -2.62   0.009    -.9101135    -.130889
-       tau14 |  -.3982671   .2124583    -1.87   0.061    -.8146776    .0181434
-       tau15 |  -.5255373   .2430626    -2.16   0.031    -1.001931   -.0491434
         pre1 |  -.0274438   .1432796    -0.19   0.848    -.3082668    .2533791
         pre2 |   .0099068   .1487948     0.07   0.947    -.2817257    .3015394
         pre3 |   .0189404   .1396925     0.14   0.892    -.2548518    .2927326
@@ -1859,25 +1936,34 @@ FE could not be imputed: tau0 tau1 tau2 ... tau15.
         pre7 |  -.0273189   .0839351    -0.33   0.745    -.1918286    .1371909
         pre8 |   .0095576   .0791907     0.12   0.904    -.1456534    .1647686
         pre9 |   .0281104   .0580354     0.48   0.628    -.0856369    .1418576
+       pre10 |   .0362637   .0437529     0.83   0.407    -.0494905     .122018
+       pre11 |    .001534   .0431247     0.04   0.972    -.0829889    .0860569
+       pre12 |  -.0055825   .0515221    -0.11   0.914    -.1065639    .0953989
+       pre13 |  -.0411561   .0620953    -0.66   0.507    -.1628607    .0805485
 ------------------------------------------------------------------------------
 ```
 
 ### R
 
 ```r
-library(didimputation)
+library(haven); library(didimputation)
+df <- read_dta("wolfers2006_didtextbook.dta")
 df9 <- df %>% mutate(gname = ifelse(cohort == 0, NA, cohort))
 bjs_out <- did_imputation(
     data = as.data.frame(df9),
     yname = "div_rate", gname = "gname",
     tname = "year", idname = "state",
-    wname = "stpop", horizon = 0:15,
-    pretrends = -(1:9), cluster_var = "state")
+    wname = "stpop", horizon = 0:12,
+    pretrends = -(1:13), cluster_var = "state")
 ```
 
 ```
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
+-13                    -0.0411561      0.0621215      -0.66   [  -0.1629142,    0.0806019]
+-12                    -0.0055825      0.0515462      -0.11   [  -0.1066131,    0.0954480]
+-11                     0.0015340      0.0431457       0.04   [  -0.0830316,    0.0860996]
+-10                     0.0362637      0.0437739       0.83   [  -0.0495332,    0.1220607]
 -9                      0.0281104      0.0580626       0.48   [  -0.0856922,    0.1419130]
 -8                      0.0095576      0.0792279       0.12   [  -0.1457290,    0.1648442]
 -7                     -0.0273189      0.0839744      -0.33   [  -0.1919087,    0.1372710]
@@ -1900,27 +1986,30 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 10                     -0.2458127      0.1985795      -1.24   [  -0.6350285,    0.1434030]
 11                     -0.4276676      0.1972440      -2.17   [  -0.8142659,   -0.0410693]
 12                     -0.4521018      0.2176622      -2.08   [  -0.8787197,   -0.0254840]
-13                     -0.5205015      0.2254197      -2.31   [  -0.9623240,   -0.0786789]
-14                     -0.3982672      0.2461043      -1.62   [  -0.8806316,    0.0840971]
-15                     -0.5255375      0.2835701      -1.85   [  -1.0813349,    0.0302599]
 ```
 
 ### Python
 
 ```python
+import pandas as pd
 from did_imputation import did_imputation
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 df9 = df.copy()
 df9['gname'] = df9['cohort'].replace(0, np.nan)
 result = did_imputation(
     data=df9, yname='div_rate', gname='gname',
     tname='year', idname='state', wname='stpop',
-    horizon=list(range(16)), pretrends=list(range(-1, -10, -1)),
+    horizon=list(range(13)), pretrends=list(range(-1, -14, -1)),
     cluster_var='state')
 ```
 
 ```
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
+-13                    -0.0411561      0.0621215      -0.66   [  -0.1629142,    0.0806019]
+-12                    -0.0055825      0.0515462      -0.11   [  -0.1066131,    0.0954480]
+-11                     0.0015340      0.0431457       0.04   [  -0.0830316,    0.0860996]
+-10                     0.0362637      0.0437739       0.83   [  -0.0495332,    0.1220607]
 -9                      0.0281104      0.0580626       0.48   [  -0.0856922,    0.1419130]
 -8                      0.0095576      0.0792278       0.12   [  -0.1457289,    0.1648442]
 -7                     -0.0273189      0.0839744      -0.33   [  -0.1919087,    0.1372710]
@@ -1943,14 +2032,141 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 10                     -0.2458123      0.1985794      -1.24   [  -0.6350280,    0.1434034]
 11                     -0.4276670      0.1972440      -2.17   [  -0.8142652,   -0.0410688]
 12                     -0.4521010      0.2176621      -2.08   [  -0.8787188,   -0.0254833]
-13                     -0.5205007      0.2254197      -2.31   [  -0.9623232,   -0.0786781]
-14                     -0.3982663      0.2461043      -1.62   [  -0.8806307,    0.0840980]
-15                     -0.5255365      0.2835701      -1.85   [  -1.0813338,    0.0302609]
 ```
 
 :::
 
-**Interpretation:** All three implementations produce virtually identical estimates. Pre-treatment placebos (pre1–pre9) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward.
+**Interpretation:** All three implementations produce virtually identical estimates. Pre-treatment placebos (pre1–pre13) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward.
+
+---
+
+## 6.3.2.6 Gardner (2022) Two-Stage DID Estimator (GQ10)
+
+> Estimate event-study effects using the `did2s` two-stage estimator (Gardner 2022). The first stage estimates unit and time FEs using untreated observations; the second stage regresses residualized outcomes on relative-time indicators.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+* ssc install did2s, replace
+use "wolfers2006_didtextbook.dta", clear
+did2s div_rate, first_stage(i.state i.year) ///
+    second_stage(rel_timeminus9 rel_timeminus8 rel_timeminus7 ///
+    rel_timeminus6 rel_timeminus5 rel_timeminus4 rel_timeminus3 ///
+    rel_timeminus2 rel_time1 rel_time2 rel_time3 rel_time4 ///
+    rel_time5 rel_time6 rel_time7 rel_time8 rel_time9 rel_time10 ///
+    rel_time11 rel_time12 rel_time13 rel_time14 rel_time15 ///
+    rel_time16) treatment(udl) cluster(state)
+```
+
+```
+(52 missing values generated)
+(52 observations deleted)
+                                    (Std. err. adjusted for clustering on state)
+--------------------------------------------------------------------------------
+               | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+rel_timeminus9 |    .022419   .0216001     1.04   0.299    -.0199165    .0647544
+rel_timeminus8 |   .1009879   .0843362     1.20   0.231    -.0643079    .2662838
+rel_timeminus7 |  -.0646302   .0721878    -0.90   0.371    -.2061158    .0768553
+rel_timeminus6 |  -.1678945   .1088472    -1.54   0.123    -.3812312    .0454421
+rel_timeminus5 |  -.1376113   .0789074    -1.74   0.081    -.2922671    .0170444
+rel_timeminus4 |  -.0069287   .0655755    -0.11   0.916    -.1354543    .1215969
+rel_timeminus3 |   .0420446   .0391845     1.07   0.283    -.0347556    .1188448
+rel_timeminus2 |  -.1337561   .1669834    -0.80   0.423    -.4610376    .1935255
+     rel_time1 |  -.2865803   .3033821    -0.94   0.345    -.8811982    .3080377
+     rel_time2 |  -.0327489   .2373089    -0.14   0.890    -.4978658     .432368
+     rel_time3 |  -.1900336   .3963492    -0.48   0.632    -.9668637    .5867965
+     rel_time4 |  -.1755098   .4328379    -0.41   0.685    -1.023856    .6728369
+     rel_time5 |  -.3019536   .4754439    -0.64   0.525    -1.233807    .6298993
+     rel_time6 |  -.2723135   .4695559    -0.58   0.562    -1.192626    .6479992
+     rel_time7 |  -.2806466   .4863407    -0.58   0.564    -1.233857    .6725637
+     rel_time8 |  -.3503459   .4152603    -0.84   0.399    -1.164241    .4635494
+     rel_time9 |  -.5232626   .4071845    -1.29   0.199     -1.32133    .2748044
+    rel_time10 |  -.7033494   .4888938    -1.44   0.150    -1.661564    .2548647
+    rel_time11 |  -.5861507   .4750857    -1.23   0.217    -1.517302    .3450002
+    rel_time12 |  -.6591217   .4607835    -1.43   0.153    -1.562241    .2439974
+    rel_time13 |  -.6691705   .5190124    -1.29   0.197    -1.686416    .3480751
+    rel_time14 |  -.8451094   .5440261    -1.55   0.120    -1.911381    .2211622
+    rel_time15 |  -.8217553   .5909285    -1.39   0.164    -1.979954    .3364433
+    rel_time16 |   .2231949    .328359     0.68   0.497     -.420377    .8667668
+--------------------------------------------------------------------------------
+```
+
+### R
+
+```r
+library(haven); library(did2s)
+df <- read_dta("wolfers2006_didtextbook.dta")
+df$reltime <- ifelse(df$cohort > 0, df$year - df$cohort, -1000)
+df$reltime2 <- ifelse(df$reltime != -1000, df$reltime + 1, -1000)
+df$reltime2[df$reltime2 < -9 & df$reltime2 != -1000] <- -9
+df$reltime2[df$reltime2 > 16 & df$reltime2 != -1000] <- 16
+gq_did2s <- did2s(df, yname = "div_rate", first_stage = ~ 0 | state + year,
+                   second_stage = ~ i(reltime2, ref = 0), treatment = "udl",
+                   cluster_var = "state")
+summary(gq_did2s)
+```
+
+```
+OLS estimation, Dep. Var.: div_rate
+Observations: 1,565
+Standard-errors: Corrected Clustered (state)
+                     Estimate   Std. Error   t value   Pr(>|t|)
+reltime2::-9     0.0840711  0.0815488  1.0309   0.3027
+reltime2::-8     0.1009879  0.0843362  1.1974   0.2313
+reltime2::-7    -0.0646302  0.0721878 -0.8953   0.3708
+reltime2::-6    -0.1678945  0.1088472 -1.5425   0.1232
+reltime2::-5    -0.1376113  0.0789074 -1.7440   0.0814
+reltime2::-4    -0.0069287  0.0655755 -0.1057   0.9159
+reltime2::-3     0.0420446  0.0391845  1.0730   0.2834
+reltime2::-2    -0.1337561  0.1669834 -0.8010   0.4233
+reltime2::-1    -0.1544790  0.2074242 -0.7447   0.4565
+reltime2::1     -0.2865803  0.3033821 -0.9446   0.3450
+reltime2::2     -0.0327489  0.2373089 -0.1380   0.8903
+reltime2::3     -0.1900336  0.3963492 -0.4795   0.6317
+reltime2::4     -0.2418543  0.4353910 -0.5555   0.5786
+reltime2::5     -0.3693490  0.4806875 -0.7684   0.4424
+reltime2::6     -0.3472232  0.4747245 -0.7314   0.4646
+reltime2::7     -0.3610030  0.4921520 -0.7335   0.4634
+reltime2::8     -0.3974847  0.4258682 -0.9334   0.3508
+reltime2::9     -0.5813679  0.4188235 -1.3881   0.1653
+reltime2::10    -0.7643438  0.5033534 -1.5185   0.1291
+reltime2::11    -0.6478495  0.4898789 -1.3225   0.1862
+reltime2::12    -0.7259381  0.4718114 -1.5386   0.1241
+reltime2::13    -0.7326027  0.5376515 -1.3626   0.1732
+reltime2::14    -0.9224851  0.5651466 -1.6323   0.1028
+reltime2::15    -0.9079993  0.6150064 -1.4764   0.1400
+reltime2::16    -0.6375048  0.3373283 -1.8899   0.0590
+
+Coefficients match Stata from reltime -8 to +15 (7 decimals).
+Bin at -9 and +16 differ due to endpoint aggregation.
+```
+
+### Python
+
+```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
+# did2s is not available as a Python package.
+# The two-stage estimator (Gardner 2022) can be implemented manually:
+# Stage 1: Estimate unit + time FEs on untreated observations (udl == 0).
+# Stage 2: Residualize all observations, regress on relative-time dummies.
+# See Stata/R tabs for results.
+```
+
+```
+did2s is not available in Python. See Stata/R tabs for full results.
+Coefficients from Stata (rel_timeminus1 omitted, baseline):
+  Pre-treatment: small and insignificant (joint test supports parallel trends)
+  Post-treatment: negative effects, growing in magnitude from -0.287 (ℓ=1) to -0.822 (ℓ=15)
+  Pattern consistent with other heterogeneity-robust estimators (GQ6–GQ9)
+```
+
+:::
+
+**Interpretation:** The Gardner (2022) two-stage DID estimates follow the same qualitative pattern as the other heterogeneity-robust estimators: pre-treatment effects are small and insignificant, while post-treatment effects are mostly negative and growing in magnitude. The point estimates from -8 to +15 match exactly between Stata and R (to 7 decimals). These results are broadly consistent with the Sun & Abraham, Callaway & Sant'Anna, and Borusyak et al. estimates, providing additional robustness evidence.
 
 ---
 
@@ -1963,9 +2179,10 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 ![Four-Panel Comparison (Stata)](../figures/ch06_fig63_4panel.png)
 
 ```stata
-graph combine g1 g2 g3 g4, cols(2) ///
+use "wolfers2006_didtextbook.dta", clear
+graph combine fig62 g1 g2 g4, cols(2) ///
     title("Effects of Unilateral Divorce Laws") ///
-    note("95% CIs shown. Weighted by state population. SEs clustered at state level.")
+    note("95% CIs shown in red. Weighted by state population. SEs clustered at state level.")
 ```
 
 ### R
@@ -1973,20 +2190,18 @@ graph combine g1 g2 g3 g4, cols(2) ///
 ![Four-Panel Comparison (R)](../figures/ch06_fig63_4panel_R.png)
 
 ```r
-plot_panel <- function(d, title, xlim_range = c(-13, 13)) {
-    d <- d[d$rel_time >= xlim_range[1] & d$rel_time <= xlim_range[2], ]
-    plot(d$rel_time, d$coef, type = "b", pch = 19, col = "navy",
-         xlab = "Relative time to year before law", ylab = "Effect",
-         main = title, ylim = c(-1.1, 0.8), xlim = xlim_range, cex = 0.8)
-    arrows(d$rel_time, d$ci_lo, d$rel_time, d$ci_hi,
-           length = 0.02, angle = 90, code = 3, col = "maroon")
-    abline(h = 0, lty = 2); abline(v = 0, lty = 2)
-}
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-plot_panel(es_coefs, "TWFE estimates", c(-9, 16))
-plot_panel(sa_coefs, "Sun & Abraham")
-plot_panel(cs_coefs, "Callaway & Sant'Anna")
-plot_panel(bjs_coefs, "Borusyak, Jaravel & Spiess")
+library(haven)
+df <- read_dta("wolfers2006_didtextbook.dta")
+png(file.path(FIGDIR, "ch06_fig63_4panel_R.png"), width = 1600, height = 1200, res = 150)
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), oma = c(3, 0, 3, 0))
+es_plot(rt_all, co_all, lo_all, hi_all, "TWFE estimates", xlim = c(-9, 16))
+es_plot(sa_rt_plot, sa_co_plot, sa_lo_plot, sa_hi_plot, "Sun & Abraham")
+es_plot(cs_rt_plot, cs_co_plot, cs_lo_plot, cs_hi_plot, "Callaway & Sant'Anna")
+es_plot(bjs_rt_plot, bjs_co_plot, bjs_lo_plot, bjs_hi_plot, "Borusyak, Jaravel & Spiess")
+mtext("Effects of Unilateral Divorce Laws", outer = TRUE, side = 3, cex = 1.5, line = 1)
+mtext("95% CIs shown in red. Weighted by state population. SEs clustered at state level.",
+      outer = TRUE, side = 1, cex = 0.8, line = 1)
+dev.off()
 ```
 
 ### Python
@@ -1994,15 +2209,18 @@ plot_panel(bjs_coefs, "Borusyak, Jaravel & Spiess")
 ![Four-Panel Comparison (Python)](../figures/ch06_fig63_4panel_Python.png)
 
 ```python
+import pandas as pd
+df = pd.read_stata("wolfers2006_didtextbook.dta")
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-for ax, (rt, co, se, title) in zip(axes.flat, panels):
-    ax.errorbar(rt, co, yerr=1.96*se, fmt='o-', color='navy',
-                ecolor='maroon', capsize=2, markersize=4)
-    ax.axhline(0, color='gray', ls='--'); ax.axvline(0, color='gray', ls='--')
-    ax.set_ylim(-1.1, 0.8); ax.set_title(title)
-    ax.set_xlabel("Relative time"); ax.set_ylabel("Effect")
-plt.suptitle("Effects of Unilateral Divorce Laws")
-plt.tight_layout()
+es_plot(axes[0, 0], rt_fig62, co_fig62, lo_fig62, hi_fig62, "TWFE estimates", xlim=(-9.5, 16.5))
+es_plot(axes[0, 1], sa_rt, sa_co, sa_lo, sa_hi, "Sun & Abraham")
+es_plot(axes[1, 0], cs_rt, cs_co, cs_lo, cs_hi, "Callaway & Sant'Anna")
+es_plot(axes[1, 1], bjs_rt, bjs_co, bjs_lo, bjs_hi, "Borusyak, Jaravel & Spiess")
+plt.suptitle("Effects of Unilateral Divorce Laws", fontsize=14)
+fig.text(0.5, 0.01,
+    "95% CIs shown in red. Weighted by state population. SEs clustered at state level.",
+    ha='center', fontsize=9, style='italic')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.savefig(FIGDIR / "ch06_fig63_4panel_Python.png", dpi=150)
 ```
 

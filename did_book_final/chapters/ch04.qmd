@@ -17,52 +17,70 @@ This chapter explores alternatives to the parallel trends assumption. We conside
 ### Stata
 
 ```stata
+* ssc install panelview, replace
+use "moser_voena_didtextbook.dta", clear
 panelview patents twea, i(subclass) t(year) type(treat) ///
-    title("Treatment Status: Moser & Voena (2012)")
-graph export "figures/ch04_panelview_stata.png", replace width(1200)
+    title("Treatment Status: Moser & Voena (2012)") ///
+    ylabel(none) ytitle("")
+graph export "figures/ch03_panelview_stata.png", replace width(1200)
 ```
 
-<img src="../figures/ch04_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
+<img src="../figures/ch03_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
 
 ### R
 
 ```r
-library(panelView)
-panelview(patents ~ twea, data = df,
-          index = c("subclass", "year"), type = "treat",
-          main = "Treatment Status: Moser & Voena (2012)",
-          xlab = "Year", ylab = "Subclass",
-          legend.labs = c("Control", "Treated"))
+library(haven); library(ggplot2)
+df <- read_dta("moser_voena_didtextbook.dta")
+treat_yr <- aggregate(year ~ subclass, data = df[df$twea == 1,], FUN = min)
+names(treat_yr)[2] <- "first_treat"
+df <- merge(df, treat_yr, by = "subclass", all.x = TRUE)
+df$first_treat[is.na(df$first_treat)] <- 9999
+df$subclass_rank <- rank(df$first_treat * 10000 + df$subclass, ties.method = "first")
+df$subclass_rank <- ave(df$subclass_rank, df$subclass, FUN = min)
+png("figures/ch03_panelview_R.png", width = 1200, height = 1000)
+ggplot(df, aes(x = year, y = reorder(factor(subclass), -subclass_rank),
+               fill = factor(twea))) +
+    geom_tile(height = 0.8) +
+    scale_fill_manual(values = c("0" = "#D4E6F1", "1" = "#00AAAA"),
+                      labels = c("Control", "Treated")) +
+    scale_x_continuous(breaks = 1900:1939) +
+    labs(title = "Treatment Status: Moser & Voena (2012)",
+         x = "year", y = "", fill = "") +
+    theme_minimal() +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+          panel.grid = element_blank(), legend.position = "bottom",
+          plot.title = element_text(size = 18, hjust = 0.5))
+dev.off()
 ```
 
-<img src="../figures/ch04_panelview_R.png" alt="Treatment Status (R)" width="100%" />
+<img src="../figures/ch03_panelview_R.png" alt="Treatment Status (R)" width="100%" />
 
 ### Python
 
 ```python
-python
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-pivot = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="max")
-pivot = pivot.fillna(0).astype(int)
-treated_subs = df.loc[df["treatmentgroup"] == 1, "subclass"].unique()
-control_subs = df.loc[df["treatmentgroup"] == 0, "subclass"].unique()
-pivot = pivot.reindex(list(control_subs) + list(treated_subs))
-
-fig, ax = plt.subplots(figsize=(12, 7))
-cmap = mcolors.ListedColormap(["#4575b4", "#d73027"])
-ax.imshow(pivot.values, aspect="auto", cmap=cmap, interpolation="nearest")
-years = pivot.columns.astype(int)
-tick_positions = list(range(0, len(years), 5))
-ax.set_xticks(tick_positions)
-ax.set_xticklabels([str(years[i]) for i in tick_positions])
-ax.set_xlabel("Year"); ax.set_ylabel("Subclass")
-ax.set_title("Treatment Status: Moser & Voena (2012)\n"
-             "7,248 subclasses × 40 years | 336 treated from 1919")
-ax.legend(handles=[Patch(facecolor="#4575b4", label="Control (D=0)"),
-                   Patch(facecolor="#d73027", label="Treated (D=1)")], loc="upper left")
+df = pd.read_stata("moser_voena_didtextbook.dta")
+pv = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="first")
+pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
+cmap = mcolors.ListedColormap(["#D4E6F1", "#00AAAA"])
+fig, ax = plt.subplots(figsize=(12, 10))
+ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
+for i in range(0, len(pv_sorted), 10):
+    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
+ax.set_xticks(range(0, len(pv_sorted.columns), 1))
+ax.set_xticklabels([int(c) for c in pv_sorted.columns], rotation=45, ha="right", fontsize=8)
+ax.set_yticks([])
+ax.set_xlabel("year")
+ax.set_title("Treatment Status: Moser & Voena (2012)", fontsize=16)
+ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="Control"),
+                   Patch(facecolor="#00AAAA", edgecolor="gray", label="Treated")],
+          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
 plt.tight_layout()
 plt.savefig("figures/ch03_panelview_Python.png", dpi=150, bbox_inches="tight")
 plt.show()
@@ -83,6 +101,8 @@ plt.show()
 ### Stata
 
 ```stata
+* ssc install reghdfe, replace
+use "moser_voena_didtextbook.dta", clear
 reghdfe patents reltimeminus* reltimeplus*, ///
     absorb(year#patents1900 treatmentgroup) cluster(subclass)
 ```
@@ -146,6 +166,7 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
 ```
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 * F-test on pre-trends
 test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 ///
      reltimeminus5 reltimeminus6 reltimeminus7 reltimeminus8 ///
@@ -160,6 +181,7 @@ test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 ///
 ```
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 * Testing correlation between treatment and covariate
 reg patents1900 treatmentgroup if year==1900
 ```
@@ -184,7 +206,7 @@ treatmentgroup |   -.156312   .0432625    -3.61   0.000     -.241119    -.071505
 
 ```r
 library(fixest); library(haven); library(car); library(dplyr)
-df <- read_dta("data/moser_voena_didtextbook.dta")
+df <- read_dta("moser_voena_didtextbook.dta")
 
 formula_str <- paste("patents ~",
     paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
@@ -266,7 +288,7 @@ import pyfixest as pf
 import numpy as np
 from scipy import stats
 
-df = pd.read_stata("data/moser_voena_didtextbook.dta")
+df = pd.read_stata("moser_voena_didtextbook.dta")
 
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
@@ -372,6 +394,8 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 ### Stata
 
 ```stata
+* ssc install did_multiplegt_dyn, replace
+use "moser_voena_didtextbook.dta", clear
 did_multiplegt_dyn patents subclass year twea, ///
     effects(21) placebo(18) trends_nonparam(patents1900)
 ```
@@ -447,9 +471,8 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 ### R
 
 ```r
-library(DIDmultiplegtDYN)
-library(polars)
-
+library(haven); library(DIDmultiplegtDYN); library(polars)
+df <- read_dta("moser_voena_didtextbook.dta")
 did_multiplegt_dyn(
     df = as.data.frame(df),
     outcome = "patents",
@@ -476,7 +499,7 @@ import polars as pl
 import pandas as pd
 from did_multiplegt_dyn import DidMultiplegtDyn
 
-df = pd.read_stata("data/moser_voena_didtextbook.dta")
+df = pd.read_stata("moser_voena_didtextbook.dta")
 model = DidMultiplegtDyn(
     df=pl.from_pandas(df),
     outcome='patents',
@@ -551,6 +574,8 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 ### Stata
 
 ```stata
+* ssc install fect, replace
+use "moser_voena_didtextbook.dta", clear
 * Cross-validation
 fect patents, treat(twea) unit(subclass) time(year) ///
     method("ife") r(4) tol(1e-4) cv
@@ -567,6 +592,8 @@ optimal r=2 in fe/ife model
 ```
 
 ```stata
+* ssc install fect, replace
+use "moser_voena_didtextbook.dta", clear
 * Estimation with r=2 and bootstrap SEs
 set seed 1
 fect patents, treat(twea) unit(subclass) time(year) ///
@@ -583,8 +610,8 @@ r1     .2966552         7056    .04932318    .17481898    .37326233       0
 ### R
 
 ```r
-library(fect)
-
+library(haven); library(fect)
+df <- read_dta("moser_voena_didtextbook.dta")
 # Cross-validation
 out_cv <- fect(patents ~ twea, data = as.data.frame(df),
     index = c("subclass","year"),
@@ -625,6 +652,7 @@ IFE ATT = 0.296834
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 * Standard SC
 set seed 1
 sdid_event patents subclass year twea, method("sc") brep(200)
@@ -659,6 +687,7 @@ Synthetic Control
 ```
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 * Demeaned SC
 bys subclass: egen pre_mean_temp=mean(patents) if year<=1918
 bys subclass: egen pre_mean=mean(pre_mean_temp)
@@ -699,8 +728,8 @@ Synthetic Control (Demeaned)
 ### R
 
 ```r
-library(synthdid)
-
+library(haven); library(synthdid)
+df <- read_dta("moser_voena_didtextbook.dta")
 panel <- panel.matrices(as.data.frame(df),
     unit = "subclass", time = "year",
     outcome = "patents", treatment = "twea")
@@ -748,6 +777,7 @@ Demeaned SC ATT = 0.474263
 ### Stata
 
 ```stata
+use "moser_voena_didtextbook.dta", clear
 set seed 1
 sdid_event patents subclass year twea, brep(200)
 ```
@@ -783,6 +813,8 @@ Synthetic Difference-in-differences
 ### R
 
 ```r
+library(haven)
+df <- read_dta("moser_voena_didtextbook.dta")
 set.seed(1)
 sdid_est <- synthdid_estimate(panel$Y, panel$N0, panel$T0)
 cat("SDID ATT:", round(sdid_est, 6), "\n")
@@ -811,6 +843,8 @@ SDID SE  = 0.041352
 ### Stata
 
 ```stata
+* ssc install reghdfe, replace
+use "moser_voena_didtextbook.dta", clear
 preserve
 keep if year==1918|year==1904|year==1932
 reghdfe patents reltimeminus14 reltimeplus14, ///
@@ -847,8 +881,8 @@ reltimeminus14 |   .0431961   .0403288     1.07   0.284      -.03586    .1222522
 ### R
 
 ```r
-library(HonestDiD)
-
+library(haven); library(HonestDiD)
+df <- read_dta("moser_voena_didtextbook.dta")
 df_subset <- df %>% filter(year %in% c(1918, 1904, 1932))
 subset_model <- feols(patents ~ reltimeminus14 + reltimeplus14 |
     year + treatmentgroup, data = df_subset, cluster = ~subclass)
@@ -891,7 +925,7 @@ import numpy as np
 import pyfixest as pf
 from honestdid import createSensitivityResults_relativeMagnitudes
 
-df = pd.read_stata("data/moser_voena_didtextbook.dta")
+df = pd.read_stata("moser_voena_didtextbook.dta")
 df_subset = df[df["year"].isin([1904, 1918, 1932])].copy()
 
 subset_model = pf.feols(
