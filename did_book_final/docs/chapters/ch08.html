@@ -318,7 +318,7 @@ window.Quarto = {
 <ul>
 <li><strong>R <code>DIDmultiplegtSTAT</code>:</strong> <code>devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)</code></li>
 <li><strong>R <code>DIDmultiplegtDYN</code>:</strong> The <code>design()</code> option has a known <code>data.table</code> join bug. Treatment path tables (GQ5) are Stata-only. Effects match across platforms.</li>
-<li><strong>Python <code>did_multiplegt_dyn</code>:</strong> <code>pip install py-did-multiplegt-dyn</code>. Requires <code>polars</code> DataFrames. Point estimates return NaN in v0.1.4 (SE and N/Switchers are correct).</li>
+<li><strong>Python <code>did_multiplegt_dyn</code>:</strong> <code>pip install py-did-multiplegt-dyn</code>. Requires <code>polars</code> DataFrames.</li>
 <li><strong>Python <code>did_multiplegt_stat</code>:</strong> Local notebook-based translation; see <code>py_did_multiplegt_stat</code>.</li>
 </ul>
 <p><strong>Note on cross-platform differences:</strong> GQ1–GQ4 and GQ6 match exactly between Stata and R to 7 decimals. GQ7 (<code>did_multiplegt_stat</code>) shows small differences between Stata, R, and Python due to internal implementation variations. N, switchers, and stayers counts are identical across all three.</p>
@@ -333,7 +333,7 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install panelview, <span class="kw">replace</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>panelview prestout numdailies, i(cnty90) t(<span class="fu">year</span>) <span class="dv">type</span>(treat) <span class="co">///</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="bn">title</span>(<span class="st">"Treatment Status: Gentzkow et al. (2011)"</span>) <span class="bn">legend</span>(<span class="kw">off</span>) <span class="co">///</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="bn">title</span>(<span class="st">"Gentzkow et al. (2011)"</span>) <span class="bn">legend</span>(<span class="kw">off</span>) <span class="co">///</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ylabel</span>(<span class="kw">none</span>) <span class="bn">ytitle</span>(<span class="st">""</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"figures/ch05_panelview_stata.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
@@ -348,11 +348,11 @@ window.Quarto = {
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">panelview</span>(prestout <span class="sc">~</span> numdailies, <span class="at">data =</span> df,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"cnty90"</span>, <span class="st">"year"</span>), <span class="at">type =</span> <span class="st">"treat"</span>,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">main =</span> <span class="st">"Treatment Status: Gentzkow et al. (2011)"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">main =</span> <span class="st">"Gentzkow et al. (2011)"</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../figures/ch05_panelview_R.png" class="img-fluid figure-img"></p>
+<p><img src="../figures/ch08_panelview_R.png" class="img-fluid figure-img"></p>
 <figcaption>R PanelView</figcaption>
 </figure>
 </div>
@@ -376,16 +376,16 @@ window.Quarto = {
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(c) <span class="cf">for</span> c <span class="kw">in</span> pv_sorted.columns[::<span class="dv">2</span>]], rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Year"</span>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Treatment Status: Gentzkow et al. (2011)"</span>, fontsize<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Gentzkow et al. (2011)"</span>, fontsize<span class="op">=</span><span class="dv">16</span>)</span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>ax.legend(handles<span class="op">=</span>[Patch(facecolor<span class="op">=</span><span class="st">"#D4E6F1"</span>, edgecolor<span class="op">=</span><span class="st">"gray"</span>, label<span class="op">=</span><span class="st">"No newspaper"</span>),</span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                   Patch(facecolor<span class="op">=</span><span class="st">"#2171B5"</span>, edgecolor<span class="op">=</span><span class="st">"gray"</span>, label<span class="op">=</span><span class="st">"Has newspaper"</span>)],</span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>          loc<span class="op">=</span><span class="st">"lower center"</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.12</span>), ncol<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch05_panelview_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_panelview_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../figures/ch05_panelview_Python.png" class="img-fluid figure-img"></p>
+<p><img src="../figures/ch08_panelview_Python.png" class="img-fluid figure-img"></p>
 <figcaption>Python PanelView</figcaption>
 </figure>
 </div>
@@ -696,27 +696,43 @@ Joint nullity of placebos : p = 0.9922</code></pre>
 </div>
 <div id="tabset-5-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn.did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>gq4 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>gq4.fit()<span class="op">;</span> gq4.summary()</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>gq4.plot(title<span class="op">=</span><span class="st">"Non-normalized Event Study: Gentzkow et al. (2011)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>               Block Estimate       SE LB CI UB CI      N  Switchers
-            Effect_1      NaN 0.004248   NaN   NaN 5725.0     1119.0
-            Effect_2      NaN 0.005843   NaN   NaN 4840.0     1054.0
-            Effect_3      NaN 0.007916   NaN   NaN 4045.0      984.0
-            Effect_4      NaN 0.009792   NaN   NaN 3342.0      917.0
-Average_Total_Effect          0.004776             9081.0     4074.0
-           Placebo_1      NaN 0.005132   NaN   NaN 4611.0      902.0
-           Placebo_2      NaN 0.008503   NaN   NaN 3122.0      746.0
-           Placebo_3      NaN 0.011682   NaN   NaN 2156.0      604.0
-           Placebo_4      NaN 0.017503   NaN   NaN 1589.0      441.0
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>gq4 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>gq4.fit()<span class="op">;</span> gq4.summary()</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> gq4.result[<span class="st">'mat_res_XX'</span>]</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> mat[mat.index <span class="op">!=</span> <span class="dv">4</span>].copy()</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>ref <span class="op">=</span> pd.DataFrame({<span class="st">'Estimate'</span>: [<span class="dv">0</span>], <span class="st">'LB CI'</span>: [<span class="dv">0</span>], <span class="st">'UB CI'</span>: [<span class="dv">0</span>], <span class="st">'Time'</span>: [<span class="dv">0</span>]})</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> pd.concat([mat, ref], ignore_index<span class="op">=</span><span class="va">True</span>).sort_values(<span class="st">'Time'</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>ax.plot(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>], <span class="st">'o-'</span>, color<span class="op">=</span><span class="st">'navy'</span>, markersize<span class="op">=</span><span class="dv">5</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>ax.errorbar(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>],</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    yerr<span class="op">=</span>[mat[<span class="st">'Estimate'</span>]<span class="op">-</span>mat[<span class="st">'LB CI'</span>], mat[<span class="st">'UB CI'</span>]<span class="op">-</span>mat[<span class="st">'Estimate'</span>]],</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">=</span><span class="st">'none'</span>, ecolor<span class="op">=</span><span class="st">'firebrick'</span>, capsize<span class="op">=</span><span class="dv">3</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>)</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Relative time to last period before treatment changes (t=0)"</span>)</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"DID, from last period before treatment changes (t=0) to t"</span>)</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig81_nonnormalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>               Block   Estimate        SE      LB CI     UB CI      N  Switchers
+            Effect_1  0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+            Effect_2  0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+            Effect_3  0.0207147 0.0079164  0.0051989 0.0362305   3750       984
+            Effect_4  0.0272653 0.0097924  0.0080727 0.0464580   2980       917
+Average_Total_Effect  0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+           Placebo_1 -0.0005025 0.0051322 -0.0105615 0.0095565   4471       902
+           Placebo_2  0.0020594 0.0085031 -0.0146063 0.0187251   2778       746
+           Placebo_3 -0.0015365 0.0116825 -0.0244337 0.0213607   1644       604
+           Placebo_4  0.0006573 0.0175032 -0.0336483 0.0349628    910       441
 
-Note: Point estimates display NaN in py-did-multiplegt-dyn v0.1.4.
-SE and N/Switchers match Stata/R. See Stata/R tabs for full results.</code></pre>
+Joint nullity of effects : p = 0.006814
+Joint nullity of placebos : p = 0.992198</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figures/ch08_fig81_nonnormalized_es_Python.png" class="img-fluid figure-img"></p>
@@ -749,67 +765,129 @@ SE and N/Switchers match Stata/R. See Stata/R tabs for full results.</code></pre
 <span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
 <span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) design(0.8,<span class="kw">console</span>) graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>--- ℓ = 1 (1,126 switchers) ---
-  TreatPath1:  721 groups (64.03%), treatment vector (0 → 1)
-  TreatPath2:  139 groups (12.34%), treatment vector (0 → 2)
-  TreatPath3:   54 groups ( 4.80%), treatment vector (1 → 2)
+<pre><code>--- ℓ = 1 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Av_tot_eff   .0120186   .0035392   .0050819   .0189552       5674       1119
+
+Detection of treatment paths - 1 periods after first switch (1,126 switchers):
+  TreatPath1:  721 groups (64.03%), ℓ=0: 0, ℓ=1: 1
+  TreatPath2:  139 groups (12.34%), ℓ=0: 0, ℓ=1: 2
+  TreatPath3:   54 groups ( 4.80%), ℓ=0: 1, ℓ=1: 2
   Top 3 cover 81.17% of switchers
 
---- ℓ = 2 (1,067 switchers) ---
-  TreatPath1: 343 groups (32.15%), vector (0,1,1) vs (0,0,0)
-  TreatPath2: 187 groups (17.53%), vector (0,1,0) vs (0,0,0)
-  9 paths, top paths cover 81.54% of switchers
+--- ℓ = 2 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Effect_2     .0190899   .0058429   .0076381   .0305418       4648       1054
+Av_tot_eff   .0143270   .0039890   .0065087   .0221454       6754       2173
+Joint nullity p-value = 0.0015
 
---- ℓ = 4 (933 switchers) ---
-  TreatPath1: 141 groups (15.11%), vector (0,1,1,1,1) vs (0,0,0,0,0)
-  56 treatment paths detected
-  Top paths cover 80.17% of switchers</code></pre>
+Detection of treatment paths - 2 periods after first switch (1,067 switchers):
+  TreatPath1: 343 groups (32.15%), (0, 1, 1)
+  TreatPath2: 187 groups (17.53%), (0, 1, 0)
+  TreatPath3: 131 groups (12.28%), (0, 1, 2)
+  ... 9 paths cover 81.54% of switchers
+
+--- ℓ = 4 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Effect_2     .0190899   .0058429   .0076381   .0305418       4648       1054
+Effect_3     .0207147   .0079164   .0051989   .0362305       3750        984
+Effect_4     .0272653   .0097924   .0080727   .0464580       2980        917
+Av_tot_eff   .0160565   .0047761   .0066956   .0254174       8659       4074
+Joint nullity p-value = 0.0068
+
+Detection of treatment paths - 4 periods after first switch (933 switchers):
+  TreatPath1: 141 groups (15.11%), (0, 1, 1, 1, 1)
+  TreatPath2: 127 groups (13.61%), (0, 1, 0, 0, 0)
+  TreatPath3:  43 groups ( 4.61%), (0, 1, 2, 2, 2)
+  ... 56 paths cover 80.17% of switchers</code></pre>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co"># design() triggers a data.table join bug in DIDmultiplegtDYN (R):</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error: "columns to join by must be specified using 'on=' argument"</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Workaround: run without design() to verify effects match Stata.</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>gq5_l1 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">1</span>, <span class="at">cluster =</span> <span class="st">"cnty90"</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>gq5_l2 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">2</span>, <span class="at">cluster =</span> <span class="st">"cnty90"</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>gq5_l4 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">4</span>, <span class="at">cluster =</span> <span class="st">"cnty90"</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Effects (without design paths — design() bug in R):
-  ℓ = 1: Effect_1 = 0.0144244 (SE = 0.0042477), N = 5,674, Switchers = 1,119
-  ℓ = 2: Effect_1 = 0.0143314 (SE = 0.0042477), N = 5,674, Switchers = 1,119
-  ℓ = 4: Effect_1 = 0.0160565 (SE = 0.0047761), N = 5,674, Switchers = 1,119
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(polars); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>))</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>gq5_l1 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(<span class="at">df=</span>df, <span class="at">outcome=</span><span class="st">"prestout"</span>, <span class="at">group=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">time=</span><span class="st">"year"</span>, <span class="at">treatment=</span><span class="st">"numdailies"</span>, <span class="at">effects=</span><span class="dv">1</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">design=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="st">"console"</span>), <span class="at">graph_off=</span><span class="cn">TRUE</span>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>gq5_l2 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(<span class="at">df=</span>df, <span class="at">outcome=</span><span class="st">"prestout"</span>, <span class="at">group=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">time=</span><span class="st">"year"</span>, <span class="at">treatment=</span><span class="st">"numdailies"</span>, <span class="at">effects=</span><span class="dv">2</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">design=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="st">"console"</span>), <span class="at">graph_off=</span><span class="cn">TRUE</span>)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>gq5_l4 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(<span class="at">df=</span>df, <span class="at">outcome=</span><span class="st">"prestout"</span>, <span class="at">group=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">time=</span><span class="st">"year"</span>, <span class="at">treatment=</span><span class="st">"numdailies"</span>, <span class="at">effects=</span><span class="dv">4</span>,</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">design=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="st">"console"</span>), <span class="at">graph_off=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>--- ℓ = 1 ---
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.0144244   0.0042477   0.0060992   0.0227497     5,674     1,119
+Av_tot_eff = 0.0120186 (SE = 0.0035392)
 
-Note: Effects match Stata exactly. Treatment path tables require design(),
-which is Stata-only due to the R data.table bug.</code></pre>
+Detection of treatment paths - 1 periods after first switch:
+  TreatPath1: 721 (64.03%), (0, 1)
+  TreatPath2: 139 (12.34%), (0, 2)
+  TreatPath3:  54 ( 4.80%), (1, 2)
+  Top 3 cover 81.17%
+
+--- ℓ = 2 ---
+             Estimate    SE          LB CI       UB CI   N     Switchers
+Effect_1     0.0144244   0.0042477   0.0060992   0.0227497 5,674 1,119
+Effect_2     0.0190899   0.0058429   0.0076381   0.0305418 4,648 1,054
+Av_tot_eff = 0.0143270 (SE = 0.0039890). Joint nullity p = 0.0015
+
+Detection of treatment paths - 2 periods after first switch:
+  TreatPath1: 343 (32.15%), (0, 1, 1)
+  TreatPath2: 187 (17.53%), (0, 1, 0)
+  TreatPath3: 131 (12.28%), (0, 1, 2)
+  ... 9 paths cover 81.54%
+
+--- ℓ = 4 ---
+             Estimate    SE          LB CI       UB CI   N     Switchers
+Effect_1     0.0144244   0.0042477   0.0060992   0.0227497 5,674 1,119
+Effect_2     0.0190899   0.0058429   0.0076381   0.0305418 4,648 1,054
+Effect_3     0.0207147   0.0079164   0.0051989   0.0362305 3,750   984
+Effect_4     0.0272653   0.0097924   0.0080727   0.0464580 2,980   917
+Av_tot_eff = 0.0160565 (SE = 0.0047761). Joint nullity p = 0.0068
+
+Detection of treatment paths - 4 periods after first switch:
+  TreatPath1: 141 (15.11%), (0, 1, 1, 1, 1)
+  TreatPath2: 127 (13.61%), (0, 1, 0, 0, 0)
+  TreatPath3:  43 ( 4.61%), (0, 1, 2, 2, 2)
+  ... 56 paths cover 80.17%</code></pre>
 </div>
 <div id="tabset-6-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn.did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># design() option not available in py-did-multiplegt-dyn.</span></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run effects(1), effects(2), effects(4) without design paths.</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># design() option not yet available in py-did-multiplegt-dyn.</span></span>
 <span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ell <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>]:</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span>ell, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    m.fit()<span class="op">;</span> m.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Effects (without design paths — design() not available in Python):
-  ℓ = 1: Effect_1 SE = 0.004248, N = 5,725, Switchers = 1,119
-  ℓ = 2: Effect_1 SE = 0.004248, N = 5,725, Switchers = 1,119
-  ℓ = 4: Effect_1 SE = 0.004776, N = 5,725, Switchers = 1,119
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    model.fit()<span class="op">;</span> model.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>--- effects = 1 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Av_tot_eff   0.0120186 0.0035392  0.0050819 0.0189552   5674      1119
 
-Note: Point estimates display NaN (v0.1.4 bug). SE and N/Switchers match
-Stata/R. Treatment path tables are Stata-only.</code></pre>
+--- effects = 2 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+Av_tot_eff   0.0143270 0.0039890  0.0065087 0.0221454   6754      2173
+Joint nullity p-value = 0.001482
+
+--- effects = 4 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+Effect_3     0.0207147 0.0079164  0.0051989 0.0362305   3750       984
+Effect_4     0.0272653 0.0097924  0.0080727 0.0464580   2980       917
+Av_tot_eff   0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+Joint nullity p-value = 0.006814
+
+All effects match Stata/R to 7 decimal places.
+Treatment path tables not available (design option not in Python package).</code></pre>
 </div>
 </div>
 </div>
@@ -904,27 +982,44 @@ Joint nullity of placebos : p = 0.9922</code></pre>
 <div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn.did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>gq6 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>,</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    normalized<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>gq6.fit()<span class="op">;</span> gq6.summary()</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>gq6.plot(title<span class="op">=</span><span class="st">"Normalized Event Study: Gentzkow et al. (2011)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>               Block Estimate       SE LB CI UB CI      N  Switchers
-            Effect_1      NaN 0.003539   NaN   NaN 5725.0     1119.0
-            Effect_2      NaN 0.002514   NaN   NaN 4840.0     1054.0
-            Effect_3      NaN 0.002186   NaN   NaN 4045.0      984.0
-            Effect_4      NaN 0.001935   NaN   NaN 3342.0      917.0
-Average_Total_Effect          0.004776             9081.0     4074.0
-           Placebo_1      NaN 0.004247   NaN   NaN 4611.0      902.0
-           Placebo_2      NaN 0.003593   NaN   NaN 3122.0      746.0
-           Placebo_3      NaN 0.003194   NaN   NaN 2156.0      604.0
-           Placebo_4      NaN 0.003713   NaN   NaN 1589.0      441.0
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>gq6 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    normalized<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>gq6.fit()<span class="op">;</span> gq6.summary()</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> gq6.result[<span class="st">'mat_res_XX'</span>]</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> mat[mat.index <span class="op">!=</span> <span class="dv">4</span>].copy()</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>ref <span class="op">=</span> pd.DataFrame({<span class="st">'Estimate'</span>: [<span class="dv">0</span>], <span class="st">'LB CI'</span>: [<span class="dv">0</span>], <span class="st">'UB CI'</span>: [<span class="dv">0</span>], <span class="st">'Time'</span>: [<span class="dv">0</span>]})</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> pd.concat([mat, ref], ignore_index<span class="op">=</span><span class="va">True</span>).sort_values(<span class="st">'Time'</span>)</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>ax.plot(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>], <span class="st">'o-'</span>, color<span class="op">=</span><span class="st">'navy'</span>, markersize<span class="op">=</span><span class="dv">5</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>ax.errorbar(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>],</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    yerr<span class="op">=</span>[mat[<span class="st">'Estimate'</span>]<span class="op">-</span>mat[<span class="st">'LB CI'</span>], mat[<span class="st">'UB CI'</span>]<span class="op">-</span>mat[<span class="st">'Estimate'</span>]],</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">=</span><span class="st">'none'</span>, ecolor<span class="op">=</span><span class="st">'firebrick'</span>, capsize<span class="op">=</span><span class="dv">3</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>)</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Relative time to last period before treatment changes (t=0)"</span>)</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"DID, from last period before treatment changes (t=0) to t"</span>)</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig82_normalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>               Block   Estimate        SE      LB CI     UB CI      N  Switchers
+            Effect_1  0.0120186 0.0035392  0.0050818 0.0189554   5674      1119
+            Effect_2  0.0082126 0.0025136  0.0032860 0.0131392   4648      1054
+            Effect_3  0.0057192 0.0021857  0.0014353 0.0100031   3750       984
+            Effect_4  0.0053873 0.0019348  0.0015951 0.0091795   2980       917
+Average_Total_Effect  0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+           Placebo_1 -0.0004159 0.0042471 -0.0087401 0.0079083   4471       902
+           Placebo_2  0.0008718 0.0035920 -0.0061704 0.0079140   2778       746
+           Placebo_3 -0.0004199 0.0031938 -0.0066796 0.0058398   1644       604
+           Placebo_4  0.0001390 0.0037130 -0.0071380 0.0074160    910       441
 
-Note: Point estimates display NaN in py-did-multiplegt-dyn v0.1.4.
-SE and N/Switchers match Stata/R. See Stata/R tabs for full results.</code></pre>
+Joint nullity of effects : p = 0.006814
+Joint nullity of placebos : p = 0.992198
+Equality of effects : p = 0.165258</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figures/ch08_fig82_normalized_es_Python.png" class="img-fluid figure-img"></p>
@@ -1112,9 +1207,14 @@ Test of equality of the effects : p-value = 0.8301</code></pre>
 </div>
 <div id="tabset-9-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Python did_multiplegt_dyn returns NaN for point estimates in v0.1.4.</span></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Stata/R results shown for reference.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    same_switchers<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>bonus.fit()<span class="op">;</span> bonus.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>             Estimate SE      LB CI   UB CI   N     Switchers
 Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
 Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512

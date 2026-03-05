@@ -26,7 +26,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 
 - **R `DIDmultiplegtSTAT`:** `devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)`
 - **R `DIDmultiplegtDYN`:** The `design()` option has a known `data.table` join bug. Treatment path tables (GQ5) are Stata-only. Effects match across platforms.
-- **Python `did_multiplegt_dyn`:** `pip install py-did-multiplegt-dyn`. Requires `polars` DataFrames. Point estimates return NaN in v0.1.4 (SE and N/Switchers are correct).
+- **Python `did_multiplegt_dyn`:** `pip install py-did-multiplegt-dyn`. Requires `polars` DataFrames.
 - **Python `did_multiplegt_stat`:** Local notebook-based translation; see `py_did_multiplegt_stat`.
 
 **Note on cross-platform differences:** GQ1–GQ4 and GQ6 match exactly between Stata and R to 7 decimals. GQ7 (`did_multiplegt_stat`) shows small differences between Stata, R, and Python due to internal implementation variations. N, switchers, and stayers counts are identical across all three.
@@ -43,7 +43,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 * ssc install panelview, replace
 use "gentzkowetal_didtextbook.dta", clear
 panelview prestout numdailies, i(cnty90) t(year) type(treat) ///
-    title("Treatment Status: Gentzkow et al. (2011)") legend(off) ///
+    title("Gentzkow et al. (2011)") legend(off) ///
     ylabel(none) ytitle("")
 graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ```
@@ -57,11 +57,11 @@ library(haven); library(panelView)
 df <- read_dta("gentzkowetal_didtextbook.dta")
 panelview(prestout ~ numdailies, data = df,
           index = c("cnty90", "year"), type = "treat",
-          main = "Treatment Status: Gentzkow et al. (2011)",
+          main = "Gentzkow et al. (2011)",
           ylab = "")
 ```
 
-![R PanelView](../figures/ch05_panelview_R.png)
+![R PanelView](../figures/ch08_panelview_R.png)
 
 ### Python
 
@@ -84,16 +84,16 @@ ax.set_xticks(range(0, len(pv_sorted.columns), 2))
 ax.set_xticklabels([int(c) for c in pv_sorted.columns[::2]], rotation=45, ha="right", fontsize=8)
 ax.set_yticks([])
 ax.set_xlabel("Year")
-ax.set_title("Treatment Status: Gentzkow et al. (2011)", fontsize=16)
+ax.set_title("Gentzkow et al. (2011)", fontsize=16)
 ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="No newspaper"),
                    Patch(facecolor="#2171B5", edgecolor="gray", label="Has newspaper")],
           loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
 plt.tight_layout()
-plt.savefig("figures/ch05_panelview_Python.png", dpi=150, bbox_inches="tight")
+plt.savefig("figures/ch08_panelview_Python.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
 
-![Python PanelView](../figures/ch05_panelview_Python.png)
+![Python PanelView](../figures/ch08_panelview_Python.png)
 
 :::
 
@@ -462,30 +462,46 @@ Joint nullity of placebos : p = 0.9922
 
 ```python
 import pandas as pd
-from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
 import polars as pl
+import matplotlib.pyplot as plt
+from did_multiplegt_dyn import DidMultiplegtDyn
 df = pd.read_stata("gentzkowetal_didtextbook.dta")
 df_pl = pl.from_pandas(df)
+pd.set_option('display.float_format', lambda x: f'{x:.7f}')
 gq4 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4, cluster="cnty90")
 gq4.fit(); gq4.summary()
-gq4.plot(title="Non-normalized Event Study: Gentzkow et al. (2011)")
+mat = gq4.result['mat_res_XX']
+mat = mat[mat.index != 4].copy()
+ref = pd.DataFrame({'Estimate': [0], 'LB CI': [0], 'UB CI': [0], 'Time': [0]})
+mat = pd.concat([mat, ref], ignore_index=True).sort_values('Time')
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(mat['Time'], mat['Estimate'], 'o-', color='navy', markersize=5, linewidth=1.5)
+ax.errorbar(mat['Time'], mat['Estimate'],
+    yerr=[mat['Estimate']-mat['LB CI'], mat['UB CI']-mat['Estimate']],
+    fmt='none', ecolor='firebrick', capsize=3, linewidth=1.2)
+ax.axhline(0, color='black', linewidth=0.8)
+ax.axvline(0, color='black', linewidth=0.8)
+ax.set_xlabel("Relative time to last period before treatment changes (t=0)")
+ax.set_title("DID, from last period before treatment changes (t=0) to t")
+plt.tight_layout()
+plt.savefig("figures/ch08_fig81_nonnormalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
 ```
-               Block Estimate       SE LB CI UB CI      N  Switchers
-            Effect_1      NaN 0.004248   NaN   NaN 5725.0     1119.0
-            Effect_2      NaN 0.005843   NaN   NaN 4840.0     1054.0
-            Effect_3      NaN 0.007916   NaN   NaN 4045.0      984.0
-            Effect_4      NaN 0.009792   NaN   NaN 3342.0      917.0
-Average_Total_Effect          0.004776             9081.0     4074.0
-           Placebo_1      NaN 0.005132   NaN   NaN 4611.0      902.0
-           Placebo_2      NaN 0.008503   NaN   NaN 3122.0      746.0
-           Placebo_3      NaN 0.011682   NaN   NaN 2156.0      604.0
-           Placebo_4      NaN 0.017503   NaN   NaN 1589.0      441.0
+               Block   Estimate        SE      LB CI     UB CI      N  Switchers
+            Effect_1  0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+            Effect_2  0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+            Effect_3  0.0207147 0.0079164  0.0051989 0.0362305   3750       984
+            Effect_4  0.0272653 0.0097924  0.0080727 0.0464580   2980       917
+Average_Total_Effect  0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+           Placebo_1 -0.0005025 0.0051322 -0.0105615 0.0095565   4471       902
+           Placebo_2  0.0020594 0.0085031 -0.0146063 0.0187251   2778       746
+           Placebo_3 -0.0015365 0.0116825 -0.0244337 0.0213607   1644       604
+           Placebo_4  0.0006573 0.0175032 -0.0336483 0.0349628    910       441
 
-Note: Point estimates display NaN in py-did-multiplegt-dyn v0.1.4.
-SE and N/Switchers match Stata/R. See Stata/R tabs for full results.
+Joint nullity of effects : p = 0.006814
+Joint nullity of placebos : p = 0.992198
 ```
 
 ![Python Event Study](../figures/ch08_fig81_nonnormalized_es_Python.png)
@@ -520,53 +536,99 @@ did_multiplegt_dyn prestout cnty90 year numdailies, ///
 ```
 
 ```
---- ℓ = 1 (1,126 switchers) ---
-  TreatPath1:  721 groups (64.03%), treatment vector (0 → 1)
-  TreatPath2:  139 groups (12.34%), treatment vector (0 → 2)
-  TreatPath3:   54 groups ( 4.80%), treatment vector (1 → 2)
+--- ℓ = 1 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Av_tot_eff   .0120186   .0035392   .0050819   .0189552       5674       1119
+
+Detection of treatment paths - 1 periods after first switch (1,126 switchers):
+  TreatPath1:  721 groups (64.03%), ℓ=0: 0, ℓ=1: 1
+  TreatPath2:  139 groups (12.34%), ℓ=0: 0, ℓ=1: 2
+  TreatPath3:   54 groups ( 4.80%), ℓ=0: 1, ℓ=1: 2
   Top 3 cover 81.17% of switchers
 
---- ℓ = 2 (1,067 switchers) ---
-  TreatPath1: 343 groups (32.15%), vector (0,1,1) vs (0,0,0)
-  TreatPath2: 187 groups (17.53%), vector (0,1,0) vs (0,0,0)
-  9 paths, top paths cover 81.54% of switchers
+--- ℓ = 2 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Effect_2     .0190899   .0058429   .0076381   .0305418       4648       1054
+Av_tot_eff   .0143270   .0039890   .0065087   .0221454       6754       2173
+Joint nullity p-value = 0.0015
 
---- ℓ = 4 (933 switchers) ---
-  TreatPath1: 141 groups (15.11%), vector (0,1,1,1,1) vs (0,0,0,0,0)
-  56 treatment paths detected
-  Top paths cover 80.17% of switchers
+Detection of treatment paths - 2 periods after first switch (1,067 switchers):
+  TreatPath1: 343 groups (32.15%), (0, 1, 1)
+  TreatPath2: 187 groups (17.53%), (0, 1, 0)
+  TreatPath3: 131 groups (12.28%), (0, 1, 2)
+  ... 9 paths cover 81.54% of switchers
+
+--- ℓ = 4 ---
+             Estimate         SE      LB CI      UB CI          N  Switchers
+Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
+Effect_2     .0190899   .0058429   .0076381   .0305418       4648       1054
+Effect_3     .0207147   .0079164   .0051989   .0362305       3750        984
+Effect_4     .0272653   .0097924   .0080727   .0464580       2980        917
+Av_tot_eff   .0160565   .0047761   .0066956   .0254174       8659       4074
+Joint nullity p-value = 0.0068
+
+Detection of treatment paths - 4 periods after first switch (933 switchers):
+  TreatPath1: 141 groups (15.11%), (0, 1, 1, 1, 1)
+  TreatPath2: 127 groups (13.61%), (0, 1, 0, 0, 0)
+  TreatPath3:  43 groups ( 4.61%), (0, 1, 2, 2, 2)
+  ... 56 paths cover 80.17% of switchers
 ```
 
 ### R
 
 ```r
-library(haven); library(DIDmultiplegtDYN)
-df <- read_dta("gentzkowetal_didtextbook.dta")
-# design() triggers a data.table join bug in DIDmultiplegtDYN (R):
-# Error: "columns to join by must be specified using 'on=' argument"
-# Workaround: run without design() to verify effects match Stata.
-gq5_l1 <- did_multiplegt_dyn(
-    df = df, outcome = "prestout", group = "cnty90",
-    time = "year", treatment = "numdailies",
-    effects = 1, cluster = "cnty90", graph_off = TRUE)
-gq5_l2 <- did_multiplegt_dyn(
-    df = df, outcome = "prestout", group = "cnty90",
-    time = "year", treatment = "numdailies",
-    effects = 2, cluster = "cnty90", graph_off = TRUE)
-gq5_l4 <- did_multiplegt_dyn(
-    df = df, outcome = "prestout", group = "cnty90",
-    time = "year", treatment = "numdailies",
-    effects = 4, cluster = "cnty90", graph_off = TRUE)
+library(haven); library(polars); library(DIDmultiplegtDYN)
+df <- as.data.frame(read_dta("gentzkowetal_didtextbook.dta"))
+gq5_l1 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
+    time="year", treatment="numdailies", effects=1,
+    design=c(0.8,"console"), graph_off=TRUE)
+gq5_l2 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
+    time="year", treatment="numdailies", effects=2,
+    design=c(0.8,"console"), graph_off=TRUE)
+gq5_l4 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
+    time="year", treatment="numdailies", effects=4,
+    design=c(0.8,"console"), graph_off=TRUE)
 ```
 
 ```
-Effects (without design paths — design() bug in R):
-  ℓ = 1: Effect_1 = 0.0144244 (SE = 0.0042477), N = 5,674, Switchers = 1,119
-  ℓ = 2: Effect_1 = 0.0143314 (SE = 0.0042477), N = 5,674, Switchers = 1,119
-  ℓ = 4: Effect_1 = 0.0160565 (SE = 0.0047761), N = 5,674, Switchers = 1,119
+--- ℓ = 1 ---
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.0144244   0.0042477   0.0060992   0.0227497     5,674     1,119
+Av_tot_eff = 0.0120186 (SE = 0.0035392)
 
-Note: Effects match Stata exactly. Treatment path tables require design(),
-which is Stata-only due to the R data.table bug.
+Detection of treatment paths - 1 periods after first switch:
+  TreatPath1: 721 (64.03%), (0, 1)
+  TreatPath2: 139 (12.34%), (0, 2)
+  TreatPath3:  54 ( 4.80%), (1, 2)
+  Top 3 cover 81.17%
+
+--- ℓ = 2 ---
+             Estimate    SE          LB CI       UB CI   N     Switchers
+Effect_1     0.0144244   0.0042477   0.0060992   0.0227497 5,674 1,119
+Effect_2     0.0190899   0.0058429   0.0076381   0.0305418 4,648 1,054
+Av_tot_eff = 0.0143270 (SE = 0.0039890). Joint nullity p = 0.0015
+
+Detection of treatment paths - 2 periods after first switch:
+  TreatPath1: 343 (32.15%), (0, 1, 1)
+  TreatPath2: 187 (17.53%), (0, 1, 0)
+  TreatPath3: 131 (12.28%), (0, 1, 2)
+  ... 9 paths cover 81.54%
+
+--- ℓ = 4 ---
+             Estimate    SE          LB CI       UB CI   N     Switchers
+Effect_1     0.0144244   0.0042477   0.0060992   0.0227497 5,674 1,119
+Effect_2     0.0190899   0.0058429   0.0076381   0.0305418 4,648 1,054
+Effect_3     0.0207147   0.0079164   0.0051989   0.0362305 3,750   984
+Effect_4     0.0272653   0.0097924   0.0080727   0.0464580 2,980   917
+Av_tot_eff = 0.0160565 (SE = 0.0047761). Joint nullity p = 0.0068
+
+Detection of treatment paths - 4 periods after first switch:
+  TreatPath1: 141 (15.11%), (0, 1, 1, 1, 1)
+  TreatPath2: 127 (13.61%), (0, 1, 0, 0, 0)
+  TreatPath3:  43 ( 4.61%), (0, 1, 2, 2, 2)
+  ... 56 paths cover 80.17%
 ```
 
 ### Python
@@ -574,25 +636,41 @@ which is Stata-only due to the R data.table bug.
 ```python
 import pandas as pd
 import polars as pl
-from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
+from did_multiplegt_dyn import DidMultiplegtDyn
 df = pd.read_stata("gentzkowetal_didtextbook.dta")
 df_pl = pl.from_pandas(df)
-# design() option not available in py-did-multiplegt-dyn.
-# Run effects(1), effects(2), effects(4) without design paths.
+pd.set_option('display.float_format', lambda x: f'{x:.7f}')
+# design() option not yet available in py-did-multiplegt-dyn.
 for ell in [1, 2, 4]:
-    m = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
+    model = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
         time="year", treatment="numdailies", effects=ell, cluster="cnty90")
-    m.fit(); m.summary()
+    model.fit(); model.summary()
 ```
 
 ```
-Effects (without design paths — design() not available in Python):
-  ℓ = 1: Effect_1 SE = 0.004248, N = 5,725, Switchers = 1,119
-  ℓ = 2: Effect_1 SE = 0.004248, N = 5,725, Switchers = 1,119
-  ℓ = 4: Effect_1 SE = 0.004776, N = 5,725, Switchers = 1,119
+--- effects = 1 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Av_tot_eff   0.0120186 0.0035392  0.0050819 0.0189552   5674      1119
 
-Note: Point estimates display NaN (v0.1.4 bug). SE and N/Switchers match
-Stata/R. Treatment path tables are Stata-only.
+--- effects = 2 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+Av_tot_eff   0.0143270 0.0039890  0.0065087 0.0221454   6754      2173
+Joint nullity p-value = 0.001482
+
+--- effects = 4 ---
+             Estimate        SE      LB CI     UB CI      N  Switchers
+Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
+Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
+Effect_3     0.0207147 0.0079164  0.0051989 0.0362305   3750       984
+Effect_4     0.0272653 0.0097924  0.0080727 0.0464580   2980       917
+Av_tot_eff   0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+Joint nullity p-value = 0.006814
+
+All effects match Stata/R to 7 decimal places.
+Treatment path tables not available (design option not in Python package).
 ```
 
 :::
@@ -693,30 +771,47 @@ Joint nullity of placebos : p = 0.9922
 ```python
 import pandas as pd
 import polars as pl
-from did_multiplegt_dyn.did_multiplegt_dyn import DidMultiplegtDyn
+import matplotlib.pyplot as plt
+from did_multiplegt_dyn import DidMultiplegtDyn
 df = pd.read_stata("gentzkowetal_didtextbook.dta")
 df_pl = pl.from_pandas(df)
+pd.set_option('display.float_format', lambda x: f'{x:.7f}')
 gq6 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4,
     normalized=True, effects_equal=True, cluster="cnty90")
 gq6.fit(); gq6.summary()
-gq6.plot(title="Normalized Event Study: Gentzkow et al. (2011)")
+mat = gq6.result['mat_res_XX']
+mat = mat[mat.index != 4].copy()
+ref = pd.DataFrame({'Estimate': [0], 'LB CI': [0], 'UB CI': [0], 'Time': [0]})
+mat = pd.concat([mat, ref], ignore_index=True).sort_values('Time')
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(mat['Time'], mat['Estimate'], 'o-', color='navy', markersize=5, linewidth=1.5)
+ax.errorbar(mat['Time'], mat['Estimate'],
+    yerr=[mat['Estimate']-mat['LB CI'], mat['UB CI']-mat['Estimate']],
+    fmt='none', ecolor='firebrick', capsize=3, linewidth=1.2)
+ax.axhline(0, color='black', linewidth=0.8)
+ax.axvline(0, color='black', linewidth=0.8)
+ax.set_xlabel("Relative time to last period before treatment changes (t=0)")
+ax.set_title("DID, from last period before treatment changes (t=0) to t")
+plt.tight_layout()
+plt.savefig("figures/ch08_fig82_normalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
 ```
-               Block Estimate       SE LB CI UB CI      N  Switchers
-            Effect_1      NaN 0.003539   NaN   NaN 5725.0     1119.0
-            Effect_2      NaN 0.002514   NaN   NaN 4840.0     1054.0
-            Effect_3      NaN 0.002186   NaN   NaN 4045.0      984.0
-            Effect_4      NaN 0.001935   NaN   NaN 3342.0      917.0
-Average_Total_Effect          0.004776             9081.0     4074.0
-           Placebo_1      NaN 0.004247   NaN   NaN 4611.0      902.0
-           Placebo_2      NaN 0.003593   NaN   NaN 3122.0      746.0
-           Placebo_3      NaN 0.003194   NaN   NaN 2156.0      604.0
-           Placebo_4      NaN 0.003713   NaN   NaN 1589.0      441.0
+               Block   Estimate        SE      LB CI     UB CI      N  Switchers
+            Effect_1  0.0120186 0.0035392  0.0050818 0.0189554   5674      1119
+            Effect_2  0.0082126 0.0025136  0.0032860 0.0131392   4648      1054
+            Effect_3  0.0057192 0.0021857  0.0014353 0.0100031   3750       984
+            Effect_4  0.0053873 0.0019348  0.0015951 0.0091795   2980       917
+Average_Total_Effect  0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
+           Placebo_1 -0.0004159 0.0042471 -0.0087401 0.0079083   4471       902
+           Placebo_2  0.0008718 0.0035920 -0.0061704 0.0079140   2778       746
+           Placebo_3 -0.0004199 0.0031938 -0.0066796 0.0058398   1644       604
+           Placebo_4  0.0001390 0.0037130 -0.0071380 0.0074160    910       441
 
-Note: Point estimates display NaN in py-did-multiplegt-dyn v0.1.4.
-SE and N/Switchers match Stata/R. See Stata/R tabs for full results.
+Joint nullity of effects : p = 0.006814
+Joint nullity of placebos : p = 0.992198
+Equality of effects : p = 0.165258
 ```
 
 ![Python Normalized ES](../figures/ch08_fig82_normalized_es_Python.png)
@@ -933,9 +1028,14 @@ Test of equality of the effects : p-value = 0.8301
 
 ```python
 import pandas as pd
+import polars as pl
+from did_multiplegt_dyn import DidMultiplegtDyn
 df = pd.read_stata("gentzkowetal_didtextbook.dta")
-# Python did_multiplegt_dyn returns NaN for point estimates in v0.1.4.
-# Stata/R results shown for reference.
+df_pl = pl.from_pandas(df)
+bonus = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
+    time="year", treatment="numdailies", effects=2,
+    same_switchers=True, effects_equal=True, cluster="cnty90")
+bonus.fit(); bonus.summary()
 ```
 
 ```

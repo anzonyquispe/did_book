@@ -473,7 +473,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 ```r
 library(haven); library(DIDmultiplegtDYN); library(polars)
 df <- read_dta("moser_voena_didtextbook.dta")
-did_multiplegt_dyn(
+result_dyn <- did_multiplegt_dyn(
     df = as.data.frame(df),
     outcome = "patents",
     group = "subclass",
@@ -481,15 +481,71 @@ did_multiplegt_dyn(
     treatment = "twea",
     effects = 21,
     placebo = 18,
-    trends_nonparam = "patents1900"
+    trends_nonparam = "patents1900",
+    graph_off = TRUE
 )
+print(result_dyn)
 ```
 
 ```
-Note: The DIDmultiplegtDYN R package has an intermittent polars backend
-bug. When it runs successfully, results match Stata exactly:
-  Effect_1 = 0.012377, Effect_5 = 0.073354 (verified with effects = 5).
-Full results (effects = 21) verified in Stata and Python.
+----------------------------------------------------------------------
+       Estimation of treatment effects: Event-study effects
+----------------------------------------------------------------------
+             Estimate SE      LB CI    UB CI   N     Switchers
+Effect_1     0.0123774 0.0407900 -0.0675695 0.0923242 6,992 336
+Effect_2     0.0368500 0.0429563 -0.0473428 0.1210428 6,992 336
+Effect_3     0.0617362 0.0424486 -0.0214616 0.1449340 6,992 336
+Effect_4     0.0265509 0.0510521 -0.0735094 0.1266112 6,992 336
+Effect_5     0.0733544 0.0612449 -0.0466835 0.1933922 6,992 336
+Effect_6     0.0122893 0.0489294 -0.0836105 0.1081892 6,992 336
+Effect_7     0.0279862 0.0558801 -0.0815369 0.1375093 6,992 336
+Effect_8     0.1010481 0.0496669  0.0037028 0.1983933 6,992 336
+Effect_9     0.1877217 0.0571643  0.0756817 0.2997617 6,992 336
+Effect_10    0.1938123 0.0579096  0.0803116 0.3073131 6,992 336
+Effect_11    0.1164829 0.0638489 -0.0086585 0.2416244 6,992 336
+Effect_12    0.1182967 0.0683539 -0.0156746 0.2522679 6,992 336
+Effect_13    0.2709911 0.0741055  0.1257470 0.4162351 6,992 336
+Effect_14    0.6614688 0.1082719  0.4492597 0.8736779 6,992 336
+Effect_15    0.6108274 0.1033414  0.4082819 0.8133728 6,992 336
+Effect_16    0.4157850 0.0904341  0.2385374 0.5930326 6,992 336
+Effect_17    0.5180924 0.1004725  0.3211699 0.7150149 6,992 336
+Effect_18    0.6892960 0.1134788  0.4668817 0.9117102 6,992 336
+Effect_19    0.5249980 0.1001209  0.3287646 0.7212314 6,992 336
+Effect_20    0.6430043 0.1028000  0.4415201 0.8444885 6,992 336
+Effect_21    0.7738304 0.1203650  0.5379193 1.0097420 6,992 336
+
+Test of joint nullity of the effects : p-value = 0.0000
+----------------------------------------------------------------------
+    Average cumulative (total) effect per treatment unit
+----------------------------------------------------------------------
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.2893714   0.0489889   0.1933549   0.3853879   146,832     7,056
+Average number of time periods over which effect is accumulated: 11.0000
+
+----------------------------------------------------------------------
+     Testing the parallel trends and no anticipation assumptions
+----------------------------------------------------------------------
+             Estimate SE      LB CI    UB CI   N     Switchers
+Placebo_1   -0.0210605 0.0457692 -0.1107665 0.0686455 6,992 336
+Placebo_2   -0.0642981 0.0374583 -0.1377151 0.0091189 6,992 336
+Placebo_3   -0.0515437 0.0342756 -0.1187227 0.0156353 6,992 336
+Placebo_4    0.0174201 0.0362663 -0.0536606 0.0885007 6,992 336
+Placebo_5    0.0358319 0.0430430 -0.0485308 0.1201947 6,992 336
+Placebo_6   -0.0030407 0.0380414 -0.0776004 0.0715191 6,992 336
+Placebo_7   -0.0056155 0.0510010 -0.1055756 0.0943446 6,992 336
+Placebo_8    0.0061129 0.0454662 -0.0829993 0.0952250 6,992 336
+Placebo_9   -0.0215649 0.0422630 -0.1043990 0.0612691 6,992 336
+Placebo_10   0.0075940 0.0483178 -0.0871072 0.1022952 6,992 336
+Placebo_11  -0.0818832 0.0588654 -0.1972572 0.0334907 6,992 336
+Placebo_12  -0.0095863 0.0420207 -0.0919453 0.0727728 6,992 336
+Placebo_13   0.0123832 0.0406417 -0.0672731 0.0920396 6,992 336
+Placebo_14  -0.0013973 0.0400975 -0.0799871 0.0771924 6,992 336
+Placebo_15   0.0186997 0.0417909 -0.0632090 0.1006084 6,992 336
+Placebo_16  -0.0183403 0.0398628 -0.0964699 0.0597894 6,992 336
+Placebo_17  -0.0058081 0.0527830 -0.1092609 0.0976447 6,992 336
+Placebo_18   0.0500484 0.0489266 -0.0458459 0.1459427 6,992 336
+
+Test of joint nullity of the placebos : p-value = 0.0000
 ```
 
 ### Python
@@ -561,7 +617,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 :::
 
-**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average total effect is **0.289371** (Stata = Python, verified). Results are consistent across Stata and Python; the R package has an intermittent bug but matches when it runs.
+**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average total effect is **0.2893714** (SE = 0.0489889). All estimates match across Stata, R, and Python to 7 decimal places.
 
 ---
 
@@ -977,7 +1033,7 @@ Coefficients:
 | Estimator | Stata | R | Python |
 |-----------|-------|---|--------|
 | TWFE with controls (F-test) | F=5.07, p<0.001 | Chi2=91.313, p<0.001 | F=5.072919, p<0.001 |
-| `did_multiplegt_dyn` (Av. Total Effect) | **0.289371** | 0.289371 (intermittent bug) | **0.289371** |
+| `did_multiplegt_dyn` (Av. Total Effect) | **0.2893714** | **0.2893714** | **0.2893714** |
 | IFE ATT (r=2) | **0.296655** | **0.296834** | — |
 | SC ATT (standard) | **0.414370** | **0.491647** | — |
 | SC ATT (demeaned) | **0.474263** | **0.474263** | — |

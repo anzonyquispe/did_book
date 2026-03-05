@@ -11,14 +11,14 @@ Each chapter is presented in three separate pages, one per language, so that all
 
 ## Datasets
 
-| Chapters | Paper                    | Dataset                              |
-|----------|--------------------------|--------------------------------------|
-| 3 & 4    | Moser & Voena (2012)     | [`moser_voena_didtextbook.dta`](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta)        |
-| 5 & 8    | Gentzkow et al. (2011)   | [`gentzkowetal_didtextbook.dta`](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20Shapiro%20and%20Sinkinson%202011/gentzkowetal_didtextbook.dta)       |
-| 6        | Wolfers (2006)           | [`wolfers2006_didtextbook.dta`](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta)        |
-| 7        | Pierce & Schott (2016)   | [`pierce_schott_didtextbook.dta`](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta)      |
+| Chapters | Paper                    | Stata (.dta) | R (.RData) | Python (.parquet) |
+|----------|--------------------------|:---:|:---:|:---:|
+| 3 & 4    | Moser & Voena (2012)     | [.dta](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet) |
+| 5 & 8    | Gentzkow et al. (2011)   | [.dta](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20Shapiro%20and%20Sinkinson%202011/gentzkowetal_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20Shapiro%20and%20Sinkinson%202011/gentzkowetal_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20Shapiro%20and%20Sinkinson%202011/gentzkowetal_didtextbook.parquet) |
+| 6        | Wolfers (2006)           | [.dta](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet) |
+| 7        | Pierce & Schott (2016)   | [.dta](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet) |
 
-Download each `.dta` file and place it in your working directory. All code blocks in the chapters assume the dataset is in the current directory.
+Download the dataset in your preferred format and place it in your working directory. All code blocks in the chapters assume the dataset is in the current directory.
 
 ## Requirements
 
