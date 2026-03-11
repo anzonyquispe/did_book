@@ -1,0 +1,26 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Applied Examples with did_multiplegt_dyn"
+  author: "de Chaisemartin, Ciccia, Knau, Malézieux, Sow, Arboleda, Angotti, D'Haultfœuille, Li, Fabre & Quispe (2025)"
+  chapters:
+    - index.qmd
+    - text: "Ch. 9 — Deryugina (2017)"
+      href: chapters/ch09.qmd
+    - text: "Ch. 10 — East et al. (2023)"
+      href: chapters/ch10.qmd
+    - text: "Ch. 11 — Gentzkow et al. (2011)"
+      href: chapters/ch11.qmd
+    - text: "Ch. 12 — Hollingsworth et al. (2022)"
+      href: chapters/ch12.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    highlight-style: github

@@ -1,0 +1,32 @@
+# Preface {.unnumbered}
+
+This book replicates the four applied examples from:
+
+> **"Using did_multiplegt_dyn to Estimate Event-Study Effects in Complex Designs: Overview, and Four Examples Based on Real Datasets"**
+> by Clément de Chaisemartin, Diego Ciccia, Felix Knau, Mélitine Malézieux, Doulo Sow, David Arboleda, Romain Angotti, Xavier D'Haultfœuille, Bingxue Li, Henri Fabre & Anzony Quispe (2025)
+
+Each example is replicated in **Stata** (with hardcoded outputs from the do file), following the same format as the companion DiD Textbook Translations.
+
+## Datasets
+
+All datasets are bundled with the `did_multiplegt_dyn` Stata package. To download them, run:
+
+```stata
+ssc install did_multiplegt_dyn, replace
+net get did_multiplegt_dyn
+```
+
+| Example | Paper | Dataset |
+|---------|-------|---------|
+| 9.1 | Deryugina (2017) | `Deryugina_2017.dta` |
+| 9.2 | East et al. (2023) | `east_et_al_2023.dta` |
+| 9.3 | Gentzkow et al. (2011) | `gentzkowetal_didtextbook.dta` |
+| 9.4 | Hollingsworth et al. (2022) | `hollingsworth_et_al_2022.dta` |
+
+## Requirements
+
+- **Stata 17+** with `did_multiplegt_dyn`: `ssc install did_multiplegt_dyn, replace`
+
+## Source code
+
+Do file: `ch09_applied_examples.do`

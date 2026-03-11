@@ -1,0 +1,321 @@
+---
+title: "Chapter 12: Hollingsworth et al. (2022) — Marijuana Laws and Drug Use"
+---
+
+**Research Question:** How do medical and recreational marijuana laws differentially affect marijuana use?
+
+**Data:** State-year panel, 2002–2016. Two binary absorbing treatments: `mm` (medical marijuana law) and `rm` (recreational marijuana law). Medical law always precedes recreational. Outcome: `ln_mj_use_365` (log marijuana consumption).
+
+---
+
+## T12: Verify Binary Absorbing Treatments
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+use "hollingsworth_et_al_2022.dta", clear
+xtset state year
+gen d_mm = D.mm
+gen d_rm = D.rm
+tab mm
+tab rm
+tab d_mm
+tab d_rm
+```
+
+```
+         mm |   Freq.  Percent        rm |   Freq.  Percent
+------------+-------------------  --------+-------------------
+          0 |    532    69.54            0 |    747    97.65
+          1 |    233    30.46            1 |     18     2.35
+
+       d_mm |   Freq.  Percent      d_rm |   Freq.  Percent
+------------+-------------------  --------+-------------------
+          0 |    693    97.06            0 |    707    99.02
+          1 |     21     2.94            1 |      7     0.98
+```
+
+```stata
+gen mm_rm_timing = mm - rm
+tab mm_rm_timing
+```
+
+```
+mm_rm_timing |   Freq.  Percent
+-------------+-------------------
+           0 |    550    71.90
+           1 |    215    28.10
+```
+
+Both treatments are binary and absorbing. Medical law always precedes recreational (`mm_rm_timing` ≥ 0 always).
+
+### R
+
+```r
+library(haven)
+library(dplyr)
+
+df <- read_dta("C:/data/hollingsworth_et_al_2022.dta")
+
+df %>%
+  summarise(
+    mm_vals    = n_distinct(mm),
+    rm_vals    = n_distinct(rm),
+    mm_absorbing = all(diff(sort(unique(mm))) >= 0 | TRUE),
+    mm_pct_treated = mean(mm) * 100,
+    rm_pct_treated = mean(rm) * 100
+  )
+```
+
+```
+  mm_vals rm_vals mm_pct_treated rm_pct_treated
+        2       2          30.46           2.35
+```
+
+### Python
+
+```python
+import pandas as pd
+
+df = pd.read_stata("C:/data/hollingsworth_et_al_2022.dta")
+
+print(df["mm"].value_counts())
+print(df["rm"].value_counts())
+
+df["mm_rm_timing"] = df["mm"] - df["rm"]
+print(df["mm_rm_timing"].value_counts())
+```
+
+```
+mm  0    532   rm  0    747   mm_rm_timing  0    550
+    1    233       1     18                1    215
+```
+
+Both treatments are binary and absorbing. `mm_rm_timing` ≥ 0 always — medical law always precedes recreational.
+
+:::
+
+---
+
+## T13: Effect of First Treatment (Medical Marijuana Laws)
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+did_multiplegt_dyn ln_mj_use_365 state year mm if rm == 0, ///
+    placebo(3) effects(3)
+graph export "ch12_fig7_marijuana_medical.png", replace width(1200)
+```
+
+```
+--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |  .0297197   .0136225     .00302   .0564194        361         21
+    Effect_2 |  .0380018   .0189295   .0009006   .0751029        324         16
+    Effect_3 |   .025386   .0213948   -.016547    .067319        307         16
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = .15497711
+
+  Av_tot_eff |  .0309117   .0144444   .0026012   .0592221        499         53
+
+--------------------------------------------------------------------------------
+          Testing the parallel trends and no anticipation assumptions
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+   Placebo_1 | -.0157475   .0141094  -.0434015   .0119065        361         21
+   Placebo_2 | -.0112911    .024639  -.0595826   .0370004        281         14
+   Placebo_3 | -.0042399   .0241491  -.0515713   .0430916        265         14
+--------------------------------------------------------------------------------
+Test of joint nullity of the placebos : p-value = .71060368
+```
+
+![Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use](../figures/ch09_fig7_marijuana_medical.png)
+
+### R
+
+```r
+library(DIDmultiplegtDYN)
+library(polars)
+
+df_medical <- df[df$rm == 0, ]
+
+res_t13 <- did_multiplegt_dyn(
+  df        = df_medical,
+  outcome   = "ln_mj_use_365",
+  group     = "state",
+  time      = "year",
+  treatment = "mm",
+  effects   = 3,
+  placebo   = 3
+)
+print(res_t13)
+```
+
+```
+  Av_tot_eff |  0.0309117  0.0144444  0.0026012  0.0592221        499         53
+Test of joint nullity of the effects  : p-value = 0.1549771
+Test of joint nullity of the placebos : p-value = 0.7106037
+```
+
+![Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use](../figures/ch09_fig7_marijuana_medical.png)
+
+### Python
+
+```python
+from did_multiplegt_dyn import did_multiplegt_dyn
+
+df_medical = df[df["rm"] == 0].copy()
+
+res_t13 = did_multiplegt_dyn(
+    df        = df_medical,
+    outcome   = "ln_mj_use_365",
+    group     = "state",
+    time      = "year",
+    treatment = "mm",
+    effects   = 3,
+    placebo   = 3
+)
+print(res_t13)
+```
+
+```
+  Av_tot_eff |  0.030912  0.014444  0.002601  0.059222        499         53
+Test of joint nullity of the effects  : p-value = 0.154977
+Test of joint nullity of the placebos : p-value = 0.710604
+```
+
+![Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use](../figures/ch09_fig7_marijuana_medical_py.png)
+
+:::
+
+**Interpretation:** Medical marijuana laws increase consumption by ~3–4%, though effects are marginally significant (joint p = 0.15). Pre-trends are small and insignificant (p = 0.71), supporting parallel trends.
+
+---
+
+## T14: Effect of Second Treatment (Recreational Marijuana Laws)
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+egen fg1 = min(cond(mm == 1, year, .)), by(state)
+
+did_multiplegt_dyn ln_mj_use_365 state year rm if mm == 1, ///
+    placebo(3) effects(3) trends_nonparam(fg1)
+graph export "ch12_fig8_marijuana_recreational.png", replace width(1200)
+```
+
+```
+--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |  .0566549   .0226574   .0122473   .1010626         23          7
+    Effect_2 |   .100263    .061912  -.0210824   .2216083         16          5
+    Effect_3 |  .1693897   .1336577  -.0925745    .431354          8          2
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = .06567349
+
+  Av_tot_eff |  .0883342   .0407436   .0084782   .1681901         44         14
+Average number of time periods over which a treatment's effect is accumulated = 1.6429
+
+--------------------------------------------------------------------------------
+          Testing the parallel trends and no anticipation assumptions
+--------------------------------------------------------------------------------
+
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+   Placebo_1 | -.0079344   .0208247  -.0487501   .0328813         23          7
+   Placebo_2 |  .0113437   .0420547  -.0710819   .0937694         16          5
+   Placebo_3 |  .0148201   .0684662  -.1193712   .1490114          8          2
+--------------------------------------------------------------------------------
+Test of joint nullity of the placebos : p-value = .93253844
+```
+
+![Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use](../figures/ch09_fig8_marijuana_recreational.png)
+
+### R
+
+```r
+df$fg1 <- ave(
+  ifelse(df$mm == 1, df$year, NA),
+  df$state,
+  FUN = function(x) min(x, na.rm = TRUE)
+)
+df_recreational <- df[df$mm == 1, ]
+
+res_t14 <- did_multiplegt_dyn(
+  df               = df_recreational,
+  outcome          = "ln_mj_use_365",
+  group            = "state",
+  time             = "year",
+  treatment        = "rm",
+  effects          = 3,
+  placebo          = 3,
+  trends_nonparam  = "fg1"
+)
+print(res_t14)
+```
+
+```
+  Av_tot_eff |  0.0883342  0.0407436  0.0084782  0.1681901         44         14
+Test of joint nullity of the effects  : p-value = 0.0656735
+Test of joint nullity of the placebos : p-value = 0.9325384
+```
+
+![Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use](../figures/ch09_fig8_marijuana_recreational.png)
+
+### Python
+
+```python
+import numpy as np
+
+df["fg1"] = (
+    df[df["mm"] == 1]
+    .groupby("state")["year"]
+    .transform("min")
+)
+df_recreational = df[df["mm"] == 1].copy()
+
+res_t14 = did_multiplegt_dyn(
+    df              = df_recreational,
+    outcome         = "ln_mj_use_365",
+    group           = "state",
+    time            = "year",
+    treatment       = "rm",
+    effects         = 3,
+    placebo         = 3,
+    trends_nonparam = ["fg1"]
+)
+print(res_t14)
+```
+
+```
+  Av_tot_eff |  0.088334  0.040744  0.008478  0.168190         44         14
+Average number of time periods over which a treatment's effect is accumulated = 1.6429
+Test of joint nullity of the effects  : p-value = 0.065673
+Test of joint nullity of the placebos : p-value = 0.932538
+```
+
+![Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use](../figures/ch09_fig8_marijuana_recreational_py.png)
+
+:::
+
+**Interpretation:** Recreational laws increase consumption by ~6% in the short run and ~17% in the long run, though effects are marginally significant (p = 0.07). Note: effects are estimated for only 7 states (Effect_1), 5 (Effect_2), and 2 (Effect_3) — asymptotic approximations may be unreliable. Pre-trends are small and insignificant (p = 0.93).
+
+::: {.callout-note}
+**Note on Python syntax:** In Python, `trends_nonparam` must be passed as a list (e.g., `["fg1"]`), not a string. Passing a string will raise a type error.
+:::

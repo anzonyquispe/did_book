@@ -4,166 +4,267 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Study Plotter</title>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --accent: #be4bdb;
-    --accent-light: #e599f7;
-    --bg: #fff;
-    --sidebar-bg: #f8f9fa;
-    --text: #212529;
-    --text-muted: #6c757d;
-    --border: #dee2e6;
-    --code-bg: #f1f3f5;
-    --effect-color: #c0392b;
-    --placebo-color: #2563eb;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background: var(--bg); }
+:root {
+  --accent: #be4bdb;
+  --accent-light: #e599f7;
+  --bg: #fff;
+  --sidebar-bg: #f8f9fa;
+  --text: #212529;
+  --text-muted: #6c757d;
+  --border: #dee2e6;
+  --code-bg: #f1f3f5;
+  --effect-color: #c0392b;
+  --placebo-color: #2563eb;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background: var(--bg); }
 
-  /* ============ INPUT PAGE ============ */
-  #input-page {
-    min-height: 100vh;
-    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    display: flex; align-items: center; justify-content: center; padding: 40px 20px;
-  }
-  .form-card {
-    width: 100%; max-width: 640px; background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
-    padding: 48px 44px; backdrop-filter: blur(12px);
-  }
-  .form-card h1 {
-    font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900;
-    color: #f0ead6; margin-bottom: 6px;
-  }
-  .form-card .subtitle { font-size: 15px; color: #888; margin-bottom: 36px; }
-  .form-label {
-    display: block; font-size: 11px; color: #be9b7b; text-transform: uppercase;
-    letter-spacing: 1.8px; font-weight: 600; margin-bottom: 6px;
-  }
-  .form-label span { font-weight: 300; color: #666; text-transform: none; letter-spacing: 0; }
-  .form-input, .form-textarea {
-    width: 100%; padding: 10px 14px; border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
-    color: #eee; font-family: 'Source Sans 3', sans-serif; font-size: 15px;
-    margin-bottom: 20px; outline: none; transition: border 0.2s;
-  }
-  .form-input:focus, .form-textarea:focus { border-color: #be9b7b; }
-  .form-textarea { resize: vertical; min-height: 70px; }
+/* ============ INPUT PAGE ============ */
+#input-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+}
+.form-card {
+  width: 100%; max-width: 660px; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+  padding: 48px 44px; backdrop-filter: blur(12px);
+}
+.form-card h1 {
+  font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900;
+  color: #f0ead6; margin-bottom: 6px;
+}
+.form-card .subtitle { font-size: 15px; color: #888; margin-bottom: 32px; }
+.form-label {
+  display: block; font-size: 15px; color: #be9b7b; text-transform: uppercase;
+  letter-spacing: 1.2px; font-weight: 600; margin-bottom: 8px;
+}
+.form-label span { font-weight: 400; color: #aaa; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.form-input, .form-textarea {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+  color: #eee; font-family: 'Source Sans 3', sans-serif; font-size: 15px;
+  margin-bottom: 20px; outline: none; transition: border 0.2s;
+}
+.form-input:focus, .form-textarea:focus { border-color: #be9b7b; }
+.form-textarea { resize: vertical; min-height: 70px; }
+.form-input::placeholder, .form-textarea::placeholder { color: #555; }
 
-  .ci-group { display: flex; gap: 8px; margin-bottom: 24px; }
-  .ci-btn {
-    flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);
-    background: transparent; color: #888; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px; font-weight: 600; transition: all 0.2s;
-  }
-  .ci-btn.active { border-color: #be9b7b; background: rgba(190,155,123,0.15); color: #be9b7b; }
+.token-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.token-row .form-input { margin-bottom: 0; flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.token-toggle {
+  background: none; border: 1px solid rgba(255,255,255,0.1); color: #888;
+  border-radius: 8px; padding: 0 14px; cursor: pointer; font-size: 13px; white-space: nowrap;
+  transition: all 0.2s;
+}
+.token-toggle:hover { border-color: #be9b7b; color: #be9b7b; }
 
-  .upload-zone {
-    border: 2px dashed rgba(255,255,255,0.12); border-radius: 10px; padding: 28px 20px;
-    text-align: center; cursor: pointer; margin-bottom: 8px; transition: all 0.2s;
-  }
-  .upload-zone:hover { border-color: #be9b7b; }
-  .upload-zone.loaded { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
-  .upload-zone.error { border-color: rgba(220,38,38,0.4); }
-  .upload-zone p { font-size: 14px; color: #888; }
-  .upload-zone.loaded p { color: #22c55e; }
+.ci-group { display: flex; gap: 8px; margin-bottom: 24px; }
+.ci-btn {
+  flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);
+  background: transparent; color: #888; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.ci-btn.active { border-color: #be9b7b; background: rgba(190,155,123,0.15); color: #be9b7b; }
 
-  .error-msg { color: #ef4444; font-size: 13px; margin-bottom: 16px; }
-  .demo-btn {
-    background: none; border: none; color: #be9b7b; font-size: 13px; cursor: pointer;
-    padding: 4px 0; margin-bottom: 28px; text-decoration: underline; text-underline-offset: 3px;
-    font-family: 'Source Sans 3', sans-serif;
-  }
-  .submit-btn {
-    width: 100%; padding: 14px 0; border-radius: 8px; border: none;
-    background: rgba(255,255,255,0.06); color: #555; font-family: 'Playfair Display', serif;
-    font-size: 18px; font-weight: 700; cursor: not-allowed; letter-spacing: 0.5px; transition: all 0.3s;
-  }
-  .submit-btn.ready {
-    background: linear-gradient(135deg, #be9b7b, #a07a5a); color: #fff; cursor: pointer;
-    box-shadow: 0 4px 20px rgba(190,155,123,0.3);
-  }
-  .submit-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(190,155,123,0.4); }
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.12); border-radius: 10px; padding: 28px 20px;
+  text-align: center; cursor: pointer; margin-bottom: 8px; transition: all 0.2s;
+}
+.upload-zone:hover { border-color: #be9b7b; }
+.upload-zone.loaded { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
+.upload-zone.error { border-color: rgba(220,38,38,0.4); }
+.upload-zone p { font-size: 14px; color: #888; }
+.upload-zone.loaded p { color: #22c55e; }
 
-  /* ============ OUTPUT PAGE — QUARTO BOOK STYLE ============ */
-  #output-page { display: none; }
-  #output-page.active { display: flex; }
+.error-msg { color: #ef4444; font-size: 13px; margin-bottom: 16px; }
+.demo-btn {
+  background: none; border: none; color: #be9b7b; font-size: 13px; cursor: pointer;
+  padding: 4px 0; margin-bottom: 28px; text-decoration: underline; text-underline-offset: 3px;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.submit-btn {
+  width: 100%; padding: 14px 0; border-radius: 8px; border: none;
+  background: rgba(255,255,255,0.06); color: #555; font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; cursor: not-allowed; letter-spacing: 0.5px; transition: all 0.3s;
+}
+.submit-btn.ready {
+  background: linear-gradient(135deg, #be9b7b, #a07a5a); color: #fff; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(190,155,123,0.3);
+}
+.submit-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(190,155,123,0.4); }
 
-  .book-sidebar {
-    width: 280px; min-height: 100vh; background: var(--sidebar-bg);
-    border-right: 1px solid var(--border); padding: 24px 20px; position: fixed; top: 0; left: 0;
-    overflow-y: auto;
-  }
-  .book-sidebar h2 {
-    font-family: 'Source Sans 3', sans-serif; font-size: 14px; font-weight: 700;
-    color: var(--text); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-  }
-  .sidebar-nav a {
-    display: block; padding: 6px 10px; font-size: 14px; color: var(--text-muted);
-    text-decoration: none; border-radius: 4px; margin-bottom: 2px; transition: all 0.15s;
-  }
-  .sidebar-nav a:hover { background: rgba(0,0,0,0.04); color: var(--text); }
-  .sidebar-nav a.active { background: rgba(190,75,219,0.08); color: var(--accent); font-weight: 600; }
-  .sidebar-back {
-    display: inline-block; font-size: 13px; color: var(--accent); text-decoration: none;
-    margin-bottom: 20px; cursor: pointer;
-  }
-  .sidebar-back:hover { text-decoration: underline; }
+/* ============ OUTPUT PAGE ============ */
+#output-page { display: none; }
+#output-page.active { display: flex; }
 
-  .book-main {
-    margin-left: 280px; max-width: 900px; padding: 48px 60px 80px;
-  }
-  .book-main h1 {
-    font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900;
-    color: var(--text); line-height: 1.2; margin-bottom: 8px;
-  }
-  .book-authors {
-    font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 32px;
-  }
-  .book-section { margin-bottom: 36px; }
-  .book-section h2 {
-    font-family: 'Source Sans 3', sans-serif; font-size: 22px; font-weight: 700;
-    color: var(--text); margin-bottom: 12px; padding-bottom: 6px;
-    border-bottom: 2px solid var(--accent-light);
-  }
-  .book-section p { font-size: 16px; line-height: 1.75; color: #495057; }
+.book-sidebar {
+  width: 280px; min-height: 100vh; background: var(--sidebar-bg);
+  border-right: 1px solid var(--border); padding: 24px 20px; position: fixed; top: 0; left: 0;
+  overflow-y: auto;
+}
+.book-sidebar h2 {
+  font-family: 'Source Sans 3', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--text); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.sidebar-nav a {
+  display: block; padding: 6px 10px; font-size: 14px; color: var(--text-muted);
+  text-decoration: none; border-radius: 4px; margin-bottom: 2px; transition: all 0.15s;
+}
+.sidebar-nav a:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+.sidebar-nav a.active { background: rgba(190,75,219,0.08); color: var(--accent); font-weight: 600; }
+.sidebar-back {
+  display: inline-block; font-size: 13px; color: var(--accent); text-decoration: none;
+  margin-bottom: 20px; cursor: pointer;
+}
+.sidebar-back:hover { text-decoration: underline; }
 
-  .method-box {
-    background: var(--code-bg); border-left: 4px solid var(--accent);
-    padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 12px 0;
-  }
-  .method-box p { font-size: 15px; color: #495057; }
+/* GitHub status in sidebar */
+.gh-status {
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
+}
+.gh-status-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.gh-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+  padding: 4px 10px; border-radius: 20px; font-weight: 600;
+}
+.gh-badge.pending { background: #fff3cd; color: #856404; }
+.gh-badge.saved { background: #d1fae5; color: #065f46; }
+.gh-badge.error { background: #fee2e2; color: #991b1b; }
+.gh-files { margin-top: 8px; }
+.gh-file-link {
+  display: block; font-size: 12px; color: var(--accent); text-decoration: none;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
+  word-break: break-all;
+}
+.gh-file-link:hover { text-decoration: underline; }
 
-  .plot-container {
-    background: #fff; border: 1px solid var(--border); border-radius: 8px;
-    padding: 24px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .plot-caption {
-    text-align: center; font-size: 13px; color: var(--text-muted);
-    font-style: italic; margin-top: 10px;
-  }
+.book-main {
+  margin-left: 280px; max-width: 900px; padding: 48px 60px 80px;
+}
+.book-main h1 {
+  font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900;
+  color: var(--text); line-height: 1.2; margin-bottom: 8px;
+}
+.book-authors {
+  font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 32px;
+}
+.book-section { margin-bottom: 36px; }
+.book-section h2 {
+  font-family: 'Source Sans 3', sans-serif; font-size: 22px; font-weight: 700;
+  color: var(--text); margin-bottom: 12px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--accent-light);
+}
+.book-section p { font-size: 16px; line-height: 1.75; color: #495057; }
 
-  .results-table {
-    width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0;
-  }
-  .results-table th {
-    text-align: right; padding: 8px 12px; border-bottom: 2px solid var(--border);
-    font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
-  }
-  .results-table td {
-    text-align: right; padding: 7px 12px; border-bottom: 1px solid #f1f3f5;
-    font-variant-numeric: tabular-nums;
-  }
-  .results-table tr.effect { background: rgba(192,57,43,0.04); }
-  .results-table tr.placebo { background: rgba(37,99,235,0.04); }
-  .results-table td:first-child { text-align: left; font-weight: 600; }
+.method-box {
+  background: var(--code-bg); border-left: 4px solid var(--accent);
+  padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 12px 0;
+}
+.method-box p { font-size: 15px; color: #495057; }
 
-  /* Responsive */
-  @media (max-width: 860px) {
-    .book-sidebar { display: none; }
-    .book-main { margin-left: 0; padding: 32px 24px; }
-  }
+/* Code block */
+.code-block {
+  background: #1e1e2e; border-radius: 8px; padding: 20px 24px; margin: 12px 0;
+  overflow-x: auto;
+}
+.code-block pre {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #cdd6f4;
+  line-height: 1.7; white-space: pre-wrap; word-break: break-all;
+}
+.code-tabs { display: flex; gap: 4px; margin-bottom: -1px; }
+.code-tab {
+  padding: 6px 16px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent; background: #2a2a3e; color: #888;
+  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+}
+.code-tab.active { background: #1e1e2e; color: #cdd6f4; border-color: #333; }
+
+.plot-container {
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  padding: 24px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.plot-caption {
+  text-align: center; font-size: 13px; color: var(--text-muted);
+  font-style: italic; margin-top: 10px;
+}
+
+.results-table {
+  width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0;
+}
+.results-table th {
+  text-align: right; padding: 8px 12px; border-bottom: 2px solid var(--border);
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+}
+.results-table td {
+  text-align: right; padding: 7px 12px; border-bottom: 1px solid #f1f3f5;
+  font-variant-numeric: tabular-nums;
+}
+.results-table tr.effect { background: rgba(192,57,43,0.04); }
+.results-table tr.placebo { background: rgba(37,99,235,0.04); }
+.results-table td:first-child { text-align: left; font-weight: 600; }
+
+/* ============ ACCEPT / REJECT BAR ============ */
+.decision-bar {
+  position: fixed; bottom: 0; left: 280px; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  padding: 16px 60px; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100;
+}
+.decision-bar .decision-label {
+  font-size: 15px; color: var(--text-muted);
+}
+.decision-bar .decision-label strong { color: var(--text); }
+.decision-btns { display: flex; gap: 12px; }
+.btn-accept {
+  padding: 10px 28px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+  transition: all 0.2s; box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+}
+.btn-accept:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(34,197,94,0.4); }
+.btn-accept:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-reject {
+  padding: 10px 28px; border-radius: 8px; border: 1px solid #fca5a5; cursor: pointer;
+  background: #fff; color: #ef4444;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+  transition: all 0.2s;
+}
+.btn-reject:hover { background: #fee2e2; }
+
+/* Saving overlay */
+.saving-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 200; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.saving-overlay.active { display: flex; }
+.saving-spinner {
+  width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.saving-text { color: #fff; font-size: 18px; font-weight: 600; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 90px; right: 32px; padding: 14px 20px;
+  border-radius: 10px; font-size: 15px; font-weight: 600; z-index: 300;
+  opacity: 0; transform: translateY(12px); transition: all 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.toast.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+@media (max-width: 860px) {
+  .book-sidebar { display: none; }
+  .book-main { margin-left: 0; padding: 32px 24px 120px; }
+  .decision-bar { left: 0; padding: 16px 24px; }
+}
 </style>
 </head>
 <body>
@@ -172,7 +273,7 @@
 <div id="input-page">
   <div class="form-card">
     <h1>Event Study Plotter</h1>
-    <p class="subtitle">Enter paper details and upload a CSV to generate a publication-ready event-study visualization.</p>
+    <p class="subtitle">Upload a CSV, visualize the event study, and save results to GitHub automatically.</p>
 
     <label class="form-label">Paper Title *</label>
     <input id="f-title" class="form-input" placeholder="e.g. Effect of Newspapers on Voter Turnout">
@@ -186,6 +287,16 @@
     <label class="form-label">Identification Strategy</label>
     <textarea id="f-method" class="form-textarea" rows="2" placeholder="e.g. Difference-in-differences with staggered treatment..."></textarea>
 
+    <label class="form-label">DiD Code <span>— paste the code that generated this CSV</span></label>
+    <textarea id="f-code" class="form-textarea" rows="8" placeholder="e.g. did_multiplegt_dyn Y G T D, graph_off placebo(4) ..."></textarea>
+
+    <label class="form-label">Code Language</label>
+    <div class="ci-group">
+      <button class="ci-btn active" data-lang="stata" onclick="setLang('stata')">Stata</button>
+      <button class="ci-btn" data-lang="r" onclick="setLang('r')">R</button>
+      <button class="ci-btn" data-lang="python" onclick="setLang('python')">Python</button>
+    </div>
+
     <label class="form-label">Confidence Level</label>
     <div class="ci-group">
       <button class="ci-btn" data-ci="90" onclick="setCI(90)">90%</button>
@@ -193,7 +304,7 @@
       <button class="ci-btn" data-ci="99" onclick="setCI(99)">99%</button>
     </div>
 
-    <label class="form-label">CSV Data * <span>— 3 columns: time_to_treatment, coefficient, standard_error</span></label>
+    <label class="form-label">CSV Data * <span>— columns: time_to_treatment, coefficient, standard_error</span></label>
     <div id="upload-zone" class="upload-zone" onclick="document.getElementById('file-input').click()">
       <input type="file" id="file-input" accept=".csv,.tsv,.txt" style="display:none" onchange="handleFile(event)">
       <p id="upload-text">Click to upload CSV or TSV file</p>
@@ -202,11 +313,26 @@
 
     <button class="demo-btn" onclick="loadDemo()">Load demo data (Gentzkow et al., 2011)</button><br>
 
+    <label class="form-label">Reviewer Name <span>— who is reviewing this study</span></label>
+    <input id="f-reviewer" class="form-input" placeholder="e.g. Dr. Jane Smith">
+
+    <label class="form-label">Reviewer Comments <span>— questions or feedback</span></label>
+    <textarea id="f-reviewer-comments" class="form-textarea" rows="3" placeholder="e.g. Are the pre-trends significant? What about heterogeneity?"></textarea>
+
+    <label class="form-label">Author Response <span>— response to reviewer comments</span></label>
+    <textarea id="f-author-response" class="form-textarea" rows="3" placeholder="e.g. Pre-trends are not significant at 5% level..."></textarea>
+
+    <label class="form-label">GitHub Token <span>— to save results to the repo</span></label>
+    <div class="token-row">
+      <input id="f-token" class="form-input" type="password" placeholder="ghp_...">
+      <button class="token-toggle" onclick="toggleToken()">Show</button>
+    </div>
+
     <button id="submit-btn" class="submit-btn" onclick="generate()">Generate Event Study →</button>
   </div>
 </div>
 
-<!-- ========== OUTPUT PAGE (QUARTO BOOK STYLE) ========== -->
+<!-- ========== OUTPUT PAGE ========== -->
 <div id="output-page">
   <nav class="book-sidebar">
     <a class="sidebar-back" onclick="goBack()">← Back to form</a>
@@ -214,12 +340,20 @@
     <div class="sidebar-nav">
       <a href="#sec-overview" class="active">Overview</a>
       <a href="#sec-method">Identification</a>
+      <a href="#sec-code">Code</a>
       <a href="#sec-plot">Event Study Plot</a>
       <a href="#sec-results">Results Table</a>
+      <a href="#sec-qa">Reviewer Q&A</a>
+    </div>
+
+    <div class="gh-status">
+      <div class="gh-status-label">GitHub Status</div>
+      <span id="gh-badge" class="gh-badge pending">⏳ Pending decision</span>
+      <div class="gh-files" id="gh-files"></div>
     </div>
   </nav>
 
-  <main class="book-main">
+  <main class="book-main" style="padding-bottom: 100px;">
     <h1 id="out-title"></h1>
     <p class="book-authors" id="out-authors"></p>
 
@@ -232,6 +366,16 @@
       <h2>Identification Strategy</h2>
       <div class="method-box">
         <p id="out-method"></p>
+      </div>
+    </section>
+
+    <section class="book-section" id="sec-code">
+      <h2>Code</h2>
+      <div class="code-tabs">
+        <div id="tab-label" class="code-tab active">Stata</div>
+      </div>
+      <div class="code-block">
+        <pre id="out-code"></pre>
       </div>
     </section>
 
@@ -258,30 +402,106 @@
         <tbody id="results-body"></tbody>
       </table>
     </section>
+
+    <section class="book-section" id="sec-qa">
+      <h2>Reviewer Q&A</h2>
+      <div id="qa-content" style="display:none">
+        <div class="method-box" style="margin-bottom:12px">
+          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reviewer</p>
+          <p id="out-reviewer" style="font-weight:600"></p>
+        </div>
+        <div class="method-box" style="border-left-color:#2563eb;margin-bottom:12px">
+          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reviewer Comments</p>
+          <p id="out-reviewer-comments"></p>
+        </div>
+        <div class="method-box" style="border-left-color:#22c55e">
+          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Author Response</p>
+          <p id="out-author-response"></p>
+        </div>
+      </div>
+      <p id="qa-empty" style="color:#999;font-style:italic">No reviewer feedback provided.</p>
+    </section>
   </main>
+
+  <!-- DECISION BAR -->
+  <div class="decision-bar">
+    <div class="decision-label">
+      <strong>Review results</strong> — Accept to save CSV, plot, and metadata to GitHub
+    </div>
+    <div class="decision-btns">
+      <button class="btn-reject" onclick="rejectStudy()">✕ Reject</button>
+      <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save to GitHub</button>
+    </div>
+  </div>
 </div>
 
+<!-- SAVING OVERLAY -->
+<div class="saving-overlay" id="saving-overlay">
+  <div class="saving-spinner"></div>
+  <div class="saving-text" id="saving-text">Saving to GitHub...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
+// ============ STATE ============
 let parsedData = null;
 let ciLevel = 95;
+let codeLang = 'stata';
+let csvRawText = '';
+let currentId = null;
 const zMap = {90: 1.645, 95: 1.96, 99: 2.576};
+
+const GITHUB_REPO = 'damianrojasjhosbel-sudo/event_study_results';
+const GITHUB_BRANCH = 'main';
 
 const demoData = [
   {time:-4, coef:0.00022, se:0.00496},
   {time:-3, coef:-0.00079, se:0.00412},
   {time:-2, coef:0.00142, se:0.00459},
   {time:-1, coef:-0.00060, se:0.00563},
-  {time:1, coef:0.01436, se:0.00530},
-  {time:2, coef:0.01910, se:0.00598},
-  {time:3, coef:0.02073, se:0.00689},
-  {time:4, coef:0.02729, se:0.00834},
+  {time:1,  coef:0.01436, se:0.00530},
+  {time:2,  coef:0.01910, se:0.00598},
+  {time:3,  coef:0.02073, se:0.00689},
+  {time:4,  coef:0.02729, se:0.00834},
 ];
 
+const demoCSV = `time_to_treatment,coefficient,standard_error
+-4,0.00022,0.00496
+-3,-0.00079,0.00412
+-2,0.00142,0.00459
+-1,-0.00060,0.00563
+1,0.01436,0.00530
+2,0.01910,0.00598
+3,0.02073,0.00689
+4,0.02729,0.00834`;
+
+// ============ UI HELPERS ============
 function setCI(lv) {
   ciLevel = lv;
-  document.querySelectorAll('.ci-btn').forEach(b => b.classList.toggle('active', +b.dataset.ci === lv));
+  document.querySelectorAll('.ci-btn[data-ci]').forEach(b => b.classList.toggle('active', +b.dataset.ci === lv));
 }
 
+function setLang(lang) {
+  codeLang = lang;
+  document.querySelectorAll('.ci-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+}
+
+function toggleToken() {
+  const inp = document.getElementById('f-token');
+  const btn = document.querySelector('.token-toggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
+  else { inp.type = 'password'; btn.textContent = 'Show'; }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 4000);
+}
+
+// ============ CSV PARSING ============
 function parseCSV(text) {
   const lines = text.trim().split('\n').filter(l => l.trim());
   const sep = lines[0].includes('\t') ? '\t' : lines[0].includes(';') ? ';' : ',';
@@ -303,7 +523,8 @@ function handleFile(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    const d = parseCSV(ev.target.result);
+    csvRawText = ev.target.result;
+    const d = parseCSV(csvRawText);
     const zone = document.getElementById('upload-zone');
     const txt = document.getElementById('upload-text');
     const err = document.getElementById('error-msg');
@@ -328,8 +549,10 @@ function loadDemo() {
   document.getElementById('f-title').value = 'Effect of Newspapers on Voter Turnout';
   document.getElementById('f-authors').value = 'Gentzkow, Shapiro & Sinkinson (2011)';
   document.getElementById('f-desc').value = 'This paper estimates the effect of newspaper entry on political participation in US elections from 1868 to 1928, using county-level panel data on daily newspapers and presidential voter turnout.';
-  document.getElementById('f-method').value = 'Non-normalized event-study DID using did_multiplegt_dyn (de Chaisemartin & D\'Haultfœuille, 2024). Estimator allows non-binary, non-absorbing treatment with heterogeneous effects. Standard errors clustered at county level.';
+  document.getElementById('f-method').value = "Non-normalized event-study DID using did_multiplegt_dyn (de Chaisemartin & D'Haultfœuille, 2024). Standard errors clustered at county level.";
+  document.getElementById('f-code').value = "did_multiplegt_dyn lnVoters lnPapers year county, graph_off placebo(4) effects(4) cluster(county)";
   parsedData = demoData;
+  csvRawText = demoCSV;
   const zone = document.getElementById('upload-zone');
   zone.className = 'upload-zone loaded';
   document.getElementById('upload-text').innerHTML = '✓ <strong>demo_data.csv</strong> — 8 observations loaded';
@@ -338,28 +561,52 @@ function loadDemo() {
 }
 
 function checkReady() {
-  const ok = document.getElementById('f-title').value.trim() && document.getElementById('f-authors').value.trim() && parsedData;
+  const token = document.getElementById('f-token').value.trim();
+  const ok = document.getElementById('f-title').value.trim() &&
+             document.getElementById('f-authors').value.trim() &&
+             parsedData;
   const btn = document.getElementById('submit-btn');
   btn.className = ok ? 'submit-btn ready' : 'submit-btn';
 }
 document.querySelectorAll('.form-input,.form-textarea').forEach(el => el.addEventListener('input', checkReady));
 
+// ============ GENERATE ============
 function generate() {
   const title = document.getElementById('f-title').value.trim();
   const authors = document.getElementById('f-authors').value.trim();
   if (!title || !authors || !parsedData) return;
+
+  // Generate unique ID
+  currentId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
   document.getElementById('out-title').textContent = title;
   document.getElementById('out-authors').textContent = authors;
   document.getElementById('sidebar-title').textContent = title.length > 35 ? title.slice(0,35)+'…' : title;
   document.getElementById('out-desc').textContent = document.getElementById('f-desc').value || 'No description provided.';
   document.getElementById('out-method').textContent = document.getElementById('f-method').value || 'Not specified.';
+  document.getElementById('out-code').textContent = document.getElementById('f-code').value || '# No code provided';
+  document.getElementById('tab-label').textContent = codeLang.charAt(0).toUpperCase() + codeLang.slice(1);
+
+  // Q&A
+  const reviewerName = document.getElementById('f-reviewer').value.trim();
+  const reviewerComments = document.getElementById('f-reviewer-comments').value.trim();
+  const authorResponse = document.getElementById('f-author-response').value.trim();
+  if (reviewerName || reviewerComments || authorResponse) {
+    document.getElementById('qa-content').style.display = 'block';
+    document.getElementById('qa-empty').style.display = 'none';
+    document.getElementById('out-reviewer').textContent = reviewerName || 'Anonymous';
+    document.getElementById('out-reviewer-comments').textContent = reviewerComments || 'No comments.';
+    document.getElementById('out-author-response').textContent = authorResponse || 'No response.';
+  } else {
+    document.getElementById('qa-content').style.display = 'none';
+    document.getElementById('qa-empty').style.display = 'block';
+  }
 
   const z = zMap[ciLevel];
   document.getElementById('th-lb').textContent = 'LB ' + ciLevel + '%';
   document.getElementById('th-ub').textContent = 'UB ' + ciLevel + '%';
   document.getElementById('plot-caption').textContent =
-    'Event-study estimates with ' + ciLevel + '% confidence intervals. Blue = pre-treatment placebos. Red = post-treatment effects.';
+    'Figure 1. Event-study estimates with ' + ciLevel + '% confidence intervals. Blue = pre-treatment placebos. Red = post-treatment effects.';
 
   // Table
   const tbody = document.getElementById('results-body');
@@ -376,16 +623,14 @@ function generate() {
   // Plot
   drawPlot(sorted, z);
 
-  // Switch view
+  // Reset GH status
+  document.getElementById('gh-badge').className = 'gh-badge pending';
+  document.getElementById('gh-badge').textContent = '⏳ Pending decision';
+  document.getElementById('gh-files').innerHTML = '';
+  document.getElementById('btn-accept').disabled = false;
+
   document.getElementById('input-page').style.display = 'none';
   document.getElementById('output-page').classList.add('active');
-
-  // Sidebar scroll spy
-  const links = document.querySelectorAll('.sidebar-nav a');
-  links.forEach(a => a.addEventListener('click', function(e) {
-    links.forEach(x => x.classList.remove('active'));
-    this.classList.add('active');
-  }));
 }
 
 function goBack() {
@@ -393,22 +638,23 @@ function goBack() {
   document.getElementById('input-page').style.display = 'flex';
 }
 
+// ============ PLOT ============
 function drawPlot(data, z) {
   const canvas = document.getElementById('es-canvas');
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  const W = 760, H = 440;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
 
-  const pad = {top:25, right:35, bottom:55, left:65};
+  const pad = {top:25, right:35, bottom:55, left:72};
   const pw = W - pad.left - pad.right;
   const ph = H - pad.top - pad.bottom;
 
   const allY = data.flatMap(d => [d.coef + z*d.se, d.coef - z*d.se, 0]);
   const yMin = Math.min(...allY), yMax = Math.max(...allY);
-  const yPad = (yMax - yMin) * 0.12;
+  const yPad = (yMax - yMin) * 0.15;
 
   const xMin = Math.min(...data.map(d=>d.time)) - 0.6;
   const xMax = Math.max(...data.map(d=>d.time)) + 0.6;
@@ -416,7 +662,6 @@ function drawPlot(data, z) {
   const sx = t => pad.left + ((t - xMin) / (xMax - xMin)) * pw;
   const sy = v => pad.top + ((yMax + yPad - v) / (yMax - yMin + 2*yPad)) * ph;
 
-  // Background
   ctx.fillStyle = '#fff'; ctx.fillRect(0,0,W,H);
 
   // Grid
@@ -438,7 +683,7 @@ function drawPlot(data, z) {
   ctx.beginPath(); ctx.moveTo(pad.left, sy(0)); ctx.lineTo(W-pad.right, sy(0)); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Vertical at 0
+  // Vertical at t=0
   ctx.strokeStyle = '#ced4da'; ctx.lineWidth = 0.8; ctx.setLineDash([4,4]);
   ctx.beginPath(); ctx.moveTo(sx(0), pad.top); ctx.lineTo(sx(0), H-pad.bottom); ctx.stroke();
   ctx.setLineDash([]);
@@ -455,16 +700,14 @@ function drawPlot(data, z) {
     const color = d.time > 0 ? '#c0392b' : '#2563eb';
     ctx.strokeStyle = color; ctx.lineWidth = 2.2;
     ctx.beginPath(); ctx.moveTo(x, yTop); ctx.lineTo(x, yBot); ctx.stroke();
-    // Caps
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(x-4, yTop); ctx.lineTo(x+4, yTop); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x-4, yBot); ctx.lineTo(x+4, yBot); ctx.stroke();
-    // Point
     ctx.fillStyle = color;
     ctx.beginPath(); ctx.arc(x, yC, 4.5, 0, Math.PI*2); ctx.fill();
   });
 
-  // Zero point
+  // Zero reference point
   ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(sx(0), sy(0), 3, 0, Math.PI*2); ctx.fill();
 
   // X labels
@@ -474,18 +717,231 @@ function drawPlot(data, z) {
 
   // Axis labels
   ctx.font = '13px Source Sans 3'; ctx.fillStyle = '#495057';
-  ctx.fillText('Periods since treatment', W/2, H-8);
-  ctx.save(); ctx.translate(16, H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Periods since treatment', W/2, H-6);
+  ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2);
   ctx.fillText('Estimate and ' + ciLevel + '% CI', 0, 0);
   ctx.restore();
 
   // Legend
-  const lx = W - pad.right - 135;
+  const lx = W - pad.right - 140;
   ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(lx, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#495057'; ctx.font = '12px Source Sans 3'; ctx.textAlign = 'left';
-  ctx.fillText('Placebos', lx+10, pad.top+16);
-  ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(lx+80, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#495057'; ctx.fillText('Effects', lx+90, pad.top+16);
+  ctx.fillText('Placebos (pre)', lx+10, pad.top+16);
+  ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(lx+96, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#495057'; ctx.fillText('Effects (post)', lx+106, pad.top+16);
+}
+
+// ============ ACCEPT / REJECT ============
+async function acceptStudy() {
+  const token = document.getElementById('f-token').value.trim();
+  if (!token) { showToast('Please enter a GitHub token', 'error'); return; }
+
+  document.getElementById('btn-accept').disabled = true;
+  const overlay = document.getElementById('saving-overlay');
+  overlay.classList.add('active');
+
+  try {
+    const id = currentId;
+    const title = document.getElementById('out-title').textContent;
+    const authors = document.getElementById('out-authors').textContent;
+    const desc = document.getElementById('out-desc').textContent;
+    const method = document.getElementById('out-method').textContent;
+    const code = document.getElementById('out-code').textContent;
+    const ts = new Date().toISOString();
+
+    const folderBase = `event_study`;
+
+    // 1. Save CSV
+    document.getElementById('saving-text').textContent = 'Saving CSV...';
+    const csvPath = `${folderBase}/csv/${id}.csv`;
+    await ghPut(token, csvPath, csvRawText, `Add event study CSV [${id}]`);
+
+    // 2. Save PNG
+    document.getElementById('saving-text').textContent = 'Saving plot PNG...';
+    const canvas = document.getElementById('es-canvas');
+    const pngB64 = await canvasToBase64(canvas);
+    const pngPath = `${folderBase}/plots/${id}.png`;
+    await ghPutB64(token, pngPath, pngB64, `Add event study plot [${id}]`);
+
+    // 3. Save JSON (metadata + Q&A)
+    document.getElementById('saving-text').textContent = 'Saving metadata JSON...';
+    const reviewerName = document.getElementById('f-reviewer').value.trim();
+    const reviewerComments = document.getElementById('f-reviewer-comments').value.trim();
+    const authorResponse = document.getElementById('f-author-response').value.trim();
+
+    const jsonObj = {
+      id,
+      timestamp: ts,
+      paper: { title, authors, description: desc },
+      methodology: { identification_strategy: method, code_language: codeLang, code },
+      qa: {
+        reviewer_name: reviewerName || null,
+        reviewer_comments: reviewerComments || null,
+        author_response: authorResponse || null
+      },
+      results: {
+        confidence_level: ciLevel,
+        observations: parsedData.length,
+        data: [...parsedData].sort((a,b)=>a.time-b.time).map(d => {
+          const z = zMap[ciLevel];
+          return { period: d.time, estimate: d.coef, std_error: d.se,
+                   lb: d.coef - z*d.se, ub: d.coef + z*d.se };
+        })
+      },
+      github: {
+        repo: GITHUB_REPO,
+        csv_path: csvPath,
+        plot_path: pngPath,
+        json_path: `${folderBase}/json/${id}.json`
+      },
+      decision: { accepted: true, accepted_at: ts }
+    };
+    const jsonPath = `${folderBase}/json/${id}.json`;
+    await ghPut(token, jsonPath, JSON.stringify(jsonObj, null, 2), `Add event study metadata [${id}]`);
+
+    overlay.classList.remove('active');
+
+    // Update sidebar status
+    const badge = document.getElementById('gh-badge');
+    badge.className = 'gh-badge saved';
+    badge.textContent = '✓ Saved to GitHub';
+
+    const filesDiv = document.getElementById('gh-files');
+    const baseUrl = `https://github.com/${GITHUB_REPO}/blob/${GITHUB_BRANCH}`;
+    filesDiv.innerHTML = `
+      <a class="gh-file-link" href="${baseUrl}/${csvPath}" target="_blank">📄 ${id}.csv</a>
+      <a class="gh-file-link" href="${baseUrl}/${pngPath}" target="_blank">🖼 ${id}.png</a>
+      <a class="gh-file-link" href="${baseUrl}/${jsonPath}" target="_blank">📋 ${id}.json</a>
+    `;
+
+    showToast('✓ Saved to GitHub successfully!', 'success');
+
+  } catch(err) {
+    overlay.classList.remove('active');
+    document.getElementById('btn-accept').disabled = false;
+    const badge = document.getElementById('gh-badge');
+    badge.className = 'gh-badge error';
+    badge.textContent = '✗ Save failed';
+    showToast('Error saving to GitHub: ' + err.message, 'error');
+    console.error(err);
+  }
+}
+
+function rejectStudy() {
+  const badge = document.getElementById('gh-badge');
+  badge.className = 'gh-badge error';
+  badge.textContent = '✗ Rejected — not saved';
+  document.getElementById('btn-accept').disabled = true;
+  showToast('Results rejected. Go back to modify inputs.', 'error');
+}
+
+// ============ CANVAS TO BASE64 (manual encoder, no btoa) ============
+function uint8ToBase64(bytes) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const len = bytes.length;
+  const parts = [];
+  for (let i = 0; i < len; i += 3) {
+    const a = bytes[i];
+    const b = i + 1 < len ? bytes[i + 1] : 0;
+    const c = i + 2 < len ? bytes[i + 2] : 0;
+    parts.push(
+      chars[a >> 2],
+      chars[((a & 3) << 4) | (b >> 4)],
+      i + 1 < len ? chars[((b & 15) << 2) | (c >> 6)] : '=',
+      i + 2 < len ? chars[c & 63] : '='
+    );
+  }
+  return parts.join('');
+}
+
+function canvasToBase64(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) { reject(new Error('Canvas toBlob returned null')); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const bytes = new Uint8Array(reader.result);
+        resolve(uint8ToBase64(bytes));
+      };
+      reader.onerror = () => reject(new Error('FileReader failed'));
+      reader.readAsArrayBuffer(blob);
+    }, 'image/png');
+  });
+}
+
+// ============ GITHUB API ============
+
+// Safe UTF-8 to Base64 (replaces broken btoa+unescape combo)
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function ghGetSha(token, url) {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) { const j = await res.json(); return j.sha; }
+  } catch(e) {}
+  return null;
+}
+
+async function ghPut(token, path, content, message) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
+  const sha = await ghGetSha(token, url);
+
+  const body = { message, content: utf8ToBase64(content), branch: GITHUB_BRANCH };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: 'token ' + token,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'GitHub API error ' + res.status);
+  }
+  return res.json();
+}
+
+async function ghPutB64(token, path, b64content, message) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
+  const sha = await ghGetSha(token, url);
+
+  const cleanB64 = b64content.replace(/[\s\r\n]/g, '');
+
+  const body = { message, content: cleanB64, branch: GITHUB_BRANCH };
+  if (sha) body.sha = sha;
+
+  // Send body as Blob to prevent browser extensions from modifying the content
+  const jsonStr = JSON.stringify(body);
+  const bodyBlob = new Blob([jsonStr], { type: 'application/json' });
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: 'token ' + token,
+      Accept: 'application/vnd.github.v3+json'
+    },
+    body: bodyBlob
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'GitHub API error ' + res.status);
+  }
+  return res.json();
 }
 </script>
 </body>
