@@ -25,7 +25,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 **Installation notes:**
 
 - **R `DIDmultiplegtSTAT`:** `devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)`
-- **R `DIDmultiplegtDYN`:** The `design()` option has a known `data.table` join bug. Treatment path tables (GQ5) are Stata-only. Effects match across platforms.
+- **R `DIDmultiplegtDYN`:** The `design()` option works with `design=c(0.8,"console")`. Effects match across platforms.
 - **Python `did_multiplegt_dyn`:** `pip install py-did-multiplegt-dyn`. Requires `polars` DataFrames.
 - **Python `did_multiplegt_stat`:** Local notebook-based translation; see `py_did_multiplegt_stat`.
 
@@ -41,6 +41,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 
 ```stata
 * ssc install panelview, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 panelview prestout numdailies, i(cnty90) t(year) type(treat) ///
     title("Gentzkow et al. (2011)") legend(off) ///
@@ -54,7 +55,7 @@ graph export "figures/ch05_panelview_stata.png", replace width(1200)
 
 ```r
 library(haven); library(panelView)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 panelview(prestout ~ numdailies, data = df,
           index = c("cnty90", "year"), type = "treat",
           main = "Gentzkow et al. (2011)",
@@ -71,7 +72,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 df["has_newspaper"] = (df["numdailies"] > 0).astype(int)
 pv = df.pivot_table(index="cnty90", columns="year", values="has_newspaper", aggfunc="first")
 pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
@@ -108,6 +109,7 @@ plt.show()
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 reg changedailies lag_numdailies, cluster(cnty90)
 ```
@@ -128,7 +130,7 @@ N = 15,627
 
 ```r
 library(haven); library(lmtest); library(sandwich)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq1 <- lm(changedailies ~ lag_numdailies, data = df)
 coeftest(gq1, vcov = vcovCL(gq1, cluster = ~cnty90))
 ```
@@ -145,7 +147,7 @@ N = 15,627
 ```python
 import pandas as pd
 import statsmodels.api as sm
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 sub = df.dropna(subset=['changedailies','lag_numdailies'])
 y = sub['changedailies']; X = sm.add_constant(sub['lag_numdailies'])
 res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
@@ -173,6 +175,7 @@ res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 reg changedailies lag_ishare_urb, cluster(cnty90)
 ```
@@ -193,7 +196,7 @@ N = 15,292
 
 ```r
 library(haven); library(lmtest); library(sandwich)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq2 <- lm(changedailies ~ lag_ishare_urb, data = df)
 coeftest(gq2, vcov = vcovCL(gq2, cluster = ~cnty90))
 ```
@@ -210,7 +213,7 @@ N = 15,292
 ```python
 import pandas as pd
 import statsmodels.api as sm
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 sub = df.dropna(subset=['changedailies','lag_ishare_urb'])
 y = sub['changedailies']; X = sm.add_constant(sub['lag_ishare_urb'])
 res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
@@ -238,6 +241,7 @@ res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 areg prestout i.year numdailies lag_numdailies, absorb(cnty90) cluster(cnty90)
 ```
@@ -256,6 +260,7 @@ N = 15,629
 
 ```stata
 * ssc install twowayfeweights, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 * Decompose beta on numdailies
 twowayfeweights prestout cnty90 year numdailies, ///
@@ -286,7 +291,7 @@ Under the common trends assumption, beta estimates a weighted sum of 9,339 ATTs.
 
 ```r
 library(haven); library(fixest); library(TwoWayFEWeights)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq3 <- feols(prestout ~ numdailies + lag_numdailies | cnty90 + year,
              data = df, cluster = ~cnty90)
 summary(gq3)
@@ -320,7 +325,7 @@ N = 15,629
 import pandas as pd
 import pyfixest as pf
 from twowayfeweights import twowayfeweights
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 # TWFE with county and year FEs
 m8 = pf.feols("prestout ~ numdailies + lag_numdailies + C(year) | cnty90",
               data=df, vcov={"CRV1": "cnty90"},
@@ -386,6 +391,7 @@ Total                   10056       0.0000
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(4) placebo(4) cluster(cnty90)
@@ -429,7 +435,7 @@ Test of joint nullity of the placebos : p-value = 0.9922
 
 ```r
 library(haven); library(DIDmultiplegtDYN)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq4 <- did_multiplegt_dyn(
     df = df, outcome = "prestout", group = "cnty90",
     time = "year", treatment = "numdailies",
@@ -465,26 +471,13 @@ import pandas as pd
 import polars as pl
 import matplotlib.pyplot as plt
 from did_multiplegt_dyn import DidMultiplegtDyn
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 df_pl = pl.from_pandas(df)
 pd.set_option('display.float_format', lambda x: f'{x:.7f}')
 gq4 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4, cluster="cnty90")
 gq4.fit(); gq4.summary()
-mat = gq4.result['mat_res_XX']
-mat = mat[mat.index != 4].copy()
-ref = pd.DataFrame({'Estimate': [0], 'LB CI': [0], 'UB CI': [0], 'Time': [0]})
-mat = pd.concat([mat, ref], ignore_index=True).sort_values('Time')
-fig, ax = plt.subplots(figsize=(8, 5))
-ax.plot(mat['Time'], mat['Estimate'], 'o-', color='navy', markersize=5, linewidth=1.5)
-ax.errorbar(mat['Time'], mat['Estimate'],
-    yerr=[mat['Estimate']-mat['LB CI'], mat['UB CI']-mat['Estimate']],
-    fmt='none', ecolor='firebrick', capsize=3, linewidth=1.2)
-ax.axhline(0, color='black', linewidth=0.8)
-ax.axvline(0, color='black', linewidth=0.8)
-ax.set_xlabel("Relative time to last period before treatment changes (t=0)")
-ax.set_title("DID, from last period before treatment changes (t=0) to t")
-plt.tight_layout()
+gq4.plot()
 plt.savefig("figures/ch08_fig81_nonnormalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
@@ -524,6 +517,7 @@ Joint nullity of placebos : p = 0.992198
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(1) design(0.8,console) graph_off
@@ -580,7 +574,7 @@ Detection of treatment paths - 4 periods after first switch (933 switchers):
 
 ```r
 library(haven); library(polars); library(DIDmultiplegtDYN)
-df <- as.data.frame(read_dta("gentzkowetal_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData")); df <- as.data.frame(df)
 gq5_l1 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=1,
     design=c(0.8,"console"), graph_off=TRUE)
@@ -637,40 +631,77 @@ Detection of treatment paths - 4 periods after first switch:
 import pandas as pd
 import polars as pl
 from did_multiplegt_dyn import DidMultiplegtDyn
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 df_pl = pl.from_pandas(df)
 pd.set_option('display.float_format', lambda x: f'{x:.7f}')
-# design() option not yet available in py-did-multiplegt-dyn.
 for ell in [1, 2, 4]:
     model = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
-        time="year", treatment="numdailies", effects=ell, cluster="cnty90")
+        time="year", treatment="numdailies", effects=ell, cluster="cnty90",
+        design=[0.8, "console"])
     model.fit(); model.summary()
 ```
 
 ```
 --- effects = 1 ---
+================================================================================
+  Detection of treatment paths - 1 periods after first switch
+================================================================================
+            #Groups    %Groups       l=0       l=1
+TreatPath1      721 64.0319716 0.0000000 1.0000000
+TreatPath2      139 12.3445826 0.0000000 2.0000000
+TreatPath3       54  4.7957371 1.0000000 2.0000000
+TreatPath4       54  4.7957371 2.0000000 3.0000000
+================================================================================
+Treatment paths detected in switching groups: 1126
+Total % shown: 85.97%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
-Av_tot_eff   0.0120186 0.0035392  0.0050819 0.0189552   5674      1119
 
 --- effects = 2 ---
+================================================================================
+  Detection of treatment paths - 2 periods after first switch
+================================================================================
+             #Groups    %Groups       l=0       l=1       l=2
+TreatPath1       343 32.1462043 0.0000000 1.0000000 1.0000000
+TreatPath2       187 17.5257732 0.0000000 1.0000000 0.0000000
+TreatPath3       131 12.2774133 0.0000000 1.0000000 2.0000000
+TreatPath4        57  5.3420806 0.0000000 2.0000000 2.0000000
+TreatPath5        47  4.4048735 0.0000000 2.0000000 1.0000000
+TreatPath6        33  3.0927835 1.0000000 2.0000000 2.0000000
+TreatPath7        30  2.8116214 0.0000000 1.0000000 3.0000000
+TreatPath8        22  2.0618557 2.0000000 3.0000000 2.0000000
+TreatPath9        20  1.8744142 2.0000000 1.0000000 1.0000000
+================================================================================
+Treatment paths detected in switching groups: 1067
+Total % shown: 83.22%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
 Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
 Av_tot_eff   0.0143270 0.0039890  0.0065087 0.0221454   6754      2173
-Joint nullity p-value = 0.001482
 
 --- effects = 4 ---
+================================================================================
+  Detection of treatment paths - 4 periods after first switch
+================================================================================
+             #Groups    %Groups       l=0       l=1       l=2       l=3       l=4
+TreatPath1       141 15.1125402 0.0000000 1.0000000 1.0000000 1.0000000 1.0000000
+TreatPath2       127 13.6120043 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000
+TreatPath3        43  4.6087889 0.0000000 1.0000000 2.0000000 2.0000000 2.0000000
+  ... (57 treatment paths total, top 3 cover 33.3%)
+================================================================================
+Treatment paths detected in switching groups: 933
+Total % shown: 80.49%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
 Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
 Effect_3     0.0207147 0.0079164  0.0051989 0.0362305   3750       984
 Effect_4     0.0272653 0.0097924  0.0080727 0.0464580   2980       917
 Av_tot_eff   0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
-Joint nullity p-value = 0.006814
 
-All effects match Stata/R to 7 decimal places.
-Treatment path tables not available (design option not in Python package).
+All effects and treatment paths match Stata/R.
 ```
 
 :::
@@ -689,6 +720,7 @@ Treatment path tables not available (design option not in Python package).
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, ///
     effects(4) placebo(4) normalized effects_equal(all) cluster(cnty90)
@@ -735,7 +767,7 @@ Test of joint nullity of the placebos : p-value = 0.9922
 
 ```r
 library(haven); library(DIDmultiplegtDYN)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq6 <- did_multiplegt_dyn(
     df = df, outcome = "prestout", group = "cnty90",
     time = "year", treatment = "numdailies",
@@ -773,27 +805,14 @@ import pandas as pd
 import polars as pl
 import matplotlib.pyplot as plt
 from did_multiplegt_dyn import DidMultiplegtDyn
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 df_pl = pl.from_pandas(df)
 pd.set_option('display.float_format', lambda x: f'{x:.7f}')
 gq6 = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4, placebo=4,
     normalized=True, effects_equal=True, cluster="cnty90")
 gq6.fit(); gq6.summary()
-mat = gq6.result['mat_res_XX']
-mat = mat[mat.index != 4].copy()
-ref = pd.DataFrame({'Estimate': [0], 'LB CI': [0], 'UB CI': [0], 'Time': [0]})
-mat = pd.concat([mat, ref], ignore_index=True).sort_values('Time')
-fig, ax = plt.subplots(figsize=(8, 5))
-ax.plot(mat['Time'], mat['Estimate'], 'o-', color='navy', markersize=5, linewidth=1.5)
-ax.errorbar(mat['Time'], mat['Estimate'],
-    yerr=[mat['Estimate']-mat['LB CI'], mat['UB CI']-mat['Estimate']],
-    fmt='none', ecolor='firebrick', capsize=3, linewidth=1.2)
-ax.axhline(0, color='black', linewidth=0.8)
-ax.axvline(0, color='black', linewidth=0.8)
-ax.set_xlabel("Relative time to last period before treatment changes (t=0)")
-ax.set_title("DID, from last period before treatment changes (t=0) to t")
-plt.tight_layout()
+gq6.plot()
 plt.savefig("figures/ch08_fig82_normalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
@@ -834,6 +853,7 @@ Equality of effects : p = 0.165258
 
 ```stata
 * ssc install did_multiplegt_stat, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_stat prestout cnty90 year numdailies, ///
     placebo(1) exact_match
@@ -876,103 +896,15 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 
 ### R
 
-```r
-library(haven); library(DIDmultiplegtSTAT)
-df <- read_dta("gentzkowetal_didtextbook.dta")
-# devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)
-gq7 <- did_multiplegt_stat(
-    df = as.data.frame(df),
-    Y = "prestout", ID = "cnty90",
-    Time = "year", D = "numdailies",
-    placebo = TRUE, exact_match = TRUE)
-print(gq7)
 ```
-
-```
------------------------------------
-N                =            15466
-WAOSS Method     =  Reg. Adjustment
-Common Support   =   Exact Matching
------------------------------------
-
-----------------------------------------------------------------------
-                    Estimation of AOSS(s)
-----------------------------------------------------------------------
-     Estimate    SE      LB CI   UB CI   Switchers Stayers
-AOSS 0.0062363 0.0014311 0.0034312 0.0090413 4,423     11,043
-
-----------------------------------------------------------------------
-               Estimation of AOSS(s) - Placebo
-----------------------------------------------------------------------
-      Estimate    SE      LB CI    UB CI   Switchers Stayers
-AOSS -0.0009239 0.0014709 -0.0038067 0.0019590 2,287     7,743
-
-----------------------------------------------------------------------
-                    Estimation of WAOSS(s)
-----------------------------------------------------------------------
-      Estimate    SE      LB CI   UB CI   Switchers Stayers
-WAOSS 0.0059026 0.0013034 0.0033480 0.0084572 4,423     11,043
-
-----------------------------------------------------------------------
-               Estimation of WAOSS(s) - Placebo
-----------------------------------------------------------------------
-      Estimate    SE      LB CI    UB CI   Switchers Stayers
-WAOSS 0.0002176 0.0013382 -0.0024053 0.0028404 2,287     7,743
-
-203 switchers dropped | 43 stayers dropped
-```
-
-### Python
-
-```python
-import pandas as pd
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
-# py_did_multiplegt_stat (local notebook-based translation)
-# Located at: C:\...\py_did_multiplegt_stat\stat_python
-res = did_multiplegt_stat(
-    df=df, Y="prestout", ID="cnty90", Time="year", D="numdailies",
-    estimator=["aoss","waoss"], estimation_method="ra",
-    placebo=True, exact_match=True)
-summary_did_multiplegt_stat(res)
-```
-
-```
------------------------------------
-N                =            15466
-WAOSS Method     =  Reg. Adjustment
-Common Support   =   Exact Matching
------------------------------------
-
-----------------------------------------------------------------------
-                    Estimation of AOSS(s)
-----------------------------------------------------------------------
-       Estimate         SE      LB CI      UB CI Switchers Stayers
-AOSS  0.0061034  0.0016286  0.0029113  0.0092954     4,423  11,043
-
-----------------------------------------------------------------------
-               Estimation of AOSS(s) - Placebo(s)
-----------------------------------------------------------------------
-             Estimate         SE       LB CI      UB CI Switchers Stayers
-Placebo_1  -0.0011280  0.0025056  -0.0060389  0.0037829     2,287   7,743
-
-----------------------------------------------------------------------
-                    Estimation of WAOSS(s)
-----------------------------------------------------------------------
-        Estimate         SE      LB CI      UB CI Switchers Stayers
-WAOSS  0.0057527  0.0014895  0.0028333  0.0086721     4,423  11,043
-
-----------------------------------------------------------------------
-               Estimation of WAOSS(s) - Placebo(s)
-----------------------------------------------------------------------
-                   Estimate         SE       LB CI      UB CI Switchers Stayers
-Placebo_1_waoss  -0.0000125  0.0022931  -0.0045070  0.0044820     2,287   7,743
+Note: The R DIDmultiplegtSTAT and Python py_did_multiplegt_stat packages
+are not yet updated to match the current Stata version. Results will be
+added when the packages are synchronized.
 ```
 
 :::
 
-**Interpretation:** Both ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive across all three platforms. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response: the average effect per unit of treatment change is smaller when computed across all switcher magnitudes.
-
-Note: Stata, R, and Python point estimates differ slightly due to internal implementation variations (matching algorithms, variance formulas). N, switchers, and stayers are identical across all three.
+**Interpretation:** The ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response.
 
 ---
 
@@ -986,6 +918,7 @@ Note: Stata, R, and Python point estimates differ slightly due to internal imple
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies ///
     if year<=first_change | same_treat_after_first_change==1, ///
@@ -1007,7 +940,7 @@ Test of equality of the effects : p-value = 0.8301
 
 ```r
 library(haven); library(DIDmultiplegtDYN)
-df <- read_dta("gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 df_sub <- subset(df, year <= first_change | same_treat_after_first_change == 1)
 bonus <- did_multiplegt_dyn(
     df = df_sub, outcome = "prestout", group = "cnty90",
@@ -1030,7 +963,7 @@ Test of equality of the effects : p-value = 0.8301
 import pandas as pd
 import polars as pl
 from did_multiplegt_dyn import DidMultiplegtDyn
-df = pd.read_stata("gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 df_pl = pl.from_pandas(df)
 bonus = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=2,

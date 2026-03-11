@@ -18,6 +18,7 @@ This chapter explores alternatives to the parallel trends assumption. We conside
 
 ```stata
 * ssc install panelview, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 panelview patents twea, i(subclass) t(year) type(treat) ///
     title("Treatment Status: Moser & Voena (2012)") ///
@@ -31,7 +32,7 @@ graph export "figures/ch03_panelview_stata.png", replace width(1200)
 
 ```r
 library(haven); library(ggplot2)
-df <- read_dta("moser_voena_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 treat_yr <- aggregate(year ~ subclass, data = df[df$twea == 1,], FUN = min)
 names(treat_yr)[2] <- "first_treat"
 df <- merge(df, treat_yr, by = "subclass", all.x = TRUE)
@@ -65,7 +66,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-df = pd.read_stata("moser_voena_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 pv = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="first")
 pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
 cmap = mcolors.ListedColormap(["#D4E6F1", "#00AAAA"])
@@ -102,6 +103,7 @@ plt.show()
 
 ```stata
 * ssc install reghdfe, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 reghdfe patents reltimeminus* reltimeplus*, ///
     absorb(year#patents1900 treatmentgroup) cluster(subclass)
@@ -166,6 +168,7 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
 ```
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * F-test on pre-trends
 test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 ///
@@ -181,6 +184,7 @@ test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 ///
 ```
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Testing correlation between treatment and covariate
 reg patents1900 treatmentgroup if year==1900
@@ -206,7 +210,7 @@ treatmentgroup |   -.156312   .0432625    -3.61   0.000     -.241119    -.071505
 
 ```r
 library(fixest); library(haven); library(car); library(dplyr)
-df <- read_dta("moser_voena_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
 formula_str <- paste("patents ~",
     paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
@@ -288,7 +292,7 @@ import pyfixest as pf
 import numpy as np
 from scipy import stats
 
-df = pd.read_stata("moser_voena_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
@@ -395,6 +399,7 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 did_multiplegt_dyn patents subclass year twea, ///
     effects(21) placebo(18) trends_nonparam(patents1900)
@@ -472,7 +477,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ```r
 library(haven); library(DIDmultiplegtDYN); library(polars)
-df <- read_dta("moser_voena_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 result_dyn <- did_multiplegt_dyn(
     df = as.data.frame(df),
     outcome = "patents",
@@ -555,7 +560,7 @@ import polars as pl
 import pandas as pd
 from did_multiplegt_dyn import DidMultiplegtDyn
 
-df = pd.read_stata("moser_voena_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 model = DidMultiplegtDyn(
     df=pl.from_pandas(df),
     outcome='patents',
@@ -631,6 +636,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ```stata
 * ssc install fect, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Cross-validation
 fect patents, treat(twea) unit(subclass) time(year) ///
@@ -649,6 +655,7 @@ optimal r=2 in fe/ife model
 
 ```stata
 * ssc install fect, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Estimation with r=2 and bootstrap SEs
 set seed 1
@@ -667,7 +674,7 @@ r1     .2966552         7056    .04932318    .17481898    .37326233       0
 
 ```r
 library(haven); library(fect)
-df <- read_dta("moser_voena_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 # Cross-validation
 out_cv <- fect(patents ~ twea, data = as.data.frame(df),
     index = c("subclass","year"),
@@ -708,6 +715,7 @@ IFE ATT = 0.296834
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Standard SC
 set seed 1
@@ -743,6 +751,7 @@ Synthetic Control
 ```
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Demeaned SC
 bys subclass: egen pre_mean_temp=mean(patents) if year<=1918
@@ -785,7 +794,7 @@ Synthetic Control (Demeaned)
 
 ```r
 library(haven); library(synthdid)
-df <- read_dta("moser_voena_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 panel <- panel.matrices(as.data.frame(df),
     unit = "subclass", time = "year",
     outcome = "patents", treatment = "twea")
@@ -833,6 +842,7 @@ Demeaned SC ATT = 0.474263
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 set seed 1
 sdid_event patents subclass year twea, brep(200)
@@ -866,111 +876,163 @@ Synthetic Difference-in-differences
    Effect_21 |  .8084736   .1282819   .5570411   1.059906        336
 ```
 
-### R
-
-```r
-library(haven)
-df <- read_dta("moser_voena_didtextbook.dta")
-set.seed(1)
-sdid_est <- synthdid_estimate(panel$Y, panel$N0, panel$T0)
-cat("SDID ATT:", round(sdid_est, 6), "\n")
-cat("SDID SE:", round(sqrt(vcov(sdid_est, method = "jackknife")), 6), "\n")
-```
-
-```
-SDID ATT = 0.301844
-SDID SE  = 0.041352
-
-  (Stata ATT: 0.301937, SE: 0.043458 — virtually identical)
-```
-
 :::
 
-**Result:** The SDID ATT is **0.301937** (Stata) and **0.301844** (R) — virtually identical. The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` and `synthdid` packages are not available in Python.
+**Result:** The SDID ATT is **0.3019373** (Stata). The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` package is only available in Stata.
 
 ---
 
 ## 4.3 Sensitivity Analysis (Rambachan & Roth / HonestDiD)
 
-> Conduct a sensitivity analysis on the 1932 effect of compulsory licensing. Restrict the sample to years 1904, 1918, and 1932, and compute robust confidence intervals for varying values of $\bar{M}$.
+> Run the ES-TWFER with pre-trend variables ordered from last to first, including a reference period variable `reltimeminus0`, then run `honestdid` with 18 pre-periods and 21 post-periods. Is the 95% CI for ATT1 produced by the command much wider than that produced by the ES-TWFER?
 
 ::: {.panel-tabset}
 
 ### Stata
 
 ```stata
-* ssc install reghdfe, replace
+* ssc install honestdid, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
-preserve
-keep if year==1918|year==1904|year==1932
-reghdfe patents reltimeminus14 reltimeplus14, ///
-    absorb(year treatmentgroup) cluster(subclass)
-honestdid, pre(1) post(2) mvec(2(2)10) coefplot ///
-    xtitle(M, size(large)) ytitle(95% Robust CI, size(large))
-restore
+gen reltimeminus0 = 0
+reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 ///
+    reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 ///
+    reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 ///
+    reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 ///
+    reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
+honestdid, pre(1/19) post(20/40) delta(rm) mvec(1)
 ```
 
 ```
-HDFE Linear regression                            Number of obs   =     21,744
-
                              (Std. err. adjusted for 7,248 clusters in subclass)
 --------------------------------------------------------------------------------
                |               Robust
        patents | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 ---------------+----------------------------------------------------------------
-reltimeminus14 |   .0431961   .0403288     1.07   0.284      -.03586    .1222522
- reltimeplus14 |   .6422164   .1116704     5.75   0.000       .42331    .8611229
-         _cons |    .474324   .0131325    36.12   0.000     .4485805    .5000676
+reltimeminus18 |   .0344949   .0443397     0.78   0.437    -.0524238    .1214135
+reltimeminus17 |   .0376364   .0502265     0.75   0.454    -.0608222     .136095
+reltimeminus16 |   .0220321   .0441163     0.50   0.618    -.0644488    .1085129
+reltimeminus15 |   .0510913   .0442394     1.15   0.248    -.0356309    .1378134
+reltimeminus14 |   .0431961   .0403296     1.07   0.284    -.0358617    .1222539
+reltimeminus13 |   .0529307   .0406488     1.30   0.193    -.0267528    .1326142
+reltimeminus12 |   .0299272   .0428285     0.70   0.485    -.0540291    .1138836
+reltimeminus11 |  -.0661789   .0568722    -1.16   0.245     -.177665    .0453072
+reltimeminus10 |   .0481978   .0482599     1.00   0.318    -.0464057    .1428012
+ reltimeminus9 |    .005911   .0428355     0.14   0.890    -.0780589     .089881
+ reltimeminus8 |   .0386905   .0490337     0.79   0.430    -.0574299    .1348108
+ reltimeminus7 |   .0247809   .0508559     0.49   0.626    -.0749114    .1244733
+ reltimeminus6 |   .0135375   .0383891     0.35   0.724    -.0617162    .0887913
+ reltimeminus5 |   .0687004   .0468623     1.47   0.143    -.0231634    .1605642
+ reltimeminus4 |   .0237062   .0394324     0.60   0.548    -.0535929    .1010052
+ reltimeminus3 |  -.0635747   .0343337    -1.85   0.064    -.1308788    .0037293
+ reltimeminus2 |  -.0963748   .0367189    -2.62   0.009    -.1683545   -.0243952
+ reltimeminus1 |  -.0270337    .044596    -0.61   0.544    -.1144549    .0603875
+ reltimeminus0 |          0  (omitted)
+  reltimeplus1 |   .0235202    .044417     0.53   0.596      -.06355    .1105904
+  reltimeplus2 |   .0520213   .0442393     1.18   0.240    -.0347006    .1387433
+  reltimeplus3 |    .062562   .0427633     1.46   0.144    -.0212665    .1463905
+  reltimeplus4 |   .0293692   .0535091     0.55   0.583    -.0755241    .1342626
+  reltimeplus5 |   .0930266   .0634352     1.47   0.143    -.0313249    .2173781
+  reltimeplus6 |   .0217014   .0502217     0.43   0.666    -.0767477    .1201505
+  reltimeplus7 |   .0256696   .0609219     0.42   0.674     -.093755    .1450942
+  reltimeplus8 |   .1012731   .0514298     1.97   0.049     .0004558    .2020905
+  reltimeplus9 |   .2012649   .0590831     3.41   0.001     .0854447     .317085
+ reltimeplus10 |   .2242684   .0594592     3.77   0.000     .1077111    .3408256
+ reltimeplus11 |   .1323991   .0665765     1.99   0.047     .0018899    .2629084
+ reltimeplus12 |   .1228712   .0747647     1.64   0.100    -.0236894    .2694318
+ reltimeplus13 |   .2393973   .0769896     3.11   0.002     .0884752    .3903194
+ reltimeplus14 |   .6422164   .1116727     5.75   0.000     .4233053    .8611275
+ reltimeplus15 |   .6165881   .1057387     5.83   0.000     .4093095    .8238668
+ reltimeplus16 |   .4268353   .0920964     4.63   0.000     .2462995    .6073711
+ reltimeplus17 |   .5457589   .1051384     5.19   0.000     .3396571    .7518608
+ reltimeplus18 |   .7173239   .1159405     6.19   0.000     .4900467    .9446011
+ reltimeplus19 |   .5673776   .1025554     5.53   0.000     .3663392    .7684161
+ reltimeplus20 |    .677724   .1074766     6.31   0.000     .4670385    .8884095
+ reltimeplus21 |    .797433   .1240308     6.43   0.000     .5542965     1.04057
+         _cons |   .4628452   .0108281    42.74   0.000      .441619    .4840713
 --------------------------------------------------------------------------------
 
 |    M    |   lb   |   ub   |
 | ------- | ------ | ------ |
-|       . |  0.423 |  0.861 | (Original)
-|  2.0000 |  0.361 |  0.993 |
-|  4.0000 |  0.197 |  1.194 |
-|  6.0000 | -0.004 |  1.403 |
-|  8.0000 | -0.217 |  1.621 |
-| 10.0000 | -0.433 |  1.840 |
+|       . | -0.064 |  0.111 | (Original)
+|  1.0000 | -0.196 |  0.221 |
 (method = C-LF, Delta = DeltaRM, alpha = 0.050)
 ```
 
 ### R
 
 ```r
-library(haven); library(HonestDiD)
-df <- read_dta("moser_voena_didtextbook.dta")
-df_subset <- df %>% filter(year %in% c(1918, 1904, 1932))
-subset_model <- feols(patents ~ reltimeminus14 + reltimeplus14 |
-    year + treatmentgroup, data = df_subset, cluster = ~subclass)
-
-betahat_sub <- coef(subset_model)
-sigma_sub <- vcov(subset_model)
-
-delta_rm_sub <- createSensitivityResults_relativeMagnitudes(
-    betahat = betahat_sub,
-    sigma = sigma_sub,
-    numPrePeriods = 1,
-    numPostPeriods = 1,
-    Mbarvec = seq(2, 10, by = 2)
-)
-print(delta_rm_sub)
+library(haven); library(fixest); library(HonestDiD)
+options(digits=7)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+reltimeminus_vars <- paste0("reltimeminus", 18:1)
+reltimeplus_vars <- paste0("I(reltimeplus", 1:21, ")")
+sens_model <- feols(as.formula(paste("patents ~",
+    paste(reltimeminus_vars, collapse = " + "), "+",
+    paste(reltimeplus_vars, collapse = " + "),
+    "| year + treatmentgroup")),
+    data = df, cluster = ~subclass)
+summary(sens_model)
+delta_rm <- HonestDiD::createSensitivityResults_relativeMagnitudes(
+    betahat = coef(sens_model), sigma = vcov(sens_model),
+    numPrePeriods = 18, numPostPeriods = 21, Mbarvec = 1)
+print(delta_rm)
 ```
 
 ```
 OLS estimation, Dep. Var.: patents
-Observations: 21,744
-               Estimate Std. Error t value   Pr(>|t|)
-reltimeminus14 0.043196   0.040329  1.0711 2.8416e-01
-reltimeplus14  0.642216   0.111670  5.7510 9.2325e-09 ***
+Observations: 289,920
+Fixed-effects: year: 40,  treatmentgroup: 2
+Standard-errors: Clustered (subclass) 
+                  Estimate Std. Error   t value   Pr(>|t|)    
+reltimeminus18    0.034495   0.044340  0.777969 4.3661e-01    
+reltimeminus17    0.037636   0.050227  0.749333 4.5368e-01    
+reltimeminus16    0.022032   0.044116  0.499409 6.1751e-01    
+reltimeminus15    0.051091   0.044239  1.154881 2.4818e-01    
+reltimeminus14    0.043196   0.040330  1.071076 2.8417e-01    
+reltimeminus13    0.052931   0.040649  1.302147 1.9291e-01    
+reltimeminus12    0.029927   0.042829  0.698769 4.8472e-01    
+reltimeminus11   -0.066179   0.056872 -1.163642 2.4461e-01    
+reltimeminus10    0.048198   0.048260  0.998713 3.1797e-01    
+reltimeminus9     0.005911   0.042835  0.137994 8.9025e-01    
+reltimeminus8     0.038690   0.049034  0.789059 4.3010e-01    
+reltimeminus7     0.024781   0.050856  0.487277 6.2608e-01    
+reltimeminus6     0.013538   0.038389  0.352640 7.2437e-01    
+reltimeminus5     0.068700   0.046862  1.466006 1.4269e-01    
+reltimeminus4     0.023706   0.039432  0.601185 5.4774e-01    
+reltimeminus3    -0.063575   0.034334 -1.851672 6.4114e-02 .  
+reltimeminus2    -0.096375   0.036719 -2.624668 8.6915e-03 ** 
+reltimeminus1    -0.027034   0.044596 -0.606192 5.4441e-01    
+I(reltimeplus1)   0.023520   0.044417  0.529531 5.9645e-01    
+I(reltimeplus2)   0.052021   0.044239  1.175907 2.3967e-01    
+I(reltimeplus3)   0.062562   0.042763  1.462984 1.4352e-01    
+I(reltimeplus4)   0.029369   0.053509  0.548864 5.8312e-01    
+I(reltimeplus5)   0.093027   0.063435  1.466483 1.4256e-01    
+I(reltimeplus6)   0.021701   0.050222  0.432112 6.6567e-01    
+I(reltimeplus7)   0.025670   0.060922  0.421354 6.7351e-01    
+I(reltimeplus8)   0.101273   0.051430  1.969154 4.8973e-02 *  
+I(reltimeplus9)   0.201265   0.059083  3.406470 6.6167e-04 ***
+I(reltimeplus10)  0.224268   0.059459  3.771805 1.6336e-04 ***
+I(reltimeplus11)  0.132399   0.066576  1.988678 4.6774e-02 *  
+I(reltimeplus12)  0.122871   0.074765  1.643439 1.0034e-01    
+I(reltimeplus13)  0.239397   0.076990  3.109475 1.8815e-03 ** 
+I(reltimeplus14)  0.642216   0.111673  5.750879 9.2391e-09 ***
+I(reltimeplus15)  0.616588   0.105739  5.831244 5.7380e-09 ***
+I(reltimeplus16)  0.426835   0.092096  4.634657 3.6378e-06 ***
+I(reltimeplus17)  0.545759   0.105138  5.190863 2.1501e-07 ***
+I(reltimeplus18)  0.717324   0.115941  6.186999 6.4656e-10 ***
+I(reltimeplus19)  0.567378   0.102555  5.532403 3.2690e-08 ***
+I(reltimeplus20)  0.677724   0.107477  6.305781 3.0358e-10 ***
+I(reltimeplus21)  0.797433   0.124031  6.429314 1.3632e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 1.33587     Adj. R2: 0.026953
+                Within R2: 0.001469
 
-# A tibble: 5 × 5
-        lb       ub method Delta    Mbar
-     <dbl>    <dbl> <chr>  <chr>   <dbl>
-1  0.360    0.995   C-LF   DeltaRM     2
-2  0.199    1.192   C-LF   DeltaRM     4
-3 -0.002    1.406   C-LF   DeltaRM     6
-4 -0.217    1.621   C-LF   DeltaRM     8
-5 -0.431    1.840   C-LF   DeltaRM    10
+# A tibble: 1 × 5
+      lb    ub method Delta    Mbar
+   <dbl> <dbl> <chr>  <chr>   <dbl>
+1 -0.200 0.225 C-LF   DeltaRM     1
 ```
 
 ### Python
@@ -978,53 +1040,71 @@ reltimeplus14  0.642216   0.111670  5.7510 9.2325e-09 ***
 ```python
 import pandas as pd
 import numpy as np
+import torch
 import pyfixest as pf
-from honestdid import createSensitivityResults_relativeMagnitudes
+import honestdid as hd
 
-df = pd.read_stata("moser_voena_didtextbook.dta")
-df_subset = df[df["year"].isin([1904, 1918, 1932])].copy()
-
-subset_model = pf.feols(
-    "patents ~ reltimeminus14 + reltimeplus14 | year + treatmentgroup",
-    data=df_subset, vcov={"CRV1": "subclass"})
-
-betahat = subset_model.coef().values
-sigma = np.array(subset_model._vcov)
-
-delta_rm = createSensitivityResults_relativeMagnitudes(
-    betahat=betahat,
-    sigma=sigma,
-    numPrePeriods=1,
-    numPostPeriods=1,
-    Mbarvec=[2, 4, 6, 8, 10]
-)
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+minus_vars = [f"reltimeminus{i}" for i in range(18, 0, -1)]
+plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
+fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | year + treatmentgroup"
+m = pf.feols(fml, data=df, vcov={'CRV1': 'subclass'})
+betahat = torch.tensor(m.coef().values, dtype=torch.float64)
+sigma = torch.tensor(np.array(m._vcov), dtype=torch.float64)
+delta_rm = hd.createSensitivityResults_relativeMagnitudes(
+    betahat=betahat, sigma=sigma,
+    numPrePeriods=18, numPostPeriods=21, Mbarvec=[1])
 print(delta_rm)
 ```
 
 ```
-Coefficients:
-  reltimeminus14 = 0.043196
-  reltimeplus14  = 0.642216
+      reltimeminus18 |    0.0344949   0.0443397      0.78     0.4366
+      reltimeminus17 |    0.0376364   0.0502265      0.75     0.4537
+      reltimeminus16 |    0.0220321   0.0441163      0.50     0.6175
+      reltimeminus15 |    0.0510913   0.0442394      1.15     0.2482
+      reltimeminus14 |    0.0431961   0.0403296      1.07     0.2842
+      reltimeminus13 |    0.0529307   0.0406488      1.30     0.1929
+      reltimeminus12 |    0.0299272   0.0428285      0.70     0.4847
+      reltimeminus11 |   -0.0661789   0.0568722     -1.16     0.2446
+      reltimeminus10 |    0.0481978   0.0482599      1.00     0.3180
+       reltimeminus9 |    0.0059110   0.0428355      0.14     0.8902
+       reltimeminus8 |    0.0386905   0.0490337      0.79     0.4301
+       reltimeminus7 |    0.0247809   0.0508559      0.49     0.6261
+       reltimeminus6 |    0.0135375   0.0383891      0.35     0.7244
+       reltimeminus5 |    0.0687004   0.0468623      1.47     0.1427
+       reltimeminus4 |    0.0237062   0.0394324      0.60     0.5477
+       reltimeminus3 |   -0.0635747   0.0343337     -1.85     0.0641
+       reltimeminus2 |   -0.0963748   0.0367189     -2.62     0.0087
+       reltimeminus1 |   -0.0270337   0.0445960     -0.61     0.5444
+        reltimeplus1 |    0.0235202   0.0444170      0.53     0.5965
+        reltimeplus2 |    0.0520213   0.0442393      1.18     0.2397
+        reltimeplus3 |    0.0625620   0.0427633      1.46     0.1435
+        reltimeplus4 |    0.0293692   0.0535091      0.55     0.5831
+        reltimeplus5 |    0.0930266   0.0634352      1.47     0.1426
+        reltimeplus6 |    0.0217014   0.0502217      0.43     0.6657
+        reltimeplus7 |    0.0256696   0.0609219      0.42     0.6735
+        reltimeplus8 |    0.1012731   0.0514298      1.97     0.0490
+        reltimeplus9 |    0.2012649   0.0590831      3.41     0.0007
+       reltimeplus10 |    0.2242684   0.0594592      3.77     0.0002
+       reltimeplus11 |    0.1323991   0.0665765      1.99     0.0468
+       reltimeplus12 |    0.1228712   0.0747647      1.64     0.1003
+       reltimeplus13 |    0.2393973   0.0769896      3.11     0.0019
+       reltimeplus14 |    0.6422164   0.1116727      5.75     0.0000
+       reltimeplus15 |    0.6165881   0.1057387      5.83     0.0000
+       reltimeplus16 |    0.4268353   0.0920964      4.63     0.0000
+       reltimeplus17 |    0.5457589   0.1051384      5.19     0.0000
+       reltimeplus18 |    0.7173239   0.1159405      6.19     0.0000
+       reltimeplus19 |    0.5673776   0.1025554      5.53     0.0000
+       reltimeplus20 |    0.6777240   0.1074766      6.31     0.0000
+       reltimeplus21 |    0.7974330   0.1240308      6.43     0.0000
 
-       lb       ub method   Delta  Mbar
- 0.359939 0.994861   C-LF DeltaRM     2
- 0.198972 1.191598   C-LF DeltaRM     4
--0.002236 1.406219   C-LF DeltaRM     6
--0.216857 1.620841   C-LF DeltaRM     8
--0.431479 1.839934   C-LF DeltaRM    10
+         lb        ub method    Delta  Mbar
+0 -0.200076  0.223196   C-LF  DeltaRM     1
 ```
 
 :::
 
-**Result:** The confidence intervals from Stata, R, and Python are virtually identical. For the 1932 effect to become insignificant, one needs to allow for differential trends post-treatment almost **six times larger** than the pre-treatment differential trends ($\bar{M} \approx 6$). This suggests the effect is very robust to violations of parallel trends.
-
-| Mbar | Stata CI | R CI | Python CI |
-|------|----------|------|-----------|
-| 2 | [0.361, 0.993] | [0.360, 0.995] | [0.360, 0.995] |
-| 4 | [0.197, 1.194] | [0.199, 1.192] | [0.199, 1.192] |
-| 6 | [−0.004, 1.403] | [−0.002, 1.406] | [−0.002, 1.406] |
-| 8 | [−0.217, 1.621] | [−0.217, 1.621] | [−0.217, 1.621] |
-| 10 | [−0.433, 1.840] | [−0.431, 1.840] | [−0.431, 1.840] |
+**Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **[−0.196, 0.221]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER. The original ES-TWFER CI for ATT1 is [−0.064, 0.111], already insignificant. With `honestdid`, the CI widens further to include both positive and negative values, illustrating how even small allowed violations of parallel trends can substantially widen confidence intervals when there are many pre-treatment periods.
 
 ---
 

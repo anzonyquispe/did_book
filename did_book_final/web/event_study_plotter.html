@@ -27,7 +27,7 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 #input-page {
   min-height: 100vh;
   background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px;
 }
 .form-card {
   width: 100%; max-width: 660px; background: rgba(255,255,255,0.04);
@@ -313,26 +313,31 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 
     <button class="demo-btn" onclick="loadDemo()">Load demo data (Gentzkow et al., 2011)</button><br>
 
-    <label class="form-label">Reviewer Name <span>— who is reviewing this study</span></label>
-    <input id="f-reviewer" class="form-input" placeholder="e.g. Dr. Jane Smith">
+    <button id="submit-btn" class="submit-btn" onclick="generate()">Generate Event Study →</button>
+  </div>
 
-    <label class="form-label">Reviewer Comments <span>— questions or feedback</span></label>
-    <textarea id="f-reviewer-comments" class="form-textarea" rows="3" placeholder="e.g. Are the pre-trends significant? What about heterogeneity?"></textarea>
+  <!-- INLINE PLOT SECTION -->
+  <div id="inline-plot-section" style="display:none; width:100%; max-width:660px; margin-top:24px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px 44px; box-sizing:border-box;">
+    <h2 style="font-family:'Playfair Display',serif; color:#f0ead6; font-size:26px; margin-bottom:6px;" id="inline-title"></h2>
+    <p style="color:#be9b7b; font-weight:600; margin-bottom:24px;" id="inline-authors"></p>
 
-    <label class="form-label">Author Response <span>— response to reviewer comments</span></label>
-    <textarea id="f-author-response" class="form-textarea" rows="3" placeholder="e.g. Pre-trends are not significant at 5% level..."></textarea>
-
-    <label class="form-label">GitHub Token <span>— to save results to the repo</span></label>
-    <div class="token-row">
-      <input id="f-token" class="form-input" type="password" placeholder="ghp_...">
-      <button class="token-toggle" onclick="toggleToken()">Show</button>
+    <div style="background:#fff; border-radius:8px; padding:16px; margin-bottom:16px; overflow:hidden; width:100%; box-sizing:border-box;">
+      <canvas id="es-canvas" style="width:100%; height:auto; display:block;"></canvas>
+      <p style="text-align:center; font-size:13px; color:#6c757d; font-style:italic; margin-top:10px;" id="plot-caption"></p>
     </div>
 
-    <button id="submit-btn" class="submit-btn" onclick="generate()">Generate Event Study →</button>
+    <!-- ACCEPT / REJECT BUTTONS -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
+      <p style="color:#aaa; font-size:15px;">Accept to save to GitHub &mdash; Reject to go back and modify.</p>
+      <div style="display:flex; gap:12px;">
+        <button class="btn-reject" onclick="rejectStudy()">✕ Reject</button>
+        <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ========== OUTPUT PAGE ========== -->
+<!-- ========== OUTPUT PAGE (hidden, kept for compatibility) ========== -->
 <div id="output-page">
   <nav class="book-sidebar">
     <a class="sidebar-back" onclick="goBack()">← Back to form</a>
@@ -382,7 +387,7 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
     <section class="book-section" id="sec-plot">
       <h2>Event Study Plot</h2>
       <div class="plot-container">
-        <canvas id="es-canvas" width="760" height="440"></canvas>
+        <canvas id="es-canvas" width="560" height="380" style="width:100%;height:auto;"></canvas>
         <p class="plot-caption" id="plot-caption"></p>
       </div>
     </section>
@@ -488,12 +493,7 @@ function setLang(lang) {
   document.querySelectorAll('.ci-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
 }
 
-function toggleToken() {
-  const inp = document.getElementById('f-token');
-  const btn = document.querySelector('.token-toggle');
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
-  else { inp.type = 'password'; btn.textContent = 'Show'; }
-}
+function toggleToken() {}
 
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
@@ -561,7 +561,6 @@ function loadDemo() {
 }
 
 function checkReady() {
-  const token = document.getElementById('f-token').value.trim();
   const ok = document.getElementById('f-title').value.trim() &&
              document.getElementById('f-authors').value.trim() &&
              parsedData;
@@ -579,28 +578,8 @@ function generate() {
   // Generate unique ID
   currentId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
-  document.getElementById('out-title').textContent = title;
-  document.getElementById('out-authors').textContent = authors;
-  document.getElementById('sidebar-title').textContent = title.length > 35 ? title.slice(0,35)+'…' : title;
-  document.getElementById('out-desc').textContent = document.getElementById('f-desc').value || 'No description provided.';
-  document.getElementById('out-method').textContent = document.getElementById('f-method').value || 'Not specified.';
-  document.getElementById('out-code').textContent = document.getElementById('f-code').value || '# No code provided';
-  document.getElementById('tab-label').textContent = codeLang.charAt(0).toUpperCase() + codeLang.slice(1);
-
-  // Q&A
-  const reviewerName = document.getElementById('f-reviewer').value.trim();
-  const reviewerComments = document.getElementById('f-reviewer-comments').value.trim();
-  const authorResponse = document.getElementById('f-author-response').value.trim();
-  if (reviewerName || reviewerComments || authorResponse) {
-    document.getElementById('qa-content').style.display = 'block';
-    document.getElementById('qa-empty').style.display = 'none';
-    document.getElementById('out-reviewer').textContent = reviewerName || 'Anonymous';
-    document.getElementById('out-reviewer-comments').textContent = reviewerComments || 'No comments.';
-    document.getElementById('out-author-response').textContent = authorResponse || 'No response.';
-  } else {
-    document.getElementById('qa-content').style.display = 'none';
-    document.getElementById('qa-empty').style.display = 'block';
-  }
+  document.getElementById('inline-title').textContent = title;
+  document.getElementById('inline-authors').textContent = authors;
 
   const z = zMap[ciLevel];
   document.getElementById('th-lb').textContent = 'LB ' + ciLevel + '%';
@@ -629,8 +608,9 @@ function generate() {
   document.getElementById('gh-files').innerHTML = '';
   document.getElementById('btn-accept').disabled = false;
 
-  document.getElementById('input-page').style.display = 'none';
-  document.getElementById('output-page').classList.add('active');
+  // Show plot inline
+  document.getElementById('inline-plot-section').style.display = 'block';
+  document.getElementById('inline-plot-section').scrollIntoView({behavior: 'smooth'});
 }
 
 function goBack() {
@@ -642,10 +622,11 @@ function goBack() {
 function drawPlot(data, z) {
   const canvas = document.getElementById('es-canvas');
   const ctx = canvas.getContext('2d');
-  const W = 760, H = 440;
+  const W = 540, H = 340;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = W * dpr; canvas.height = H * dpr;
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  canvas.style.width = '100%'; canvas.style.height = 'auto';
+  canvas.style.maxWidth = W + 'px';
   ctx.scale(dpr, dpr);
 
   const pad = {top:25, right:35, bottom:55, left:72};
@@ -733,8 +714,12 @@ function drawPlot(data, z) {
 
 // ============ ACCEPT / REJECT ============
 async function acceptStudy() {
-  const token = document.getElementById('f-token').value.trim();
-  if (!token) { showToast('Please enter a GitHub token', 'error'); return; }
+  let token = sessionStorage.getItem('gh_token') || '';
+  if (!token) {
+    token = window.prompt('Enter your GitHub token to save to repository:');
+    if (!token) return;
+    sessionStorage.setItem('gh_token', token);
+  }
 
   document.getElementById('btn-accept').disabled = true;
   const overlay = document.getElementById('saving-overlay');
@@ -765,9 +750,9 @@ async function acceptStudy() {
 
     // 3. Save JSON (metadata + Q&A)
     document.getElementById('saving-text').textContent = 'Saving metadata JSON...';
-    const reviewerName = document.getElementById('f-reviewer').value.trim();
-    const reviewerComments = document.getElementById('f-reviewer-comments').value.trim();
-    const authorResponse = document.getElementById('f-author-response').value.trim();
+    const reviewerName = '';
+    const reviewerComments = '';
+    const authorResponse = '';
 
     const jsonObj = {
       id,
@@ -828,11 +813,9 @@ async function acceptStudy() {
 }
 
 function rejectStudy() {
-  const badge = document.getElementById('gh-badge');
-  badge.className = 'gh-badge error';
-  badge.textContent = '✗ Rejected — not saved';
-  document.getElementById('btn-accept').disabled = true;
-  showToast('Results rejected. Go back to modify inputs.', 'error');
+  document.getElementById('inline-plot-section').style.display = 'none';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  showToast('Results rejected. Modify your inputs and try again.', 'error');
 }
 
 // ============ CANVAS TO BASE64 (manual encoder, no btoa) ============

@@ -317,7 +317,7 @@ window.Quarto = {
 <p><strong>Installation notes:</strong></p>
 <ul>
 <li><strong>R <code>DIDmultiplegtSTAT</code>:</strong> <code>devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)</code></li>
-<li><strong>R <code>DIDmultiplegtDYN</code>:</strong> The <code>design()</code> option has a known <code>data.table</code> join bug. Treatment path tables (GQ5) are Stata-only. Effects match across platforms.</li>
+<li><strong>R <code>DIDmultiplegtDYN</code>:</strong> The <code>design()</code> option works with <code>design=c(0.8,"console")</code>. Effects match across platforms.</li>
 <li><strong>Python <code>did_multiplegt_dyn</code>:</strong> <code>pip install py-did-multiplegt-dyn</code>. Requires <code>polars</code> DataFrames.</li>
 <li><strong>Python <code>did_multiplegt_stat</code>:</strong> Local notebook-based translation; see <code>py_did_multiplegt_stat</code>.</li>
 </ul>
@@ -331,11 +331,12 @@ window.Quarto = {
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install panelview, <span class="kw">replace</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>panelview prestout numdailies, i(cnty90) t(<span class="fu">year</span>) <span class="dv">type</span>(treat) <span class="co">///</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="bn">title</span>(<span class="st">"Gentzkow et al. (2011)"</span>) <span class="bn">legend</span>(<span class="kw">off</span>) <span class="co">///</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ylabel</span>(<span class="kw">none</span>) <span class="bn">ytitle</span>(<span class="st">""</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"figures/ch05_panelview_stata.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>panelview prestout numdailies, i(cnty90) t(<span class="fu">year</span>) <span class="dv">type</span>(treat) <span class="co">///</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="bn">title</span>(<span class="st">"Gentzkow et al. (2011)"</span>) <span class="bn">legend</span>(<span class="kw">off</span>) <span class="co">///</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ylabel</span>(<span class="kw">none</span>) <span class="bn">ytitle</span>(<span class="st">""</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"figures/ch05_panelview_stata.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figures/ch05_panelview_stata.png" class="img-fluid figure-img"></p>
@@ -345,7 +346,7 @@ window.Quarto = {
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(panelView)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">panelview</span>(prestout <span class="sc">~</span> numdailies, <span class="at">data =</span> df,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"cnty90"</span>, <span class="st">"year"</span>), <span class="at">type =</span> <span class="st">"treat"</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">main =</span> <span class="st">"Gentzkow et al. (2011)"</span>,</span>
@@ -363,7 +364,7 @@ window.Quarto = {
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.colors <span class="im">as</span> mcolors</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> Patch</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"has_newspaper"</span>] <span class="op">=</span> (df[<span class="st">"numdailies"</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>pv <span class="op">=</span> df.pivot_table(index<span class="op">=</span><span class="st">"cnty90"</span>, columns<span class="op">=</span><span class="st">"year"</span>, values<span class="op">=</span><span class="st">"has_newspaper"</span>, aggfunc<span class="op">=</span><span class="st">"first"</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>pv_sorted <span class="op">=</span> pv.loc[pv.mean(axis<span class="op">=</span><span class="dv">1</span>).sort_values(ascending<span class="op">=</span><span class="va">False</span>).index]</span>
@@ -403,8 +404,9 @@ window.Quarto = {
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">reg</span> changedailies lag_numdailies, <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">reg</span> changedailies lag_numdailies, <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                               (Std. err. adjusted for 1,195 clusters in cnty90)
 --------------------------------------------------------------------------------
                |               Robust
@@ -417,7 +419,7 @@ N = 15,627</code></pre>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(lmtest); <span class="fu">library</span>(sandwich)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>gq1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(changedailies <span class="sc">~</span> lag_numdailies, <span class="at">data =</span> df)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(gq1, <span class="at">vcov =</span> <span class="fu">vcovCL</span>(gq1, <span class="at">cluster =</span> <span class="sc">~</span>cnty90))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                 Estimate Std. Error t value Pr(&gt;|t|)
@@ -428,7 +430,7 @@ N = 15,627</code></pre>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> df.dropna(subset<span class="op">=</span>[<span class="st">'changedailies'</span>,<span class="st">'lag_numdailies'</span>])</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> sub[<span class="st">'changedailies'</span>]<span class="op">;</span> X <span class="op">=</span> sm.add_constant(sub[<span class="st">'lag_numdailies'</span>])</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> sm.OLS(y, X).fit(cov_type<span class="op">=</span><span class="st">'cluster'</span>, cov_kwds<span class="op">=</span>{<span class="st">'groups'</span>: sub[<span class="st">'cnty90'</span>]})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -451,8 +453,9 @@ N = 15,627</code></pre>
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">reg</span> changedailies lag_ishare_urb, <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">reg</span> changedailies lag_ishare_urb, <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                               (Std. err. adjusted for 1,195 clusters in cnty90)
 --------------------------------------------------------------------------------
                |               Robust
@@ -465,7 +468,7 @@ N = 15,292</code></pre>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(lmtest); <span class="fu">library</span>(sandwich)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>gq2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(changedailies <span class="sc">~</span> lag_ishare_urb, <span class="at">data =</span> df)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(gq2, <span class="at">vcov =</span> <span class="fu">vcovCL</span>(gq2, <span class="at">cluster =</span> <span class="sc">~</span>cnty90))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                Estimate Std. Error t value  Pr(&gt;|t|)
@@ -476,7 +479,7 @@ N = 15,292</code></pre>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>sub <span class="op">=</span> df.dropna(subset<span class="op">=</span>[<span class="st">'changedailies'</span>,<span class="st">'lag_ishare_urb'</span>])</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> sub[<span class="st">'changedailies'</span>]<span class="op">;</span> X <span class="op">=</span> sm.add_constant(sub[<span class="st">'lag_ishare_urb'</span>])</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> sm.OLS(y, X).fit(cov_type<span class="op">=</span><span class="st">'cluster'</span>, cov_kwds<span class="op">=</span>{<span class="st">'groups'</span>: sub[<span class="st">'cnty90'</span>]})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -499,8 +502,9 @@ N = 15,292</code></pre>
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> prestout i.<span class="fu">year</span> numdailies lag_numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> prestout i.<span class="fu">year</span> numdailies lag_numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                               (Std. err. adjusted for 1,195 clusters in cnty90)
 --------------------------------------------------------------------------------
                |               Robust
@@ -511,14 +515,15 @@ N = 15,292</code></pre>
 --------------------------------------------------------------------------------
 N = 15,629</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>* Decompose beta <span class="kw">on</span> numdailies</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    other_treatments(lag_numdailies) <span class="dv">type</span>(feTR)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>* Decompose beta <span class="kw">on</span> lag_numdailies</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> lag_numdailies, <span class="co">///</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    other_treatments(numdailies) <span class="dv">type</span>(feTR)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>* Decompose beta <span class="kw">on</span> numdailies</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    other_treatments(lag_numdailies) <span class="dv">type</span>(feTR)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>* Decompose beta <span class="kw">on</span> lag_numdailies</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> lag_numdailies, <span class="co">///</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    other_treatments(numdailies) <span class="dv">type</span>(feTR)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--- Decomposition of beta on numdailies (β = -0.0008) ---
 Under the common trends assumption, beta estimates a weighted sum of 10,056 ATTs.
  5,754 ATTs receive a positive weight, and 4,302 receive a negative weight.
@@ -535,7 +540,7 @@ Under the common trends assumption, beta estimates a weighted sum of 9,339 ATTs.
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(fixest); <span class="fu">library</span>(TwoWayFEWeights)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>gq3 <span class="ot">&lt;-</span> <span class="fu">feols</span>(prestout <span class="sc">~</span> numdailies <span class="sc">+</span> lag_numdailies <span class="sc">|</span> cnty90 <span class="sc">+</span> year,</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>cnty90)</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(gq3)</span>
@@ -563,7 +568,7 @@ N = 15,629
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyfixest <span class="im">as</span> pf</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># TWFE with county and year FEs</span></span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>m8 <span class="op">=</span> pf.feols(<span class="st">"prestout ~ numdailies + lag_numdailies + C(year) | cnty90"</span>,</span>
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>              data<span class="op">=</span>df, vcov<span class="op">=</span>{<span class="st">"CRV1"</span>: <span class="st">"cnty90"</span>},</span>
@@ -624,10 +629,11 @@ Total                   10056       0.0000</code></pre>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) placebo(4) <span class="kw">cluster</span>(cnty90)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"$FIGDIR\ch08_fig81_nonnormalized_es.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) placebo(4) <span class="kw">cluster</span>(cnty90)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"$FIGDIR\ch08_fig81_nonnormalized_es.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -665,7 +671,7 @@ Test of joint nullity of the placebos : p-value = 0.9922</code></pre>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>gq4 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
@@ -699,27 +705,14 @@ Joint nullity of placebos : p = 0.9922</code></pre>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>gq4 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
 <span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>gq4.fit()<span class="op">;</span> gq4.summary()</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> gq4.result[<span class="st">'mat_res_XX'</span>]</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> mat[mat.index <span class="op">!=</span> <span class="dv">4</span>].copy()</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>ref <span class="op">=</span> pd.DataFrame({<span class="st">'Estimate'</span>: [<span class="dv">0</span>], <span class="st">'LB CI'</span>: [<span class="dv">0</span>], <span class="st">'UB CI'</span>: [<span class="dv">0</span>], <span class="st">'Time'</span>: [<span class="dv">0</span>]})</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> pd.concat([mat, ref], ignore_index<span class="op">=</span><span class="va">True</span>).sort_values(<span class="st">'Time'</span>)</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>ax.plot(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>], <span class="st">'o-'</span>, color<span class="op">=</span><span class="st">'navy'</span>, markersize<span class="op">=</span><span class="dv">5</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>ax.errorbar(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>],</span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    yerr<span class="op">=</span>[mat[<span class="st">'Estimate'</span>]<span class="op">-</span>mat[<span class="st">'LB CI'</span>], mat[<span class="st">'UB CI'</span>]<span class="op">-</span>mat[<span class="st">'Estimate'</span>]],</span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">=</span><span class="st">'none'</span>, ecolor<span class="op">=</span><span class="st">'firebrick'</span>, capsize<span class="op">=</span><span class="dv">3</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>)</span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Relative time to last period before treatment changes (t=0)"</span>)</span>
-<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"DID, from last period before treatment changes (t=0) to t"</span>)</span>
-<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig81_nonnormalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>gq4.plot()</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig81_nonnormalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>               Block   Estimate        SE      LB CI     UB CI      N  Switchers
             Effect_1  0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
             Effect_2  0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
@@ -756,15 +749,16 @@ Joint nullity of placebos : p = 0.992198</code></pre>
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(1) design(0.8,<span class="kw">console</span>) graph_off</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(2) design(0.8,<span class="kw">console</span>) graph_off</span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) design(0.8,<span class="kw">console</span>) graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(1) design(0.8,<span class="kw">console</span>) graph_off</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(2) design(0.8,<span class="kw">console</span>) graph_off</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) design(0.8,<span class="kw">console</span>) graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--- ℓ = 1 ---
              Estimate         SE      LB CI      UB CI          N  Switchers
 Effect_1     .0144244   .0042477   .0060992   .0227497       5674       1119
@@ -806,7 +800,7 @@ Detection of treatment paths - 4 periods after first switch (933 switchers):
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(polars); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>)); df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>gq5_l1 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(<span class="at">df=</span>df, <span class="at">outcome=</span><span class="st">"prestout"</span>, <span class="at">group=</span><span class="st">"cnty90"</span>,</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">time=</span><span class="st">"year"</span>, <span class="at">treatment=</span><span class="st">"numdailies"</span>, <span class="at">effects=</span><span class="dv">1</span>,</span>
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">design=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="st">"console"</span>), <span class="at">graph_off=</span><span class="cn">TRUE</span>)</span>
@@ -857,37 +851,74 @@ Detection of treatment paths - 4 periods after first switch:
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
 <span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># design() option not yet available in py-did-multiplegt-dyn.</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ell <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>]:</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span>ell, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ell <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>]:</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>        time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span>ell, cluster<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        design<span class="op">=</span>[<span class="fl">0.8</span>, <span class="st">"console"</span>])</span>
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    model.fit()<span class="op">;</span> model.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--- effects = 1 ---
+================================================================================
+  Detection of treatment paths - 1 periods after first switch
+================================================================================
+            #Groups    %Groups       l=0       l=1
+TreatPath1      721 64.0319716 0.0000000 1.0000000
+TreatPath2      139 12.3445826 0.0000000 2.0000000
+TreatPath3       54  4.7957371 1.0000000 2.0000000
+TreatPath4       54  4.7957371 2.0000000 3.0000000
+================================================================================
+Treatment paths detected in switching groups: 1126
+Total % shown: 85.97%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
-Av_tot_eff   0.0120186 0.0035392  0.0050819 0.0189552   5674      1119
 
 --- effects = 2 ---
+================================================================================
+  Detection of treatment paths - 2 periods after first switch
+================================================================================
+             #Groups    %Groups       l=0       l=1       l=2
+TreatPath1       343 32.1462043 0.0000000 1.0000000 1.0000000
+TreatPath2       187 17.5257732 0.0000000 1.0000000 0.0000000
+TreatPath3       131 12.2774133 0.0000000 1.0000000 2.0000000
+TreatPath4        57  5.3420806 0.0000000 2.0000000 2.0000000
+TreatPath5        47  4.4048735 0.0000000 2.0000000 1.0000000
+TreatPath6        33  3.0927835 1.0000000 2.0000000 2.0000000
+TreatPath7        30  2.8116214 0.0000000 1.0000000 3.0000000
+TreatPath8        22  2.0618557 2.0000000 3.0000000 2.0000000
+TreatPath9        20  1.8744142 2.0000000 1.0000000 1.0000000
+================================================================================
+Treatment paths detected in switching groups: 1067
+Total % shown: 83.22%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
 Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
 Av_tot_eff   0.0143270 0.0039890  0.0065087 0.0221454   6754      2173
-Joint nullity p-value = 0.001482
 
 --- effects = 4 ---
+================================================================================
+  Detection of treatment paths - 4 periods after first switch
+================================================================================
+             #Groups    %Groups       l=0       l=1       l=2       l=3       l=4
+TreatPath1       141 15.1125402 0.0000000 1.0000000 1.0000000 1.0000000 1.0000000
+TreatPath2       127 13.6120043 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000
+TreatPath3        43  4.6087889 0.0000000 1.0000000 2.0000000 2.0000000 2.0000000
+  ... (57 treatment paths total, top 3 cover 33.3%)
+================================================================================
+Treatment paths detected in switching groups: 933
+Total % shown: 80.49%
+
              Estimate        SE      LB CI     UB CI      N  Switchers
 Effect_1     0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
 Effect_2     0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
 Effect_3     0.0207147 0.0079164  0.0051989 0.0362305   3750       984
 Effect_4     0.0272653 0.0097924  0.0080727 0.0464580   2980       917
 Av_tot_eff   0.0160565 0.0047761  0.0066956 0.0254174   8659      4074
-Joint nullity p-value = 0.006814
 
-All effects match Stata/R to 7 decimal places.
-Treatment path tables not available (design option not in Python package).</code></pre>
+All effects and treatment paths match Stata/R.</code></pre>
 </div>
 </div>
 </div>
@@ -904,10 +935,11 @@ Treatment path tables not available (design option not in Python package).</code
 <div class="tab-content">
 <div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) placebo(4) normalized effects_equal(<span class="ot">all</span>) <span class="kw">cluster</span>(cnty90)</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"$FIGDIR\ch08_fig82_normalized_es.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(4) placebo(4) normalized effects_equal(<span class="ot">all</span>) <span class="kw">cluster</span>(cnty90)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="kw">graph</span> <span class="kw">export</span> <span class="st">"$FIGDIR\ch08_fig82_normalized_es.png"</span>, <span class="kw">replace</span> <span class="kw">width</span>(1200)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -948,7 +980,7 @@ Test of joint nullity of the placebos : p-value = 0.9922</code></pre>
 </div>
 <div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>gq6 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
@@ -984,28 +1016,15 @@ Joint nullity of placebos : p = 0.9922</code></pre>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
 <span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
 <span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>gq6 <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
 <span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">4</span>, placebo<span class="op">=</span><span class="dv">4</span>,</span>
 <span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    normalized<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
 <span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>gq6.fit()<span class="op">;</span> gq6.summary()</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> gq6.result[<span class="st">'mat_res_XX'</span>]</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> mat[mat.index <span class="op">!=</span> <span class="dv">4</span>].copy()</span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>ref <span class="op">=</span> pd.DataFrame({<span class="st">'Estimate'</span>: [<span class="dv">0</span>], <span class="st">'LB CI'</span>: [<span class="dv">0</span>], <span class="st">'UB CI'</span>: [<span class="dv">0</span>], <span class="st">'Time'</span>: [<span class="dv">0</span>]})</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> pd.concat([mat, ref], ignore_index<span class="op">=</span><span class="va">True</span>).sort_values(<span class="st">'Time'</span>)</span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>ax.plot(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>], <span class="st">'o-'</span>, color<span class="op">=</span><span class="st">'navy'</span>, markersize<span class="op">=</span><span class="dv">5</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>ax.errorbar(mat[<span class="st">'Time'</span>], mat[<span class="st">'Estimate'</span>],</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    yerr<span class="op">=</span>[mat[<span class="st">'Estimate'</span>]<span class="op">-</span>mat[<span class="st">'LB CI'</span>], mat[<span class="st">'UB CI'</span>]<span class="op">-</span>mat[<span class="st">'Estimate'</span>]],</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">=</span><span class="st">'none'</span>, ecolor<span class="op">=</span><span class="st">'firebrick'</span>, capsize<span class="op">=</span><span class="dv">3</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>)</span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Relative time to last period before treatment changes (t=0)"</span>)</span>
-<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"DID, from last period before treatment changes (t=0) to t"</span>)</span>
-<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig82_normalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>gq6.plot()</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"figures/ch08_fig82_normalized_es_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>               Block   Estimate        SE      LB CI     UB CI      N  Switchers
             Effect_1  0.0120186 0.0035392  0.0050818 0.0189554   5674      1119
             Effect_2  0.0082126 0.0025136  0.0032860 0.0131392   4648      1054
@@ -1039,13 +1058,14 @@ Equality of effects : p = 0.165258</code></pre>
 <p>Using <code>did_multiplegt_stat</code>, compute the ATS and WATS estimators with <code>exact_match</code> and one placebo. Compare to the normalized event-study effects.</p>
 </blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-3" role="tab" aria-controls="tabset-8-3" aria-selected="false" href="">Python</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false" href="">R</a></li></ul>
 <div class="tab-content">
 <div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_stat, <span class="kw">replace</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>did_multiplegt_stat prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    placebo(1) exact_match</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_stat prestout cnty90 <span class="fu">year</span> numdailies, <span class="co">///</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    placebo(1) exact_match</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>-----------------------------------
 N                =            15466
 WAOSS Method     =  Reg. Adjustment
@@ -1080,91 +1100,13 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 22 stayers dropped (baseline treatment not in switchers' support)</code></pre>
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtSTAT)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>gq7 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_stat</span>(</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> <span class="fu">as.data.frame</span>(df),</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> <span class="st">"prestout"</span>, <span class="at">ID =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Time =</span> <span class="st">"year"</span>, <span class="at">D =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">placebo =</span> <span class="cn">TRUE</span>, <span class="at">exact_match =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(gq7)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>-----------------------------------
-N                =            15466
-WAOSS Method     =  Reg. Adjustment
-Common Support   =   Exact Matching
------------------------------------
-
-----------------------------------------------------------------------
-                    Estimation of AOSS(s)
-----------------------------------------------------------------------
-     Estimate    SE      LB CI   UB CI   Switchers Stayers
-AOSS 0.0062363 0.0014311 0.0034312 0.0090413 4,423     11,043
-
-----------------------------------------------------------------------
-               Estimation of AOSS(s) - Placebo
-----------------------------------------------------------------------
-      Estimate    SE      LB CI    UB CI   Switchers Stayers
-AOSS -0.0009239 0.0014709 -0.0038067 0.0019590 2,287     7,743
-
-----------------------------------------------------------------------
-                    Estimation of WAOSS(s)
-----------------------------------------------------------------------
-      Estimate    SE      LB CI   UB CI   Switchers Stayers
-WAOSS 0.0059026 0.0013034 0.0033480 0.0084572 4,423     11,043
-
-----------------------------------------------------------------------
-               Estimation of WAOSS(s) - Placebo
-----------------------------------------------------------------------
-      Estimate    SE      LB CI    UB CI   Switchers Stayers
-WAOSS 0.0002176 0.0013382 -0.0024053 0.0028404 2,287     7,743
-
-203 switchers dropped | 43 stayers dropped</code></pre>
-</div>
-<div id="tabset-8-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># py_did_multiplegt_stat (local notebook-based translation)</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Located at: C:\...\py_did_multiplegt_stat\stat_python</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> did_multiplegt_stat(</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df, Y<span class="op">=</span><span class="st">"prestout"</span>, ID<span class="op">=</span><span class="st">"cnty90"</span>, Time<span class="op">=</span><span class="st">"year"</span>, D<span class="op">=</span><span class="st">"numdailies"</span>,</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    estimator<span class="op">=</span>[<span class="st">"aoss"</span>,<span class="st">"waoss"</span>], estimation_method<span class="op">=</span><span class="st">"ra"</span>,</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    placebo<span class="op">=</span><span class="va">True</span>, exact_match<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>summary_did_multiplegt_stat(res)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>-----------------------------------
-N                =            15466
-WAOSS Method     =  Reg. Adjustment
-Common Support   =   Exact Matching
------------------------------------
-
-----------------------------------------------------------------------
-                    Estimation of AOSS(s)
-----------------------------------------------------------------------
-       Estimate         SE      LB CI      UB CI Switchers Stayers
-AOSS  0.0061034  0.0016286  0.0029113  0.0092954     4,423  11,043
-
-----------------------------------------------------------------------
-               Estimation of AOSS(s) - Placebo(s)
-----------------------------------------------------------------------
-             Estimate         SE       LB CI      UB CI Switchers Stayers
-Placebo_1  -0.0011280  0.0025056  -0.0060389  0.0037829     2,287   7,743
-
-----------------------------------------------------------------------
-                    Estimation of WAOSS(s)
-----------------------------------------------------------------------
-        Estimate         SE      LB CI      UB CI Switchers Stayers
-WAOSS  0.0057527  0.0014895  0.0028333  0.0086721     4,423  11,043
-
-----------------------------------------------------------------------
-               Estimation of WAOSS(s) - Placebo(s)
-----------------------------------------------------------------------
-                   Estimate         SE       LB CI      UB CI Switchers Stayers
-Placebo_1_waoss  -0.0000125  0.0022931  -0.0045070  0.0044820     2,287   7,743</code></pre>
+<pre><code>Note: The R DIDmultiplegtSTAT and Python py_did_multiplegt_stat packages
+are not yet updated to match the current Stata version. Results will be
+added when the packages are synchronized.</code></pre>
 </div>
 </div>
 </div>
-<p><strong>Interpretation:</strong> Both ATS (<span class="math inline">\(\approx 0.006\)</span>) and WATS (<span class="math inline">\(\approx 0.006\)</span>) are significant and positive across all three platforms. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of <span class="math inline">\(\widehat{AVSQ}^n_1 = 0.012\)</span>, which suggests a non-linear treatment response: the average effect per unit of treatment change is smaller when computed across all switcher magnitudes.</p>
-<p>Note: Stata, R, and Python point estimates differ slightly due to internal implementation variations (matching algorithms, variance formulas). N, switchers, and stayers are identical across all three.</p>
+<p><strong>Interpretation:</strong> The ATS (<span class="math inline">\(\approx 0.006\)</span>) and WATS (<span class="math inline">\(\approx 0.006\)</span>) are significant and positive. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of <span class="math inline">\(\widehat{AVSQ}^n_1 = 0.012\)</span>, which suggests a non-linear treatment response.</p>
 <hr>
 </section>
 <section id="bonus-joint-test-of-no-dynamic-effects" class="level2" data-number="6.10">
@@ -1176,11 +1118,12 @@ Placebo_1_waoss  -0.0000125  0.0022931  -0.0045070  0.0044820     2,287   7,743<
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-3" role="tab" aria-controls="tabset-9-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies <span class="co">///</span></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="fu">year</span>&lt;=first_change | same_treat_after_first_change==1, <span class="co">///</span></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(2) effects_equal(<span class="ot">all</span>) same_switchers graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies <span class="co">///</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="fu">year</span>&lt;=first_change | same_treat_after_first_change==1, <span class="co">///</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(2) effects_equal(<span class="ot">all</span>) same_switchers graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -1191,14 +1134,14 @@ Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
 Test of equality of the effects : p-value = 0.8301</code></pre>
 </div>
 <div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>df_sub <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, year <span class="sc">&lt;=</span> first_change <span class="sc">|</span> same_treat_after_first_change <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>bonus <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df_sub, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">2</span>, <span class="at">effects_equal =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">same_switchers =</span> <span class="cn">TRUE</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>df_sub <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, year <span class="sc">&lt;=</span> first_change <span class="sc">|</span> same_treat_after_first_change <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>bonus <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df_sub, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">2</span>, <span class="at">effects_equal =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">same_switchers =</span> <span class="cn">TRUE</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>             Estimate SE      LB CI   UB CI   N     Switchers
 Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
 Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
@@ -1206,15 +1149,15 @@ Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
 Test of equality of the effects : p-value = 0.8301</code></pre>
 </div>
 <div id="tabset-9-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    same_switchers<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>bonus.fit()<span class="op">;</span> bonus.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    same_switchers<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>bonus.fit()<span class="op">;</span> bonus.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>             Estimate SE      LB CI   UB CI   N     Switchers
 Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
 Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512

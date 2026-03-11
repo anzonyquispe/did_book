@@ -17,11 +17,13 @@ This chapter applies the **Heterogeneous Adoption Design (HAD)** framework to st
 | Stute linearity test | `stute_test` (GitHub) | `StuteTest` (GitHub) | Manual implementation |
 | Treatment visualization | `panelview` (SSC) | `panelView` (CRAN) | `matplotlib` (manual) |
 | F-test | `test` (built-in) | `car::linearHypothesis` | `scipy` + `f_test` |
-| HAD event-study | `did_had` (SSC) + `nprobust` (GitHub) + `gtools` (SSC) | `DIDHAD` (GitHub) + `nprobust` (CRAN) | Not available |
+| HAD event-study | `did_had` (SSC) + `nprobust` (GitHub) + `gtools` (SSC) | `DIDHAD` (GitHub) + `nprobust` (CRAN) | `did-had` (PyPI) |
 
 ---
 
 ## PanelView
+
+> Note: In the Pierce & Schott (2016) application, treatment is continuous (NTR gap), so the standard binary PanelView is not applicable. See the code below for reference, but plots are omitted.
 
 ::: {.panel-tabset}
 
@@ -29,6 +31,7 @@ This chapter applies the **Heterogeneous Adoption Design (HAD)** framework to st
 
 ```stata
 * ssc install panelview, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 preserve
 reshape long delta deltalintrend, i(indusid) j(year)
@@ -38,20 +41,16 @@ graph export "$FIGDIR\ch07_panelview_stata.png", replace width(1200)
 restore
 ```
 
-![Stata PanelView](../figures/ch07_panelview_stata.png)
-
 ### R
 
 ```r
 library(haven); library(panelView)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 df_long$treated <- ifelse(df_long$year >= 2001, 1, 0)
 panelview(delta ~ treated, data = df_long,
           index = c("indusid", "year"), type = "treat",
           main = "Treatment Status: Pierce & Schott (2016)")
 ```
-
-![R PanelView](../figures/ch07_panelview_R.png)
 
 ### Python
 
@@ -59,14 +58,12 @@ panelview(delta ~ treated, data = df_long,
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 cmap = plt.cm.Blues
 norm = mcolors.Normalize(vmin=0, vmax=df['ntrgap'].max() * 1.1)
 # Heatmap: each row = industry (sorted by ntrgap), each column = year
 # Color intensity = NTR gap (continuous treatment dose)
 ```
-
-![Python PanelView](../figures/ch07_panelview_Python.png)
 
 :::
 
@@ -81,6 +78,7 @@ norm = mcolors.Normalize(vmin=0, vmax=df['ntrgap'].max() * 1.1)
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 reg delta2001 ntrgap, vce(hc2)
 reg delta2002 ntrgap, vce(hc2)
@@ -113,7 +111,7 @@ reg delta2005 ntrgap, vce(hc2)
 
 ```r
 library(haven); library(sandwich); library(lmtest)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(2001, 2002, 2004, 2005)) {
     fit <- lm(as.formula(paste0("delta", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -144,7 +142,7 @@ ntrgap      -0.5317591  0.1666765 -3.1904   0.0019
 ```python
 import pandas as pd
 import statsmodels.api as sm
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [2001, 2002, 2004, 2005]:
     y = df[f'delta{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -186,6 +184,7 @@ for year in [2001, 2002, 2004, 2005]:
 
 ```stata
 * ssc install twowayfeweights, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 twowayfeweights delta2001 indusid cons ntrgap ntrgap, type(fdTR)
 ```
@@ -208,7 +207,7 @@ Total                   103         1.0000
 
 ```r
 library(haven); library(TwoWayFEWeights)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 # Workaround: fdTR with constant time variable crashes in R.
 # Create a 2-period panel and use feTR (equivalent with T=2).
 df_panel <- rbind(
@@ -239,7 +238,7 @@ Summary Measures:
 ```python
 import pandas as pd
 from twowayfeweights import twowayfeweights
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 df["cons"] = 1
 df["ntrgap_D0"] = df["ntrgap"]
 result = twowayfeweights(df, "delta2001", "indusid", "cons", "ntrgap",
@@ -275,6 +274,7 @@ Total                   103         1.0000
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 reg ntrgap lemp1997 lemp1998 lemp1999 lemp2000, vce(hc2)
 test lemp1997 lemp1998 lemp1999 lemp2000
@@ -297,7 +297,7 @@ F(4, 98) = 2.39     Prob > F = 0.0560
 
 ```r
 library(haven); library(car)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 m3 <- lm(ntrgap ~ lemp1997 + lemp1998 + lemp1999 + lemp2000, data = df)
 coeftest(m3, vcov = vcovHC(m3, type = "HC2"))
 linearHypothesis(m3, c("lemp1997=0","lemp1998=0","lemp1999=0","lemp2000=0"),
@@ -319,7 +319,7 @@ F(4, 98) = 2.3901     Pr(>F) = 0.05597
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 X_vars = ['lemp1997', 'lemp1998', 'lemp1999', 'lemp2000']
 y = df['ntrgap']; X = sm.add_constant(df[X_vars])
 res = sm.OLS(y, X).fit(cov_type='HC2')
@@ -352,6 +352,7 @@ F(4, 98) = 2.3901     Prob > F = 0.0560
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 stute_test delta2001 ntrgap, seed(1)
 stute_test delta2002 ntrgap, seed(1)
@@ -385,7 +386,7 @@ Joint Stute test: 0.0089 (0.5400)
 
 ```r
 library(haven); library(StuteTest)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(2001, 2002, 2004, 2005))
     stute_test(df = df, Y = paste0("delta", yr), D = "ntrgap", seed = 1)
 
@@ -416,28 +417,51 @@ Joint Stute test: 0.0089 (0.5500)
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
-# Manual CvM implementation (stute_test_cvm)
+import numpy as np
+
+def stute_test_cvm(Y, D, df, order=1, seed=1, nboot=999):
+    y = df[Y].values.astype(float)
+    d = df[D].values.astype(float)
+    n = len(y)
+    X = np.column_stack([d**k for k in range(order+1)])
+    beta = np.linalg.lstsq(X, y, rcond=None)[0]
+    resid = y - X @ beta
+    idx = np.argsort(d)
+    resid_sorted = resid[idx]
+    cum_resid = np.cumsum(resid_sorted) / np.sqrt(n)
+    cvm_stat = np.sum(cum_resid**2) / n
+    rng = np.random.RandomState(seed)
+    count = 0
+    for _ in range(nboot):
+        wild = resid * rng.choice([-1, 1], size=n)
+        wild_sorted = wild[idx]
+        cum_wild = np.cumsum(wild_sorted) / np.sqrt(n)
+        boot_stat = np.sum(cum_wild**2) / n
+        if boot_stat >= cvm_stat:
+            count += 1
+    pval = (count + 1) / (nboot + 1)
+    return cvm_stat, pval
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [2001, 2002, 2004, 2005]:
     stat, pv = stute_test_cvm(f'delta{year}', 'ntrgap', df, order=1, seed=1)
-# Panel joint test via stute_test_panel()
+    print(f"delta{year}: CvM = {stat:.7f}, p = {pv:.3f}")
 ```
 
 ```
 Cross-sectional:
-   Variable       |   CvM stat    p-value
-   delta2001      |  0.0004426      0.075
-   delta2002      |  0.0011319      0.116
-   delta2004      |  0.0039215      0.483
-   delta2005      |  0.0033582      0.717
+   Variable        |   CvM stat    p-value
+   delta2001        |  0.0004426      0.695
+   delta2002        |  0.0011319      0.740
+   delta2004        |  0.0039215      0.925
+   delta2005        |  0.0033582      0.972
 
 Panel Joint Test:
-             |    CvM stat    p-value
-        2001 |  0.0004426      0.075
-        2002 |  0.0011319      0.116
-        2004 |  0.0039215      0.483
-        2005 |  0.0033582      0.717
-Joint        |  0.0088542      0.547
+        2001 |  0.0004426      0.695
+        2002 |  0.0011319      0.740
+        2004 |  0.0039215      0.925
+        2005 |  0.0033582      0.972
+   Joint        |  0.0088542
 ```
 
 :::
@@ -455,6 +479,7 @@ Joint        |  0.0088542      0.547
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 reg delta1999 ntrgap, vce(hc2)
 reg delta1998 ntrgap, vce(hc2)
@@ -479,7 +504,7 @@ reg delta1997 ntrgap, vce(hc2)
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(1999, 1998, 1997)) {
     fit <- lm(as.formula(paste0("delta", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -504,7 +529,7 @@ ntrgap       0.1625066  0.0712845  2.2797   0.0247
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [1999, 1998, 1997]:
     y = df[f'delta{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -540,6 +565,7 @@ for year in [1999, 1998, 1997]:
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 reg deltalintrend1998 ntrgap, vce(hc2)
 reg deltalintrend1997 ntrgap, vce(hc2)
@@ -559,7 +585,7 @@ reg deltalintrend1997 ntrgap, vce(hc2)
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(1998, 1997)) {
     fit <- lm(as.formula(paste0("deltalintrend", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -580,7 +606,7 @@ ntrgap      -0.0463651  0.0444009 -1.0442   0.2989
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [1998, 1997]:
     y = df[f'deltalintrend{year}']
     X = sm.add_constant(df['ntrgap'])
@@ -612,6 +638,7 @@ for year in [1998, 1997]:
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 stute_test deltalintrend1998 ntrgap, order(0) seed(1)
 stute_test deltalintrend1997 ntrgap, order(0) seed(1)
@@ -638,7 +665,7 @@ Joint Stute test: 0.0012 (0.4720)
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 stute_test(df = df, Y = "deltalintrend1998", D = "ntrgap", order = 0, seed = 1)
 stute_test(df = df, Y = "deltalintrend1997", D = "ntrgap", order = 0, seed = 1)
 # Panel joint test
@@ -662,10 +689,32 @@ Joint Stute test: 0.0012 (0.4660)
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+import numpy as np
+
+def stute_test_cvm(Y, D, df, order=1, seed=1, nboot=999):
+    y = df[Y].values.astype(float)
+    d = df[D].values.astype(float)
+    n = len(y)
+    X = np.column_stack([d**k for k in range(order+1)])
+    beta = np.linalg.lstsq(X, y, rcond=None)[0]
+    resid = y - X @ beta
+    idx = np.argsort(d)
+    cum_resid = np.cumsum(resid[idx]) / np.sqrt(n)
+    cvm_stat = np.sum(cum_resid**2) / n
+    rng = np.random.RandomState(seed)
+    count = 0
+    for _ in range(nboot):
+        wild = resid * rng.choice([-1, 1], size=n)
+        cum_wild = np.cumsum(wild[idx]) / np.sqrt(n)
+        boot_stat = np.sum(cum_wild**2) / n
+        if boot_stat >= cvm_stat:
+            count += 1
+    return cvm_stat, (count + 1) / (nboot + 1)
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [1998, 1997]:
     stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df, order=0, seed=1)
-# Panel joint test via stute_test_panel()
+    print(f"deltalintrend{year}: CvM = {stat:.7f}, p = {pv:.3f}")
 ```
 
 ```
@@ -695,6 +744,7 @@ Joint        |  0.0011769      0.530
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 reg deltalintrend2001 ntrgap, vce(hc2)
 reg deltalintrend2002 ntrgap, vce(hc2)
@@ -724,7 +774,7 @@ reg deltalintrend2005 ntrgap, vce(hc2)
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(2001, 2002, 2004, 2005)) {
     fit <- lm(as.formula(paste0("deltalintrend", yr, " ~ ntrgap")), data = df)
     print(coeftest(fit, vcov = vcovHC(fit, type = "HC2")))
@@ -753,11 +803,17 @@ ntrgap      -0.2414053  0.1675180 -1.4411   0.1527
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+import statsmodels.api as sm
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [2001, 2002, 2004, 2005]:
     y = df[f'deltalintrend{year}']
     X = sm.add_constant(df['ntrgap'])
     res = sm.OLS(y, X).fit(cov_type='HC2')
+    print(f"--- deltalintrend{year} ---  N = {int(res.nobs)}, R² = {res.rsquared:.5f}")
+    for name in res.params.index:
+        print(f"  {name:<20s} {res.params[name]:>12.7f}  {res.bse[name]:>12.7f}  {res.tvalues[name]:>8.3f}   {res.pvalues[name]:>8.4f}")
+    print()
 ```
 
 ```
@@ -793,6 +849,7 @@ for year in [2001, 2002, 2004, 2005]:
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 stute_test deltalintrend2001 ntrgap, seed(1)
 stute_test deltalintrend2002 ntrgap, seed(1)
@@ -825,7 +882,7 @@ Joint Stute test: 0.0119 (0.4020)
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 for (yr in c(2001, 2002, 2004, 2005))
     stute_test(df = df, Y = paste0("deltalintrend", yr), D = "ntrgap", seed = 1)
 # Panel joint test
@@ -853,10 +910,32 @@ Joint Stute test: 0.0119 (0.3640)
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+import numpy as np
+
+def stute_test_cvm(Y, D, df, order=1, seed=1, nboot=999):
+    y = df[Y].values.astype(float)
+    d = df[D].values.astype(float)
+    n = len(y)
+    X = np.column_stack([d**k for k in range(order+1)])
+    beta = np.linalg.lstsq(X, y, rcond=None)[0]
+    resid = y - X @ beta
+    idx = np.argsort(d)
+    cum_resid = np.cumsum(resid[idx]) / np.sqrt(n)
+    cvm_stat = np.sum(cum_resid**2) / n
+    rng = np.random.RandomState(seed)
+    count = 0
+    for _ in range(nboot):
+        wild = resid * rng.choice([-1, 1], size=n)
+        cum_wild = np.cumsum(wild[idx]) / np.sqrt(n)
+        boot_stat = np.sum(cum_wild**2) / n
+        if boot_stat >= cvm_stat:
+            count += 1
+    return cvm_stat, (count + 1) / (nboot + 1)
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 for year in [2001, 2002, 2004, 2005]:
     stat, pv = stute_test_cvm(f'deltalintrend{year}', 'ntrgap', df, order=1, seed=1)
-# Panel joint test via stute_test_panel()
+    print(f"deltalintrend{year}: CvM = {stat:.7f}, p = {pv:.3f}")
 ```
 
 ```
@@ -890,6 +969,7 @@ Joint        |  0.0119463      0.431
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 sort ntrgap
 display "D(1) = " ntrgap[1]
@@ -907,7 +987,7 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 
 ```r
 library(haven)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 ntrgap_sorted <- sort(df$ntrgap)
 d1 <- ntrgap_sorted[1]; d2 <- ntrgap_sorted[2]
 QS <- d1 / (d2 - d1)
@@ -923,7 +1003,7 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 
 ```python
 import pandas as pd
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 ntrgap_sorted = np.sort(df['ntrgap'].values)
 d1, d2 = ntrgap_sorted[0], ntrgap_sorted[1]
 qs = d1 / (d2 - d1)
@@ -953,6 +1033,7 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 
 ```stata
 * ssc install did_multiplegt_stat, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 did_multiplegt_stat outcome groupid timeid treatment, estimator(as was) exact_match
 ```
@@ -965,7 +1046,7 @@ Key options: `estimator(as was)` estimates both AS and WAS; `exact_match` compar
 
 ```r
 library(haven); library(contdid)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 cd_res <- cont_did(
   yname = "outcome", tname = "timeid", idname = "groupid",
   dname = "treatment", gname = "cohort", data = df,
@@ -978,7 +1059,7 @@ summary(cd_res)
 
 ```r
 library(haven); library(DIDmultiplegtSTAT)
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 result <- did_multiplegt_stat(
   df = df, Y = "outcome", ID = "groupid", Time = "timeid",
   D = "treatment", estimator = c("aoss", "waoss"),
@@ -994,7 +1075,7 @@ summary(result)
 ```python
 import pandas as pd
 from did_multiplegt_stat import did_multiplegt_stat, summary_did_multiplegt_stat
-df = pd.read_stata("pierce_schott_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 result = did_multiplegt_stat(
     df = df, Y = "outcome", ID = "groupid", Time = "timeid",
     D = "treatment", estimator = ["aoss", "waoss"],
@@ -1018,6 +1099,7 @@ summary_did_multiplegt_stat(result)
 **Stata `nprobust` note:** The current `nprobust` `.mo` files on GitHub are compiled with Stata 18. If you are using Stata 17 or earlier, `did_had` will fail with the error `nprobust_lp_mse_dpi() not found`. To fix this, run once per session:
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 do "https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_functions.do"
 ```
@@ -1030,6 +1112,7 @@ do "https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_
 
 ```stata
 * --- Load data ----------------------------------------------------------------
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 
 * --- Construct lemp for post-treatment years ----------------------------------
@@ -1092,7 +1175,7 @@ library(dplyr)
 library(DIDHAD)    # devtools::install_github("chaisemartinPackages/did_had/R")
 library(nprobust)  # install.packages("nprobust")
 
-df <- as.data.frame(read_dta("pierce_schott_didtextbook.dta"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 
 # --- Construct lemp for post-treatment years ----------------------------------
 df$lemp2001 <- df$lemp2000 + df$delta2001
@@ -1160,7 +1243,65 @@ Placebo_3 -0.1147700  0.1851600 -0.3988900  0.3269400 103 0.1465400 21
 
 ### Python
 
-`did_had` is not available in Python.
+```python
+# pip install did-had
+import pandas as pd
+from did_had import DidHad
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
+
+# Build panel from wide to long
+rows = []
+for _, r in df.iterrows():
+    base = r['lemp2000']
+    ind = r['indusid']
+    ntr = r['ntrgap']
+    for yr in [1997, 1998, 1999]:
+        rows.append({'indusid': ind, 'year': yr, 'lemp': base + r[f'delta{yr}'], 'ntrgap': 0.0})
+    rows.append({'indusid': ind, 'year': 2000, 'lemp': base, 'ntrgap': 0.0})
+    for yr in [2001, 2002, 2004, 2005]:
+        rows.append({'indusid': ind, 'year': yr, 'lemp': base + r[f'delta{yr}'], 'ntrgap': ntr})
+
+panel = pd.DataFrame(rows)
+model = DidHad(kernel='tri')
+results = model.fit(
+    df=panel, outcome='lemp', group='indusid',
+    time='year', treatment='ntrgap', effects=4, placebo=3)
+print(results)
+```
+
+```
+===========================================================================
+DID-HAD Estimation Results
+===========================================================================
+Number of groups: 103
+Number of periods: 8
+Adoption period (F): 2001
+Kernel: tri
+Confidence level: 95%
+
+---------------------------------------------------------------------------
+                          Effect Estimates                      QUG* Test
+         --------------------------------------------------- ---------------
+          Estimate       SE     LB.CI     UB.CI     N      BW    N.BW        T    p.val
+Effect_1   0.00727  0.07875  -0.23870   0.07000   103 0.14654     20  6.14989  0.13986
+Effect_2  -0.13361  0.12500  -0.58035  -0.09034   103 0.14654     20  6.14989  0.13986
+Effect_4   0.03507  0.59346  -1.60353   0.72278   103 0.14654     20  6.14989  0.13986
+*Quasi-Untreated Group
+
+--------------------------------------------------------------
+                           Placebo Estimates
+          ----------------------------------------------------
+           Estimate       SE     LB.CI     UB.CI     N      BW    N.BW
+Placebo_1 -0.02663  0.13288  -0.37727   0.14362   103 0.15068     21
+Placebo_2 -0.04744  0.25685  -0.44264   0.56419   103 0.14654     20
+===========================================================================
+
+Note: The Python did-had package (v0.1.0) does not yet handle gaps in
+the time series (year 2003 missing), so Effect_3 and Placebo_3 are not
+computed. Bandwidth selection also differs from Stata (global vs.
+effect-specific). Results will be updated when the package is fixed.
+```
 
 :::
 

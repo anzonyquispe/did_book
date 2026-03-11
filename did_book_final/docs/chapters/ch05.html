@@ -269,8 +269,8 @@ window.Quarto = {
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install panelview, <span class="kw">replace</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">gen</span> has_newspaper = (numdailies &gt; 0) <span class="kw">if</span> numdailies != .</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>panelview prestout has_newspaper, i(cnty90) t(<span class="fu">year</span>) <span class="dv">type</span>(treat) <span class="co">///</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="bn">title</span>(<span class="st">"Treatment Status: Gentzkow, Shapiro &amp; Sinkinson (2011)"</span>) <span class="co">///</span></span>
@@ -281,7 +281,7 @@ window.Quarto = {
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(panelView)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">panelview</span>(prestout <span class="sc">~</span> numdailies, <span class="at">data =</span> df,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"cnty90"</span>, <span class="st">"year"</span>), <span class="at">type =</span> <span class="st">"treat"</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">main =</span> <span class="st">"Treatment Status: Gentzkow, Shapiro &amp; Sinkinson (2011)"</span>,</span>
@@ -294,7 +294,7 @@ window.Quarto = {
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.colors <span class="im">as</span> mcolors</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> Patch</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"has_newspaper"</span>] <span class="op">=</span> (df[<span class="st">"numdailies"</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>pv <span class="op">=</span> df.pivot_table(index<span class="op">=</span><span class="st">"cnty90"</span>, columns<span class="op">=</span><span class="st">"year"</span>, values<span class="op">=</span><span class="st">"has_newspaper"</span>, aggfunc<span class="op">=</span><span class="st">"first"</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>pv_sorted <span class="op">=</span> pv.loc[pv.mean(axis<span class="op">=</span><span class="dv">1</span>).sort_values(ascending<span class="op">=</span><span class="va">False</span>).index]</span>
@@ -327,8 +327,9 @@ window.Quarto = {
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> prestout i.<span class="fu">year</span> numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> prestout i.<span class="fu">year</span> numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Linear regression, absorbing indicators             Number of obs     = 16,872
 Absorbed variable: cnty90                           No. of categories =  1,195
                                                     F(16, 1194)       = 310.47
@@ -363,8 +364,9 @@ Absorbed variable: cnty90                           No. of categories =  1,195
        _cons |   .6764326   .0082986    81.51   0.000     .6601511    .6927140
 ------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="dv">type</span>(feTR)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="dv">type</span>(feTR)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
 the TWFE coefficient beta, equal to 0.0029, estimates a weighted sum of 10378 ATTs.
 6180 ATTs receive a positive weight, and 4198 receive a negative weight.
@@ -379,7 +381,7 @@ Total                   10378       1.0000
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(fixest)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">feols</span>(prestout <span class="sc">~</span> numdailies <span class="sc">+</span> <span class="fu">i</span>(year) <span class="sc">|</span> cnty90,</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>cnty90,</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">ssc =</span> <span class="fu">ssc</span>(<span class="at">fixef.K =</span> <span class="st">"full"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -405,7 +407,7 @@ year::1924                  -0.1649369    0.0109407     -15.08      0.000   -0.1
 year::1928                  -0.1102546    0.0108236     -10.19      0.000   -0.1314900   -0.0890193
 ------------------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(TwoWayFEWeights)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>decomp1 <span class="ot">&lt;-</span> <span class="fu">twowayfeweights</span>(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"numdailies"</span>, <span class="at">type =</span> <span class="st">"feTR"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
@@ -420,7 +422,7 @@ Total                     10378            1</code></pre>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyfixest <span class="im">as</span> pf</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>m1 <span class="op">=</span> pf.feols(</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prestout ~ numdailies + C(year) | cnty90"</span>,</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df,</span>
@@ -453,7 +455,7 @@ year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688
 --------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"numdailies"</span>,</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"feTR"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
@@ -479,15 +481,17 @@ Total                   10378       1.0000
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">qui</span> <span class="kw">tab</span> styr, <span class="kw">gen</span>(styr)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">qui</span> <span class="kw">areg</span> prestout i.<span class="fu">year</span> i.styr numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">display</span> <span class="st">"numdailies:  coef = "</span> %12.7f _b[numdailies] <span class="co">///</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>   <span class="st">"  se = "</span> %12.7f _se[numdailies]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">qui</span> <span class="kw">tab</span> styr, <span class="kw">gen</span>(styr)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">qui</span> <span class="kw">areg</span> prestout i.<span class="fu">year</span> i.styr numdailies, absorb(cnty90) <span class="kw">cluster</span>(cnty90)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">display</span> <span class="st">"numdailies:  coef = "</span> %12.7f _b[numdailies] <span class="co">///</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>   <span class="st">"  se = "</span> %12.7f _se[numdailies]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="dv">type</span>(feTR) controls(styr1-styr683)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights prestout cnty90 <span class="fu">year</span> numdailies, <span class="dv">type</span>(feTR) controls(styr1-styr683)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
 the TWFE coefficient beta, equal to -0.0012, estimates a weighted sum of 10342 ATTs.
 6195 ATTs receive a positive weight, and 4147 receive a negative weight.
@@ -503,13 +507,13 @@ Total                   10342       1.0000
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">feols</span>(prestout <span class="sc">~</span> numdailies <span class="sc">+</span> <span class="fu">i</span>(year) <span class="sc">+</span> <span class="fu">i</span>(styr) <span class="sc">|</span> cnty90,</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>cnty90,</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">ssc =</span> <span class="fu">ssc</span>(<span class="at">fixef.K =</span> <span class="st">"full"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>decomp2 <span class="ot">&lt;-</span> <span class="fu">twowayfeweights</span>(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"numdailies"</span>, <span class="at">type =</span> <span class="st">"feTR"</span>,</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">controls =</span> styr_cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -525,7 +529,7 @@ Total                     10342            1</code></pre>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="op">=</span> pf.feols(</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prestout ~ numdailies + C(year) + C(styr) | cnty90"</span>,</span>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df,</span>
@@ -535,7 +539,7 @@ Total                     10342            1</code></pre>
 <pre><code>numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 (year and state-year FEs absorbed, not shown)</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Decomposition with state-year controls</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>styr_cols <span class="op">=</span> <span class="bu">sorted</span>([c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c.startswith(<span class="st">"styr"</span>) <span class="kw">and</span> c <span class="op">!=</span> <span class="st">"styr"</span>])</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"prestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>, <span class="st">"numdailies"</span>,</span>
@@ -564,8 +568,9 @@ Total                   10342       1.0000
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> changeprestout changedailies, absorb(styr) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">areg</span> changeprestout changedailies, absorb(styr) <span class="kw">cluster</span>(cnty90)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Linear regression, absorbing indicators             Number of obs     = 15,627
 Absorbed variable: styr                             No. of categories =    634
                                                     F(1, 1194)        =   7.68
@@ -583,9 +588,10 @@ changedailies |   .0025907   .0009351     2.77   0.006     .0007561    .0044252
         _cons |  -.0072455   .0003658   -19.81   0.000    -.0079632   -.0065278
 -------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>twowayfeweights changeprestout cnty90 <span class="fu">year</span> changedailies numdailies, <span class="co">///</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">type</span>(fdTR) controls(styr1-styr683)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights changeprestout cnty90 <span class="fu">year</span> changedailies numdailies, <span class="co">///</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">type</span>(fdTR) controls(styr1-styr683)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
 the TWFE coefficient beta, equal to 0.0026, estimates a weighted sum of 9876 ATTs.
 5371 ATTs receive a positive weight, and 4505 receive a negative weight.
@@ -599,9 +605,10 @@ Negative weights           4505        -1.4271
 Total                      9876        1.0000
 ------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>twowayfeweights changeprestout cnty90 <span class="fu">year</span> changedailies numdailies, <span class="co">///</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">type</span>(fdTR) controls(styr1-styr683) test_random_weights(<span class="fu">year</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights changeprestout cnty90 <span class="fu">year</span> changedailies numdailies, <span class="co">///</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">type</span>(fdTR) controls(styr1-styr683) test_random_weights(<span class="fu">year</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Regression of variables possibly correlated with the treatment effect on the weights
 
              Coef           SE       t-stat  Correlation
@@ -609,7 +616,7 @@ year    -.1674271    .05101171   -3.2821307    -.0631614</code></pre>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>model3 <span class="ot">&lt;-</span> <span class="fu">feols</span>(changeprestout <span class="sc">~</span> changedailies <span class="sc">|</span> styr,</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>cnty90,</span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">ssc =</span> <span class="fu">ssc</span>(<span class="at">fixef.K =</span> <span class="st">"full"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -620,7 +627,7 @@ Variable                   Coefficient    Std. Err.    t value   Pr(&gt;|t|)    
 changedailies                0.0025907    0.0009345       2.77     0.0057    0.0007573    0.0044241
 ------------------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>decomp3 <span class="ot">&lt;-</span> <span class="fu">twowayfeweights</span>(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"changedailies"</span>, <span class="at">D0 =</span> <span class="st">"numdailies"</span>,</span>
 <span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">type =</span> <span class="st">"fdTR"</span>, <span class="at">controls =</span> styr_cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -634,7 +641,7 @@ Positive weights             5371       2.4271
 Negative weights             4505      -1.4271
 Total                        9876            1</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>decomp3_test <span class="ot">&lt;-</span> <span class="fu">twowayfeweights</span>(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"changedailies"</span>, <span class="at">D0 =</span> <span class="st">"numdailies"</span>,</span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">type =</span> <span class="st">"fdTR"</span>, <span class="at">controls =</span> styr_cols,</span>
@@ -645,7 +652,7 @@ RW_year -0.1674271 0.05101171 -3.282131  -0.0631614</code></pre>
 </div>
 <div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>m3 <span class="op">=</span> pf.feols(</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"changeprestout ~ changedailies | styr"</span>,</span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df,</span>
@@ -663,7 +670,7 @@ Variable              Coefficient    Std. Err.          t      P&gt;|t|         
 changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580,  0.0044234]
 --------------------------------------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co"># FD weight decomposition (fdTR type)</span></span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>result3 <span class="op">=</span> twowayfeweights(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"changedailies"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"numdailies"</span>,</span>
@@ -681,7 +688,7 @@ Negative weights        4505        -1.4271
 Total                   9876        1.0000
 ------------------------------------------------</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"gentzkowetal_didtextbook.dta"</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Test random weights (year)</span></span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>result3b <span class="op">=</span> twowayfeweights(df, <span class="st">"changeprestout"</span>, <span class="st">"cnty90"</span>, <span class="st">"year"</span>,</span>
 <span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"changedailies"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"numdailies"</span>,</span>
