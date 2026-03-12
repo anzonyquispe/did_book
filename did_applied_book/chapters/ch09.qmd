@@ -15,7 +15,8 @@ title: "Chapter 9: Deryugina (2017) — Hurricane Hits and Government Transfers"
 ### Stata
 
 ```stata
-use "Deryugina_2017.dta", clear
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.dta" "deryugina_2017.dta", replace
+use "deryugina_2017.dta", clear
 egen total_hurricane = total(hurricane), by(county_fips)
 sum total_hurricane
 ```
@@ -34,7 +35,7 @@ All counties have `total_hurricane` ∈ {0, 1} — confirming the one-shot desig
 library(haven)
 library(dplyr)
 
-df <- read_dta("C:/data/Deryugina_2017.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"))
 
 df %>%
   group_by(county_fips) %>%
@@ -61,7 +62,7 @@ All counties have `total_hurricane` ∈ {0, 1} — confirming the one-shot desig
 ```python
 import pandas as pd
 
-df = pd.read_stata("C:/data/Deryugina_2017.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet")
 
 total = (
     df.groupby("county_fips")["hurricane"]

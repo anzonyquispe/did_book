@@ -226,53 +226,83 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p><strong>“Using did_multiplegt_dyn to Estimate Event-Study Effects in Complex Designs: Overview, and Four Examples Based on Real Datasets”</strong> by Clément de Chaisemartin, Diego Ciccia, Felix Knau, Mélitine Malézieux, Doulo Sow, David Arboleda, Romain Angotti, Xavier D’Haultfœuille, Bingxue Li, Henri Fabre &amp; Anzony Quispe (2025)</p>
 </blockquote>
-<p>Each example is replicated in <strong>Stata</strong> (with hardcoded outputs from the do file), following the same format as the companion DiD Textbook Translations.</p>
+<p>Each example is replicated in <strong>Stata</strong>, <strong>R</strong>, and <strong>Python</strong> with hardcoded outputs, following the same format as the companion DiD Textbook Translations.</p>
 <section id="datasets" class="level2">
 <h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
-<p>All datasets are bundled with the <code>did_multiplegt_dyn</code> Stata package. To download them, run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>net <span class="fu">get</span> did_multiplegt_dyn</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All datasets are available for direct download in three formats:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Example</th>
 <th>Paper</th>
-<th>Dataset</th>
+<th><code>.dta</code></th>
+<th><code>.RData</code></th>
+<th><code>.parquet</code></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>9.1</td>
 <td>Deryugina (2017)</td>
-<td><code>Deryugina_2017.dta</code></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.dta">deryugina_2017.dta</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.RData">.RData</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.parquet">.parquet</a></td>
 </tr>
 <tr class="even">
 <td>9.2</td>
 <td>East et al.&nbsp;(2023)</td>
-<td><code>east_et_al_2023.dta</code></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.dta">east_et_al_2023.dta</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.RData">.RData</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.parquet">.parquet</a></td>
 </tr>
 <tr class="odd">
 <td>9.3</td>
 <td>Gentzkow et al.&nbsp;(2011)</td>
-<td><code>gentzkowetal_didtextbook.dta</code></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.dta">gentzkowetal_didtextbook.dta</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.RData">.RData</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.parquet">.parquet</a></td>
 </tr>
 <tr class="even">
 <td>9.4</td>
 <td>Hollingsworth et al.&nbsp;(2022)</td>
-<td><code>hollingsworth_et_al_2022.dta</code></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.dta">hollingsworth_et_al_2022.dta</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.RData">.RData</a></td>
+<td><a href="https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.parquet">.parquet</a></td>
 </tr>
 </tbody>
 </table>
+<p>Alternatively, datasets are bundled with the <code>did_multiplegt_dyn</code> Stata package:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>net <span class="fu">get</span> did_multiplegt_dyn</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
-<ul>
-<li><strong>Stata 17+</strong> with <code>did_multiplegt_dyn</code>: <code>ssc install did_multiplegt_dyn, replace</code></li>
-</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"DIDmultiplegtDYN"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"polars"</span>)   <span class="co"># required backend</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"haven"</span>)    <span class="co"># to read .dta files</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pip install did<span class="op">-</span>multiplegt<span class="op">-</span>dyn</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pip install pandas pyarrow    <span class="co"># to read .parquet files</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
 </section>
 <section id="source-code" class="level2">
 <h2 class="anchored" data-anchor-id="source-code">Source code</h2>
-<p>Do file: <code>ch09_applied_examples.do</code></p>
+<p>All replication scripts are available in the repository:</p>
+<ul>
+<li><strong>Stata:</strong> <code>did_applied_book/ch09_applied_examples.do</code></li>
+<li><strong>R:</strong> <code>did_applied_book/ch09_ex1_deryugina.R</code>, <code>ch09_ex2_east.R</code>, <code>ch09_ex3_gentzkow.R</code>, <code>ch09_ex4_hollingsworth.R</code></li>
+<li><strong>Python:</strong> <code>did_applied_book/ch09_python_all.py</code></li>
+</ul>
 
 
 </section>

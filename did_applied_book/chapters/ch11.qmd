@@ -15,6 +15,7 @@ title: "Chapter 11: Gentzkow et al. (2011) — Newspapers and Voter Turnout"
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 xtset cnty90 year
 bysort cnty90 (year): gen first_numdailies = numdailies[1]
@@ -52,7 +53,7 @@ tab d_numdailies
 library(haven)
 library(dplyr)
 
-df <- read_dta("C:/data/gentzkowetal_didtextbook.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/gentzkowetal_didtextbook.RData"))
 
 # First-period treatment distribution
 df %>%
@@ -80,7 +81,7 @@ df %>%
 ```python
 import pandas as pd
 
-df = pd.read_stata("C:/data/gentzkowetal_didtextbook.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/gentzkowetal_didtextbook.parquet")
 
 first = (
     df.sort_values("year")

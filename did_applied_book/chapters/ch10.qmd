@@ -15,6 +15,8 @@ title: "Chapter 10: East et al. (2023) — Prenatal Medicaid and Low Birth Weigh
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.dta" "east_et_al_2023.dta", replace
+use "east_et_al_2023.dta", clear
 tab newsimeli if dob_y_p == 1975
 ```
 
@@ -40,7 +42,7 @@ All 50 states have different values of `newsimeli` in 1975 — confirming the tr
 library(haven)
 library(dplyr)
 
-df <- read_dta("C:/data/east_et_al_2023.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.RData"))
 
 df %>%
   filter(dob_y_p == 1975) %>%
@@ -67,7 +69,7 @@ All 50 states have different values of `newsimeli` in 1975 — confirming the tr
 ```python
 import pandas as pd
 
-df = pd.read_stata("C:/data/east_et_al_2023.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet")
 
 vals = df.loc[df["dob_y_p"] == 1975, "newsimeli"].value_counts()
 print(f"Unique values: {len(vals)}, all freq=1: {(vals == 1).all()}")

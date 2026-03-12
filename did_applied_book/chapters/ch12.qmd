@@ -15,6 +15,7 @@ title: "Chapter 12: Hollingsworth et al. (2022) — Marijuana Laws and Drug Use"
 ### Stata
 
 ```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.dta" "hollingsworth_et_al_2022.dta", replace
 use "hollingsworth_et_al_2022.dta", clear
 xtset state year
 gen d_mm = D.mm
@@ -57,7 +58,7 @@ Both treatments are binary and absorbing. Medical law always precedes recreation
 library(haven)
 library(dplyr)
 
-df <- read_dta("C:/data/hollingsworth_et_al_2022.dta")
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"))
 
 df %>%
   summarise(
@@ -79,7 +80,7 @@ df %>%
 ```python
 import pandas as pd
 
-df = pd.read_stata("C:/data/hollingsworth_et_al_2022.dta")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet")
 
 print(df["mm"].value_counts())
 print(df["rm"].value_counts())
