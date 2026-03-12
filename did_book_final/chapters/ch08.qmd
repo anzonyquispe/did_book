@@ -54,12 +54,12 @@ graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ### R
 
 ```r
-library(haven); library(panelView)
+library(panelView)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-panelview(prestout ~ numdailies, data = df,
-          index = c("cnty90", "year"), type = "treat",
-          main = "Gentzkow et al. (2011)",
-          ylab = "")
+png("figures/ch08_panelview_R.png", width = 1000, height = 600)
+panelview(prestout ~ numdailies, data = df, index = c("cnty90", "year"), type = "treat",
+          main = "Gentzkow, Shapiro & Sinkinson (2011)", ylab = "")
+dev.off()
 ```
 
 ![R PanelView](../figures/ch08_panelview_R.png)
@@ -97,138 +97,6 @@ plt.show()
 ![Python PanelView](../figures/ch08_panelview_Python.png)
 
 :::
-
----
-
-## GQ1 (§8.1.3): Test Independence of $\Delta D$ and $D_1$
-
-> Regress `changedailies` on `lag_numdailies`, clustering standard errors at the county level.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
-use "gentzkowetal_didtextbook.dta", clear
-reg changedailies lag_numdailies, cluster(cnty90)
-```
-
-```
-                               (Std. err. adjusted for 1,195 clusters in cnty90)
---------------------------------------------------------------------------------
-               |               Robust
- changedailies | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
-lag_numdailies |  -.0419532   .0157613    -2.66   0.008    -.0728841   -.0110222
-         _cons |   .1419944   .0202459     7.01   0.000     .1022647    .1817241
---------------------------------------------------------------------------------
-N = 15,627
-```
-
-### R
-
-```r
-library(haven); library(lmtest); library(sandwich)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-gq1 <- lm(changedailies ~ lag_numdailies, data = df)
-coeftest(gq1, vcov = vcovCL(gq1, cluster = ~cnty90))
-```
-
-```
-                 Estimate Std. Error t value Pr(>|t|)
-(Intercept)     0.1419944  0.0202459  7.0135   0.0000
-lag_numdailies -0.0419532  0.0157613 -2.6618   0.0078
-N = 15,627
-```
-
-### Python
-
-```python
-import pandas as pd
-import statsmodels.api as sm
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-sub = df.dropna(subset=['changedailies','lag_numdailies'])
-y = sub['changedailies']; X = sm.add_constant(sub['lag_numdailies'])
-res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
-```
-
-```
-  Variable                          Coef      Std.Err          t      P>|t|
-  const                        0.1419944    0.0202459      7.013     0.0000
-  lag_numdailies              -0.0419532    0.0157613     -2.662     0.0078
-  N = 15,627
-```
-
-:::
-
-**Interpretation:** The coefficient on `lag_numdailies` is $-0.0419532$ and highly significant ($p = 0.008$). The change in counties' number of newspapers ($\Delta D$) is negatively correlated with their lagged number of newspapers ($D_1$). This means the first-difference regression of turnout on $\Delta D$ may be subject to an OVB, even if the change in newspapers is as good as random.
-
----
-
-## GQ2 (§8.1.3): Balancing Check
-
-> Regress `changedailies` on `lag_ishare_urb` (counties' lagged urbanization rate), clustering at the county level.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
-use "gentzkowetal_didtextbook.dta", clear
-reg changedailies lag_ishare_urb, cluster(cnty90)
-```
-
-```
-                               (Std. err. adjusted for 1,195 clusters in cnty90)
---------------------------------------------------------------------------------
-               |               Robust
- changedailies | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
-lag_ishare_urb |  -.1422166   .0403066    -3.53   0.000    -.2213139   -.0631193
-         _cons |   .0906335   .0031300    28.96   0.000     .0844918    .0967752
---------------------------------------------------------------------------------
-N = 15,292
-```
-
-### R
-
-```r
-library(haven); library(lmtest); library(sandwich)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-gq2 <- lm(changedailies ~ lag_ishare_urb, data = df)
-coeftest(gq2, vcov = vcovCL(gq2, cluster = ~cnty90))
-```
-
-```
-                Estimate Std. Error t value  Pr(>|t|)
-(Intercept)    0.0906335  0.0031300 28.9564    0.0000
-lag_ishare_urb -0.1422166  0.0403066 -3.5284   0.0004
-N = 15,292
-```
-
-### Python
-
-```python
-import pandas as pd
-import statsmodels.api as sm
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-sub = df.dropna(subset=['changedailies','lag_ishare_urb'])
-y = sub['changedailies']; X = sm.add_constant(sub['lag_ishare_urb'])
-res = sm.OLS(y, X).fit(cov_type='cluster', cov_kwds={'groups': sub['cnty90']})
-```
-
-```
-  Variable                          Coef      Std.Err          t      P>|t|
-  const                        0.0906335    0.0031300     28.956     0.0000
-  lag_ishare_urb              -0.1422166    0.0403066     -3.528     0.0004
-  N = 15,292
-```
-
-:::
-
-**Interpretation:** The coefficient is $-0.1422166$ and highly significant ($p < 0.001$). More-urbanized counties are less likely to experience an increase in their number of newspapers. This suggests the change in newspapers may not be as good as random, casting further doubt on the validity of the first-difference approach without controls.
 
 ---
 

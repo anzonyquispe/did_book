@@ -31,16 +31,16 @@ panelview div_rate udl, i(state) t(year) type(treat) ///
 
 ### R
 
-![Treatment Status: Wolfers (2006) — R](../figures/ch06_panelview_R.png)
-
 ```r
-library(haven); library(panelView)
+library(panelView)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
-panelview(div_rate ~ udl, data = df,
-          index = c("state", "year"), type = "treat",
-          main = "Treatment Status: Wolfers (2006)",
-          xlab = "Year", ylab = "State")
+png("figures/ch06_panelview_R.png", width = 1000, height = 600)
+panelview(div_rate ~ udl, data = df, index = c("state", "year"), type = "treat",
+          main = "Wolfers (2006)", ylab = "")
+dev.off()
 ```
+
+![Treatment Status: Wolfers (2006) — R](../figures/ch06_panelview_R.png)
 
 ### Python
 

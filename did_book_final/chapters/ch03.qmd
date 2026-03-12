@@ -31,28 +31,11 @@ graph export "figures/ch03_panelview_stata.png", replace width(1200)
 ### R
 
 ```r
-library(haven); library(ggplot2)
+library(panelView)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-treat_yr <- aggregate(year ~ subclass, data = df[df$twea == 1,], FUN = min)
-names(treat_yr)[2] <- "first_treat"
-df <- merge(df, treat_yr, by = "subclass", all.x = TRUE)
-df$first_treat[is.na(df$first_treat)] <- 9999
-df$subclass_rank <- rank(df$first_treat * 10000 + df$subclass, ties.method = "first")
-df$subclass_rank <- ave(df$subclass_rank, df$subclass, FUN = min)
-png("figures/ch03_panelview_R.png", width = 1200, height = 1000)
-ggplot(df, aes(x = year, y = reorder(factor(subclass), -subclass_rank),
-               fill = factor(twea))) +
-    geom_tile(height = 0.8) +
-    scale_fill_manual(values = c("0" = "#D4E6F1", "1" = "#00AAAA"),
-                      labels = c("Control", "Treated")) +
-    scale_x_continuous(breaks = 1900:1939) +
-    labs(title = "Treatment Status: Moser & Voena (2012)",
-         x = "year", y = "", fill = "") +
-    theme_minimal() +
-    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
-          axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
-          panel.grid = element_blank(), legend.position = "bottom",
-          plot.title = element_text(size = 18, hjust = 0.5))
+png("figures/ch03_panelview_R.png", width = 1000, height = 600)
+panelview(patents ~ twea, data = df, index = c("subclass", "year"), type = "treat",
+          main = "Moser & Voena (2012)", ylab = "")
 dev.off()
 ```
 
@@ -335,51 +318,9 @@ print(m3.summary())
 
 > Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that $\hat{\beta}_1^{fe}$ equals the DID from equation (3.7).
 
-First, construct the event-study dummies. The reference period is 1918 (the last pre-treatment year). For treated subclasses, `reltimeminus_l` equals 1 at $l$ years before 1918, and `reltimeplus_l` equals 1 at $l$ years after 1918.
+The event-study dummies `reltimeminus1`–`reltimeminus18` and `reltimeplus1`–`reltimeplus21` are already included in the dataset. The reference period is 1918 (the last pre-treatment year).
 
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-* Generate event-study dummies (reference period: 1918)
-forvalues l = 1/18 {
-    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
-}
-forvalues l = 1/21 {
-    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
-}
-```
-
-### R
-
-```r
-library(haven)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-# Generate event-study dummies (reference period: 1918)
-for (l in 1:18) {
-    df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
-}
-for (l in 1:21) {
-    df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
-}
-```
-
-### Python
-
-```python
-import pandas as pd
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
-# Generate event-study dummies (reference period: 1918)
-for l in range(1, 19):
-    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
-for l in range(1, 22):
-    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
-```
-
-:::
+Now estimate the event-study TWFE regression:
 
 Now estimate the event-study TWFE regression:
 
@@ -399,7 +340,7 @@ forvalues l = 1/21 {
 reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
 
 * F-test on pre-trends
-test reltimeminus1 reltimeminus2 ... reltimeminus18
+test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 reltimeminus5 reltimeminus6 reltimeminus7 reltimeminus8 reltimeminus9 reltimeminus10 reltimeminus11 reltimeminus12 reltimeminus13 reltimeminus14 reltimeminus15 reltimeminus16 reltimeminus17 reltimeminus18
 ```
 
 ```

@@ -44,12 +44,16 @@ restore
 ### R
 
 ```r
-library(haven); library(panelView)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
+library(panelView); library(tidyr)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData"))
+df_long <- df %>% pivot_longer(cols = starts_with("delta"), names_to = "variable", values_to = "value")
+df_long$year <- as.numeric(gsub("delta", "", df_long$variable))
+df_long <- df_long[!is.na(df_long$year), ]
 df_long$treated <- ifelse(df_long$year >= 2001, 1, 0)
-panelview(delta ~ treated, data = df_long,
-          index = c("indusid", "year"), type = "treat",
-          main = "Treatment Status: Pierce & Schott (2016)")
+png("figures/ch07_panelview_R.png", width = 1000, height = 600)
+panelview(value ~ treated, data = df_long, index = c("indusid", "year"), type = "treat",
+          main = "Pierce & Schott (2016)", ylab = "")
+dev.off()
 ```
 
 ### Python

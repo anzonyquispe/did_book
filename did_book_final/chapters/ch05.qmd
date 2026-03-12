@@ -37,12 +37,12 @@ graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ### R
 
 ```r
-library(haven); library(panelView)
+library(panelView)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-panelview(prestout ~ numdailies, data = df,
-          index = c("cnty90", "year"), type = "treat",
-          main = "Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)",
-          xlab = "Year", ylab = "")
+png("figures/ch05_panelview_R.png", width = 1000, height = 600)
+panelview(prestout ~ numdailies, data = df, index = c("cnty90", "year"), type = "treat",
+          main = "Gentzkow, Shapiro & Sinkinson (2011)", ylab = "")
+dev.off()
 ```
 
 <img src="../figures/ch05_panelview_R.png" alt="Treatment Status (R)" width="100%" />
