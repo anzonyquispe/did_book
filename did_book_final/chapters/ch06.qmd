@@ -1992,55 +1992,9 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 12                     -0.4521018      0.2176622      -2.08   [  -0.8787197,   -0.0254840]
 ```
 
-### Python
-
-```python
-import pandas as pd
-from did_imputation import did_imputation
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
-df9 = df.copy()
-df9['gname'] = df9['cohort'].replace(0, np.nan)
-result = did_imputation(
-    data=df9, yname='div_rate', gname='gname',
-    tname='year', idname='state', wname='stpop',
-    horizon=list(range(13)), pretrends=list(range(-1, -14, -1)),
-    cluster_var='state')
-```
-
-```
-Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
-------------------------------------------------------------------------------------------
--13                    -0.0411561      0.0621215      -0.66   [  -0.1629142,    0.0806019]
--12                    -0.0055825      0.0515462      -0.11   [  -0.1066131,    0.0954480]
--11                     0.0015340      0.0431457       0.04   [  -0.0830316,    0.0860996]
--10                     0.0362637      0.0437739       0.83   [  -0.0495332,    0.1220607]
--9                      0.0281104      0.0580626       0.48   [  -0.0856922,    0.1419130]
--8                      0.0095576      0.0792278       0.12   [  -0.1457289,    0.1648442]
--7                     -0.0273189      0.0839744      -0.33   [  -0.1919087,    0.1372710]
--6                     -0.0187939      0.0984479      -0.19   [  -0.2117518,    0.1741640]
--5                      0.0593321      0.1575718       0.38   [  -0.2495087,    0.3681728]
--4                      0.0779494      0.1259692       0.62   [  -0.1689503,    0.3248491]
--3                      0.0189404      0.1397579       0.14   [  -0.2549851,    0.2928660]
--2                      0.0099068      0.1488646       0.07   [  -0.2818677,    0.3016814]
--1                     -0.0274438      0.1433468      -0.19   [  -0.3084035,    0.2535158]
-0                       0.2649135      0.0972983       2.72   [   0.0742088,    0.4556182]
-1                       0.3228127      0.1024412       3.15   [   0.1220278,    0.5235975]
-2                       0.2508743      0.1159301       2.16   [   0.0236514,    0.4780972]
-3                       0.1689496      0.1309897       1.29   [  -0.0877902,    0.4256894]
-4                       0.1251739      0.1501367       0.83   [  -0.1690941,    0.4194419]
-5                       0.1701528      0.1670765       1.02   [  -0.1573172,    0.4976227]
-6                       0.1720824      0.1716382       1.00   [  -0.1643285,    0.5084932]
-7                       0.1102604      0.1627624       0.68   [  -0.2087538,    0.4292747]
-8                      -0.0933059      0.1659981      -0.56   [  -0.4186621,    0.2320503]
-9                      -0.2215383      0.1856457      -1.19   [  -0.5854038,    0.1423272]
-10                     -0.2458123      0.1985794      -1.24   [  -0.6350280,    0.1434034]
-11                     -0.4276670      0.1972440      -2.17   [  -0.8142652,   -0.0410688]
-12                     -0.4521010      0.2176621      -2.08   [  -0.8787188,   -0.0254833]
-```
-
 :::
 
-**Interpretation:** All three implementations produce virtually identical estimates. Pre-treatment placebos (pre1–pre13) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward.
+**Interpretation:** Pre-treatment placebos (pre1–pre13) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward. The `did_imputation` package is available in Stata and R only.
 
 ---
 
