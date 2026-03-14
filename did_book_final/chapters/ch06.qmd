@@ -2111,6 +2111,8 @@ Bin at -9 and +16 differ due to endpoint aggregation.
 
 ## Figure 6.3: Four-Panel Comparison
 
+> This plot combines the event-study estimates from the four estimators computed in the previous sections (GQ4: TWFE, GQ6: Sun & Abraham, GQ7: Callaway & Sant'Anna, GQ9: Borusyak, Jaravel & Spiess). You must run all previous sections before generating this figure.
+
 ::: {.panel-tabset}
 
 ### Stata
@@ -2151,17 +2153,17 @@ dev.off()
 ```python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-es_plot(axes[0, 0], rt_fig62, co_fig62, lo_fig62, hi_fig62, "TWFE estimates", xlim=(-9.5, 16.5))
-es_plot(axes[0, 1], sa_rt, sa_co, sa_lo, sa_hi, "Sun & Abraham")
-es_plot(axes[1, 0], cs_rt, cs_co, cs_lo, cs_hi, "Callaway & Sant'Anna")
-es_plot(axes[1, 1], bjs_rt, bjs_co, bjs_lo, bjs_hi, "Borusyak, Jaravel & Spiess")
+# Three-panel plot (BJS/did_imputation not available in Python)
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+es_plot(axes[0], rt_fig62, co_fig62, lo_fig62, hi_fig62, "TWFE estimates", xlim=(-9.5, 16.5))
+es_plot(axes[1], sa_rt, sa_co, sa_lo, sa_hi, "Sun & Abraham")
+es_plot(axes[2], cs_rt, cs_co, cs_lo, cs_hi, "Callaway & Sant'Anna")
 plt.suptitle("Effects of Unilateral Divorce Laws", fontsize=14)
 fig.text(0.5, 0.01,
-    "95% CIs shown in red. Weighted by state population. SEs clustered at state level.",
+    "95% CIs shown in red. Weighted by state population. SEs clustered at state level.\nNote: BJS panel omitted (did_imputation not available in Python).",
     ha='center', fontsize=9, style='italic')
-plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-plt.savefig(FIGDIR / "ch06_fig63_4panel_Python.png", dpi=150)
+plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+plt.savefig(FIGDIR / "ch06_fig63_3panel_Python.png", dpi=150)
 ```
 
 :::

@@ -2208,6 +2208,9 @@ Bin at -9 and +16 differ due to endpoint aggregation.</code></pre>
 </section>
 <section id="figure-6.3-four-panel-comparison" class="level2" data-number="4.16">
 <h2 data-number="4.16" class="anchored" data-anchor-id="figure-6.3-four-panel-comparison"><span class="header-section-number">4.16</span> Figure 6.3: Four-Panel Comparison</h2>
+<blockquote class="blockquote">
+<p>This plot combines the event-study estimates from the four estimators computed in the previous sections (GQ4: TWFE, GQ6: Sun &amp; Abraham, GQ7: Callaway &amp; Sant’Anna, GQ9: Borusyak, Jaravel &amp; Spiess). You must run all previous sections before generating this figure.</p>
+</blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-15-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-1" role="tab" aria-controls="tabset-15-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-15-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-2" role="tab" aria-controls="tabset-15-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-15-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-15-3" role="tab" aria-controls="tabset-15-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -2253,17 +2256,17 @@ Bin at -9 and +16 differ due to endpoint aggregation.</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Wolfers%202006/wolfers2006_didtextbook.parquet"</span>)</span>
-<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">10</span>))</span>
-<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">0</span>, <span class="dv">0</span>], rt_fig62, co_fig62, lo_fig62, hi_fig62, <span class="st">"TWFE estimates"</span>, xlim<span class="op">=</span>(<span class="op">-</span><span class="fl">9.5</span>, <span class="fl">16.5</span>))</span>
-<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">0</span>, <span class="dv">1</span>], sa_rt, sa_co, sa_lo, sa_hi, <span class="st">"Sun &amp; Abraham"</span>)</span>
-<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">1</span>, <span class="dv">0</span>], cs_rt, cs_co, cs_lo, cs_hi, <span class="st">"Callaway &amp; Sant'Anna"</span>)</span>
-<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">1</span>, <span class="dv">1</span>], bjs_rt, bjs_co, bjs_lo, bjs_hi, <span class="st">"Borusyak, Jaravel &amp; Spiess"</span>)</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Three-panel plot (BJS/did_imputation not available in Python)</span></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">5</span>))</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">0</span>], rt_fig62, co_fig62, lo_fig62, hi_fig62, <span class="st">"TWFE estimates"</span>, xlim<span class="op">=</span>(<span class="op">-</span><span class="fl">9.5</span>, <span class="fl">16.5</span>))</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">1</span>], sa_rt, sa_co, sa_lo, sa_hi, <span class="st">"Sun &amp; Abraham"</span>)</span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>es_plot(axes[<span class="dv">2</span>], cs_rt, cs_co, cs_lo, cs_hi, <span class="st">"Callaway &amp; Sant'Anna"</span>)</span>
 <span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">"Effects of Unilateral Divorce Laws"</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
 <span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>fig.text(<span class="fl">0.5</span>, <span class="fl">0.01</span>,</span>
-<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"95% CIs shown in red. Weighted by state population. SEs clustered at state level."</span>,</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"95% CIs shown in red. Weighted by state population. SEs clustered at state level.</span><span class="ch">\n</span><span class="st">Note: BJS panel omitted (did_imputation not available in Python)."</span>,</span>
 <span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">'center'</span>, fontsize<span class="op">=</span><span class="dv">9</span>, style<span class="op">=</span><span class="st">'italic'</span>)</span>
-<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout(rect<span class="op">=</span>[<span class="dv">0</span>, <span class="fl">0.03</span>, <span class="dv">1</span>, <span class="fl">0.95</span>])</span>
-<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>plt.savefig(FIGDIR <span class="op">/</span> <span class="st">"ch06_fig63_4panel_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout(rect<span class="op">=</span>[<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="dv">1</span>, <span class="fl">0.95</span>])</span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>plt.savefig(FIGDIR <span class="op">/</span> <span class="st">"ch06_fig63_3panel_Python.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
