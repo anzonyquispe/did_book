@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>4&nbsp; Chapter 12: Hollingsworth et al.&nbsp;(2022) — Marijuana Legalization and Opioid Mortality – Applied Examples with did_multiplegt_dyn</title>
+<title>4&nbsp; Chapter 12: Hollingsworth et al.&nbsp;(2022) — Marijuana Legalization and Drug Use – Applied Examples with did_multiplegt_dyn</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -182,9 +182,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#t12-summary-statistics" id="toc-t12-summary-statistics" class="nav-link active" data-scroll-target="#t12-summary-statistics"><span class="header-section-number">4.1</span> T12: Summary Statistics</a></li>
-  <li><a href="#t13-medical-marijuana-event-study-effects" id="toc-t13-medical-marijuana-event-study-effects" class="nav-link" data-scroll-target="#t13-medical-marijuana-event-study-effects"><span class="header-section-number">4.2</span> T13: Medical Marijuana — Event-Study Effects</a></li>
-  <li><a href="#t14-recreational-marijuana-event-study-effects" id="toc-t14-recreational-marijuana-event-study-effects" class="nav-link" data-scroll-target="#t14-recreational-marijuana-event-study-effects"><span class="header-section-number">4.3</span> T14: Recreational Marijuana — Event-Study Effects</a></li>
+  <li><a href="#t12-summary-statistics-and-design-verification" id="toc-t12-summary-statistics-and-design-verification" class="nav-link active" data-scroll-target="#t12-summary-statistics-and-design-verification"><span class="header-section-number">4.1</span> T12: Summary Statistics and Design Verification</a></li>
+  <li><a href="#t13-effects-of-medical-marijuana-laws" id="toc-t13-effects-of-medical-marijuana-laws" class="nav-link" data-scroll-target="#t13-effects-of-medical-marijuana-laws"><span class="header-section-number">4.2</span> T13: Effects of Medical Marijuana Laws</a></li>
+  <li><a href="#t14-effects-of-recreational-marijuana-laws" id="toc-t14-effects-of-recreational-marijuana-laws" class="nav-link" data-scroll-target="#t14-effects-of-recreational-marijuana-laws"><span class="header-section-number">4.3</span> T14: Effects of Recreational Marijuana Laws</a></li>
   </ul>
 </nav>
     </div>
@@ -193,7 +193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 12: Hollingsworth et al.&nbsp;(2022) — Marijuana Legalization and Opioid Mortality</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Chapter 12: Hollingsworth et al.&nbsp;(2022) — Marijuana Legalization and Drug Use</span></h1>
 </div>
 
 
@@ -210,11 +210,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Research Question:</strong> How does marijuana legalization (medical and recreational) affect opioid mortality?</p>
-<p><strong>Data:</strong> State-year panel 1999–2018. Two binary treatments: <code>med_cannabis</code> (medical legalization) and <code>rec_cannabis</code> (recreational legalization). Outcome: <code>logmortality</code> (log opioid mortality rate per 100k).</p>
+<p><strong>Research Question:</strong> How do medical and recreational marijuana laws differentially affect marijuana use among adults and adolescents?</p>
+<p><strong>Data:</strong> State-year panel 2002–2019. Two binary absorbing treatments: <code>mm</code> (medical legalization) and <code>rm</code> (recreational legalization), where medical always precedes recreational. Outcome: <code>ln_mj_use_365</code> (log of marijuana use in the past 365 days).</p>
 <hr>
-<section id="t12-summary-statistics" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="t12-summary-statistics"><span class="header-section-number">4.1</span> T12: Summary Statistics</h2>
+<section id="t12-summary-statistics-and-design-verification" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="t12-summary-statistics-and-design-verification"><span class="header-section-number">4.1</span> T12: Summary Statistics and Design Verification</h2>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -222,12 +222,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.dta"</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">sum</span> logmortality med_cannabis rec_cannabis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">sum</span> ln_mj_use_365 mm rm</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>xtset state <span class="fu">year</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">tab</span> mm</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">tab</span> rm</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">tab</span> d_mm</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">tab</span> d_rm</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">tab</span> mm_rm_timing</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-logmortality |      1,020    1.827953    .6066765   .0953102   3.713512
- med_cannabis|      1,020    .3235294    .4680134          0          1
- rec_cannabis|      1,020    .0598039    .2373295          0          1</code></pre>
+ln_mj_us~365 |        765    2.433264     .259119    1.77137    3.30977
+          mm |        765    .3045752    .4605284          0          1
+          rm |        765    .0235294    .1516768          0          1
+
+         mm |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        532       69.54       69.54
+          1 |        233       30.46      100.00
+------------+-----------------------------------
+      Total |        765      100.00
+
+         rm |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        747       97.65       97.65
+          1 |         18        2.35      100.00
+------------+-----------------------------------
+      Total |        765      100.00
+
+       d_mm |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        693       97.06       97.06
+          1 |         21        2.94      100.00
+------------+-----------------------------------
+      Total |        714      100.00
+
+       d_rm |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        707       99.02       99.02
+          1 |          7        0.98      100.00
+------------+-----------------------------------
+      Total |        714      100.00
+
+mm_rm_timin |
+          g |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        550       71.90       71.90
+          1 |        215       28.10      100.00
+------------+-----------------------------------
+      Total |        765      100.00</code></pre>
+<p>Both treatments take values 0 or 1 — binary and absorbing. <code>mm_rm_timing</code> is always ≥ 0 — medical always precedes recreational.</p>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars", "haven", "dplyr"))</span></span>
@@ -238,35 +283,67 @@ logmortality |      1,020    1.827953    .6066765   .0953102   3.713512
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"</span>))</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> <span class="fu">select</span>(logmortality, med_cannabis, rec_cannabis) <span class="sc">%&gt;%</span> <span class="fu">summary</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>  logmortality    med_cannabis    rec_cannabis   
- Min.   :0.0953  Min.   :0.000  Min.   :0.0000  
- 1st Qu.:1.4271  1st Qu.:0.000  1st Qu.:0.0000  
- Median :1.8677  Median :0.000  Median :0.0000  
- Mean   :1.8280  Mean   :0.324  Mean   :0.0598  
- Max.   :3.7135  Max.   :1.000  Max.   :1.0000  </code></pre>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> <span class="fu">select</span>(ln_mj_use_365, mm, rm) <span class="sc">%&gt;%</span> <span class="fu">summary</span>()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>mm)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>rm)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>mm <span class="sc">-</span> df<span class="sc">$</span>rm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code> ln_mj_use_365         mm               rm         
+ Min.   :1.771   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:2.250   1st Qu.:0.0000   1st Qu.:0.00000  
+ Median :2.395   Median :0.0000   Median :0.00000  
+ Mean   :2.433   Mean   :0.3046   Mean   :0.02353  
+ 3rd Qu.:2.585   3rd Qu.:1.0000   3rd Qu.:0.00000  
+ Max.   :3.310   Max.   :1.0000   Max.   :1.00000  
+
+  0   1 
+532 233 
+
+  0   1 
+747  18 
+
+  0   1 
+550 215 </code></pre>
+<p>Both treatments are binary and absorbing. <code>mm - rm</code> is always ≥ 0 — medical always precedes recreational.</p>
 </div>
 <div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet"</span>)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">"logmortality"</span>, <span class="st">"med_cannabis"</span>, <span class="st">"rec_cannabis"</span>]].describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>       logmortality  med_cannabis  rec_cannabis
-count   1020.000000   1020.000000   1020.000000
-mean       1.827953      0.323529      0.059804
-std        0.606677      0.468013      0.237330
-min        0.095310      0.000000      0.000000
-max        3.713512      1.000000      1.000000</code></pre>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">"ln_mj_use_365"</span>, <span class="st">"mm"</span>, <span class="st">"rm"</span>]].describe())</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">"mm"</span>].value_counts().sort_index())</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">"rm"</span>].value_counts().sort_index())</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>((df[<span class="st">"mm"</span>] <span class="op">-</span> df[<span class="st">"rm"</span>]).value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>       ln_mj_use_365          mm          rm
+count     765.000000  765.000000  765.000000
+mean        2.433264    0.304575    0.023529
+std         0.259119    0.460528    0.151677
+min         1.771370    0.000000    0.000000
+25%         2.250365    0.000000    0.000000
+50%         2.395064    0.000000    0.000000
+75%         2.584752    1.000000    0.000000
+max         3.309770    1.000000    1.000000
+
+mm
+0    532
+1    233
+
+rm
+0    747
+1     18
+
+0    550
+1    215</code></pre>
+<p>Both treatments are binary and absorbing. <code>mm - rm</code> is always ≥ 0 — medical always precedes recreational.</p>
 </div>
 </div>
 </div>
 <hr>
 </section>
-<section id="t13-medical-marijuana-event-study-effects" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="t13-medical-marijuana-event-study-effects"><span class="header-section-number">4.2</span> T13: Medical Marijuana — Event-Study Effects</h2>
+<section id="t13-effects-of-medical-marijuana-laws" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="t13-effects-of-medical-marijuana-laws"><span class="header-section-number">4.2</span> T13: Effects of Medical Marijuana Laws</h2>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -275,130 +352,119 @@ max        3.713512      1.000000      1.000000</code></pre>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.dta"</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn logmortality stfips <span class="fu">year</span> med_cannabis, <span class="co">///</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(5) placebo(5) <span class="kw">cluster</span>(stfips)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn ln_mj_use_365 state <span class="fu">year</span> mm <span class="kw">if</span> rm==0, <span class="kw">effects</span>(3) placebo(3) <span class="kw">cluster</span>(state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
 
              |  Estimate         SE      LB CI      UB CI          N  Switchers
 -------------+------------------------------------------------------------------
-    Effect_1 |  .0261617   .0230905  -.0190948   .0714183        646         27
-    Effect_2 |  .0451289   .0352178  -.0238966   .1141544        576         27
-    Effect_3 |  .0453895   .0492226  -.0510849   .1418638        510         27
-    Effect_4 |  .0388618   .0617785  -.0822219   .1599455        439         27
-    Effect_5 |   .072505   .0783629  -.0810833    .226093        379         27
+    Effect_1 |  .0297197   .0136225     .00302   .0564194        361         21
+    Effect_2 |  .0380018   .0189295   .0009006   .0751029        324         16
+    Effect_3 |   .025386   .0213948   -.016547    .067319        307         16
 --------------------------------------------------------------------------------
-Test of joint nullity of the effects  : p-value = .15501165
+Test of joint nullity of the effects : p-value = .15497711
 
-  Av_tot_eff |  .0309124   .0144423   .0026061   .0592187        935        135
-Average number of time periods over which a treatment's effect is accumulated = 3.6444
+  Av_tot_eff |  .0309117   .0144444   .0026012   .0592221        499         53
+Average number of time periods over which a treatment's effect is accumulated = 1.9056604
 
-   Placebo_1 | -.0026001   .0198584  -.0415219   .0363218        627         27
-   Placebo_2 |  .0151714    .027571  -.0388668   .0692095        575         27
-   Placebo_3 | -.0015765   .0368671   -.073834    .070681        523         27
-   Placebo_4 |  .0082397   .0461892  -.0823894   .0988688        471         27
-   Placebo_5 | -.0149019   .0555048  -.1236893   .0938855        419         27
+   Placebo_1 | -.0157475   .0141094  -.0434015   .0119065        361         21
+   Placebo_2 | -.0112911    .024639  -.0595826   .0370004        281         14
+   Placebo_3 | -.0042399   .0241491  -.0515713   .0430916        265         14
 --------------------------------------------------------------------------------
-Test of joint nullity of the placebos : p-value = .71063826</code></pre>
+Test of joint nullity of the placebos : p-value = .71060368</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figures/ch09_fig7_marijuana_medical.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 12.1: Effects of Medical Marijuana on Opioid Mortality</figcaption>
+<figcaption>Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use</figcaption>
 </figure>
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DIDmultiplegtDYN)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polars)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"</span>))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>res_t13 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"logmortality"</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"stfips"</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"med_cannabis"</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">5</span>,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">5</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"stfips"</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t13)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>res_t13<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>res_t13 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(df[df<span class="sc">$</span>rm<span class="sc">==</span><span class="dv">0</span>,], <span class="st">"ln_mj_use_365"</span>, <span class="st">"state"</span>, <span class="st">"year"</span>, <span class="st">"mm"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects=</span><span class="dv">3</span>, <span class="at">placebo=</span><span class="dv">3</span>, <span class="at">cluster=</span><span class="st">"state"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t13)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>res_t13<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
              Estimate SE      LB CI    UB CI   N   Switchers
-Effect_1     0.02616  0.02309 -0.01909 0.07142 646 27
-Effect_2     0.04513  0.03522 -0.02390 0.11415 576 27
-Effect_3     0.04539  0.04922 -0.05108 0.14186 510 27
-Effect_4     0.03886  0.06178 -0.08222 0.15995 439 27
-Effect_5     0.07251  0.07836 -0.08108 0.22609 379 27
+Effect_1     0.02972  0.01362 0.00302  0.05642 361 21
+Effect_2     0.03800  0.01893 0.00090  0.07510 324 16
+Effect_3     0.02539  0.02139 -0.01655 0.06732 307 16
 
-Test of joint nullity of the effects  : p-value = 0.1550
+Test of joint nullity of the effects : p-value = 0.1550
 
-  Av_tot_eff |  0.03091  0.01444  0.00261  0.05922  935  135
-Average number of time periods over which a treatment effect is accumulated: 3.6444
+  Av_tot_eff |  0.03091  0.01444  0.00260  0.05922  499  53
+Average number of time periods over which a treatment effect is accumulated: 1.9057
 
-Placebo_1    -0.00260 0.01986 -0.04152  0.03632 627 27
-Placebo_2     0.01517 0.02757 -0.03887  0.06921 575 27
-Placebo_3    -0.00158 0.03687 -0.07383  0.07068 523 27
-Placebo_4     0.00824 0.04619 -0.08239 0.09887  471 27
-Placebo_5    -0.01490 0.05550 -0.12369 0.09389  419 27
+Placebo_1    -0.01575 0.01411 -0.04340 0.01191 361 21
+Placebo_2    -0.01129 0.02464 -0.05958 0.03700 281 14
+Placebo_3    -0.00424 0.02415 -0.05157 0.04309 265 14
 
 Test of joint nullity of the placebos : p-value = 0.7106</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig7_marijuana_medical_R.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use</figcaption>
+</figure>
+</div>
 </div>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet"</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>res_t13 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    df        <span class="op">=</span> df,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    outcome   <span class="op">=</span> <span class="st">"logmortality"</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    group     <span class="op">=</span> <span class="st">"stfips"</span>,</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    time      <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    treatment <span class="op">=</span> <span class="st">"med_cannabis"</span>,</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    effects   <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    placebo   <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    cluster   <span class="op">=</span> <span class="st">"stfips"</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t13)</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>res_t13.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N   Switchers
-Effect_1     0.026162  0.023091 -0.019095  0.071418 646 27
-Effect_2     0.045129  0.035218 -0.023897  0.114154 576 27
-Effect_3     0.045390  0.049223 -0.051085  0.141864 510 27
-Effect_4     0.038862  0.061779 -0.082222  0.159945 439 27
-Effect_5     0.072505  0.078363 -0.081083  0.226093 379 27
-
-Test of joint nullity of the effects  : p-value = 0.155012
-
-  Av_tot_eff |  0.030912  0.014442  0.002606  0.059219  935  135
-Average number of time periods over which a treatment's effect is accumulated = 3.6444
-
-Placebo_1    -0.002600 0.019858 -0.041522  0.036322 627 27
-Placebo_2     0.015171 0.027571 -0.038867  0.069210 575 27
-Placebo_3    -0.001577 0.036867 -0.073834  0.070681 523 27
-Placebo_4     0.008240 0.046189 -0.082389  0.098869 471 27
-Placebo_5    -0.014902 0.055505 -0.123689  0.093885 419 27
-
-Test of joint nullity of the placebos : p-value = 0.710638</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn polars matplotlib</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>res_t13 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df.<span class="bu">filter</span>(pl.col(<span class="st">"rm"</span>)<span class="op">==</span><span class="dv">0</span>),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"ln_mj_use_365"</span>, group<span class="op">=</span><span class="st">"state"</span>, time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"mm"</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">3</span>, placebo<span class="op">=</span><span class="dv">3</span>, cluster<span class="op">=</span><span class="st">"state"</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>res_t13.fit()</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>res_t13.summary()</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>res_t13.plot()</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig7_marijuana_medical_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI    UB CI     N  Switchers
+            Effect_1  0.029720 0.013623  0.003020 0.056419 361.0      21.0
+            Effect_2  0.038002 0.018930  0.000901 0.075103 324.0      16.0
+            Effect_3  0.025386 0.021395 -0.016547 0.067319 307.0      16.0
+Average_Total_Effect  0.030912 0.014444  0.002601 0.059222 499.0      53.0
+           Placebo_1 -0.015747 0.014109 -0.043401 0.011907 361.0      21.0
+           Placebo_2 -0.011291 0.024639 -0.059583 0.037000 281.0      14.0
+           Placebo_3 -0.004240 0.024149 -0.051571 0.043092 265.0      14.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.154977
+Test of joint nullity of the placebos: p-value = 0.710604</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig7_marijuana_medical_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 12.1: Effects of Medical Marijuana Laws on Marijuana Use</figcaption>
+</figure>
 </div>
 </div>
 </div>
-<p><strong>Interpretation:</strong> Medical marijuana legalization has positive but insignificant effects on opioid mortality (Av_tot_eff = 0.031, p = 0.155). Pre-trends are jointly insignificant (p = 0.71), supporting parallel trends.</p>
+</div>
+<p><strong>Interpretation:</strong> Medical marijuana laws increase marijuana use by ~3%, though effects are marginally significant (p = 0.155). Pre-trends are small and jointly insignificant (p = 0.71), supporting parallel trends.</p>
 <hr>
 </section>
-<section id="t14-recreational-marijuana-event-study-effects" class="level2" data-number="4.3">
-<h2 data-number="4.3" class="anchored" data-anchor-id="t14-recreational-marijuana-event-study-effects"><span class="header-section-number">4.3</span> T14: Recreational Marijuana — Event-Study Effects</h2>
+<section id="t14-effects-of-recreational-marijuana-laws" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="t14-effects-of-recreational-marijuana-laws"><span class="header-section-number">4.3</span> T14: Effects of Recreational Marijuana Laws</h2>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -407,127 +473,123 @@ Test of joint nullity of the placebos : p-value = 0.710638</code></pre>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.dta"</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"hollingsworth_et_al_2022.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn logmortality stfips <span class="fu">year</span> rec_cannabis, <span class="co">///</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(5) placebo(5) <span class="kw">cluster</span>(stfips)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">egen</span> fg1 = <span class="fu">min</span>(<span class="fu">cond</span>(mm == 1, <span class="fu">year</span>, .)), <span class="kw">by</span>(state)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn ln_mj_use_365 state <span class="fu">year</span> rm <span class="kw">if</span> mm==1, <span class="kw">effects</span>(3) placebo(3) trends_nonparam(fg1) <span class="kw">cluster</span>(state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
 
              |  Estimate         SE      LB CI      UB CI          N  Switchers
 -------------+------------------------------------------------------------------
-    Effect_1 |  .0750744   .0618682  -.0461852   .1963339        755         11
-    Effect_2 |  .1298784   .0776619  -.0223363   .2820932        697         11
-    Effect_3 |  .2029376   .1092284  -.0111462   .4170214        644         11
-    Effect_4 |  .2220267   .1404888  -.0533252   .4973786        581         11
-    Effect_5 |   .267748   .2012524  -.1266993   .6621954        507         11
+    Effect_1 |  .0566549   .0226574   .0122473   .1010626         23          7
+    Effect_2 |   .100263    .061912  -.0210824   .2216083         16          5
+    Effect_3 |  .1693897   .1336577  -.0925745    .431354          8          2
 --------------------------------------------------------------------------------
-Test of joint nullity of the effects  : p-value = .06567163
+Test of joint nullity of the effects : p-value = .06567349
 
-  Av_tot_eff |  .0883342   .0407387   .0084878   .1681805        951         55
-Average number of time periods over which a treatment's effect is accumulated = 2.6813
+  Av_tot_eff |  .0883342   .0407436   .0084782   .1681901         44         14
+Average number of time periods over which a treatment's effect is accumulated = 1.6428571
 
-   Placebo_1 | -.0065817   .0368264  -.0787601   .0655968        726         11
-   Placebo_2 |  .0266867   .0459773   -.063428   .1168014        657         11
-   Placebo_3 |  .0265929   .0637406  -.0983365   .1515222        589         11
-   Placebo_4 |  .0001325   .0789929   -.154692   .1549571        520         11
-   Placebo_5 |  .0058621   .0993023  -.1887671   .2004913        452         11
+   Placebo_1 | -.0079344   .0208247  -.0487501   .0328813         23          7
+   Placebo_2 |  .0113437   .0420547  -.0710819   .0937694         16          5
+   Placebo_3 |  .0148201   .0684662  -.1193712   .1490114          8          2
 --------------------------------------------------------------------------------
-Test of joint nullity of the placebos : p-value = .93253034</code></pre>
+Test of joint nullity of the placebos : p-value = .93253844</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../figures/ch09_fig8_marijuana_recreational.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 12.2: Effects of Recreational Marijuana on Opioid Mortality</figcaption>
+<figcaption>Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use</figcaption>
 </figure>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DIDmultiplegtDYN)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polars)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"</span>))</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>res_t14 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"logmortality"</span>,</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"stfips"</span>,</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"rec_cannabis"</span>,</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">5</span>,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">5</span>,</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"stfips"</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t14)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>res_t14<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.RData"</span>))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>fg1 <span class="ot">&lt;-</span> <span class="fu">ave</span>(<span class="fu">ifelse</span>(df<span class="sc">$</span>mm<span class="sc">==</span><span class="dv">1</span>, df<span class="sc">$</span>year, <span class="cn">NA</span>), df<span class="sc">$</span>state, <span class="at">FUN=</span><span class="cf">function</span>(x) <span class="fu">min</span>(x, <span class="at">na.rm=</span><span class="cn">TRUE</span>))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>res_t14 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(df[df<span class="sc">$</span>mm<span class="sc">==</span><span class="dv">1</span>,], <span class="st">"ln_mj_use_365"</span>, <span class="st">"state"</span>, <span class="st">"year"</span>, <span class="st">"rm"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects=</span><span class="dv">3</span>, <span class="at">placebo=</span><span class="dv">3</span>, <span class="at">trends_nonparam=</span><span class="st">"fg1"</span>, <span class="at">cluster=</span><span class="st">"state"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t14)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>res_t14<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
-             Estimate SE      LB CI    UB CI    N   Switchers
-Effect_1     0.07507  0.06187 -0.04619 0.19633 755 11
-Effect_2     0.12988  0.07766 -0.02234 0.28209 697 11
-Effect_3     0.20294  0.10923 -0.01115 0.41702 644 11
-Effect_4     0.22203  0.14049 -0.05333 0.49738 581 11
-Effect_5     0.26775  0.20125 -0.12670 0.66220 507 11
+             Estimate SE      LB CI    UB CI   N  Switchers
+Effect_1     0.05665  0.02266 0.01225  0.10106 23 7
+Effect_2     0.10026  0.06191 -0.02108 0.22161 16 5
+Effect_3     0.16939  0.13366 -0.09257 0.43135  8 2
 
-Test of joint nullity of the effects  : p-value = 0.0657
+Test of joint nullity of the effects : p-value = 0.0657
 
-  Av_tot_eff |  0.08833  0.04074  0.00849  0.16818  951  55
-Average number of time periods over which a treatment effect is accumulated: 2.6813
+  Av_tot_eff |  0.08833  0.04074  0.00848  0.16819  44  14
+Average number of time periods over which a treatment effect is accumulated: 1.6429
 
-Placebo_1    -0.00658 0.03683 -0.07876  0.06560 726 11
-Placebo_2     0.02669 0.04598 -0.06343  0.11680 657 11
-Placebo_3     0.02659 0.06374 -0.09834  0.15152 589 11
-Placebo_4     0.00013 0.07899 -0.15469  0.15496 520 11
-Placebo_5     0.00586 0.09930 -0.18877  0.20049 452 11
+Placebo_1    -0.00793 0.02082 -0.04875 0.03288 23 7
+Placebo_2     0.01134 0.04205 -0.07108 0.09377 16 5
+Placebo_3     0.01482 0.06847 -0.11937 0.14901  8 2
 
 Test of joint nullity of the placebos : p-value = 0.9325</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig8_marijuana_recreational_R.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use</figcaption>
+</figure>
+</div>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>res_t14 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    df        <span class="op">=</span> df,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    outcome   <span class="op">=</span> <span class="st">"logmortality"</span>,</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    group     <span class="op">=</span> <span class="st">"stfips"</span>,</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    time      <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    treatment <span class="op">=</span> <span class="st">"rec_cannabis"</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    effects   <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    placebo   <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    cluster   <span class="op">=</span> <span class="st">"stfips"</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    trends_nonparam <span class="op">=</span> [<span class="st">"stfips"</span>]</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t14)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>res_t14.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N   Switchers
-Effect_1     0.075074  0.061868 -0.046185  0.196334 755 11
-Effect_2     0.129878  0.077662 -0.022336  0.282093 697 11
-Effect_3     0.202938  0.109228 -0.011146  0.417021 644 11
-Effect_4     0.222027  0.140489 -0.053325  0.497379 581 11
-Effect_5     0.267748  0.201252 -0.126699  0.662195 507 11
-
-Test of joint nullity of the effects  : p-value = 0.065672
-
-  Av_tot_eff |  0.088334  0.040739  0.008487  0.168181  951  55
-Average number of time periods over which a treatment's effect is accumulated = 2.6813
-
-Placebo_1    -0.006582 0.036826 -0.078760  0.065597 726 11
-Placebo_2     0.026687 0.045977 -0.063428  0.116801 657 11
-Placebo_3     0.026593 0.063741 -0.098337  0.151522 589 11
-Placebo_4     0.000133 0.078993 -0.154692  0.154958 520 11
-Placebo_5     0.005862 0.099302 -0.188767  0.200491 452 11
-
-Test of joint nullity of the placebos : p-value = 0.932530</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn polars matplotlib</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/hollingsworth_et_al_2022.parquet"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.with_columns(</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    pl.when(pl.col(<span class="st">"mm"</span>)<span class="op">==</span><span class="dv">1</span>).then(pl.col(<span class="st">"year"</span>)).otherwise(<span class="va">None</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">min</span>().over(<span class="st">"state"</span>).alias(<span class="st">"fg1"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>res_t14 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df.<span class="bu">filter</span>(pl.col(<span class="st">"mm"</span>)<span class="op">==</span><span class="dv">1</span>),</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"ln_mj_use_365"</span>, group<span class="op">=</span><span class="st">"state"</span>, time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"rm"</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">3</span>, placebo<span class="op">=</span><span class="dv">3</span>, trends_nonparam<span class="op">=</span>[<span class="st">"fg1"</span>], cluster<span class="op">=</span><span class="st">"state"</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>res_t14.fit()</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>res_t14.summary()</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>res_t14.plot()</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig8_marijuana_recreational_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI    UB CI    N  Switchers
+            Effect_1  0.056655 0.022657  0.012247 0.101063 23.0       7.0
+            Effect_2  0.100263 0.061912 -0.021082 0.221608 16.0       5.0
+            Effect_3  0.169390 0.133658 -0.092575 0.431354  8.0       2.0
+Average_Total_Effect  0.088334 0.040744  0.008478 0.168190 44.0      14.0
+           Placebo_1 -0.007934 0.020825 -0.048750 0.032881 23.0       7.0
+           Placebo_2  0.011344 0.042055 -0.071082 0.093769 16.0       5.0
+           Placebo_3  0.014820 0.068466 -0.119371 0.149011  8.0       2.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.065673
+Test of joint nullity of the placebos: p-value = 0.932538</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig8_marijuana_recreational_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 12.2: Effects of Recreational Marijuana Laws on Marijuana Use</figcaption>
+</figure>
 </div>
 </div>
 </div>
-<p><strong>Interpretation:</strong> Recreational marijuana legalization increases opioid mortality by ~8.8% on average (Av_tot_eff = 0.088, p = 0.066), with effects growing over time. Pre-trends are flat and jointly insignificant (p = 0.93).</p>
+</div>
+<p><strong>Interpretation:</strong> Recreational marijuana laws increase marijuana use by ~6% in the short run and ~17% in the long run, though effects are marginally significant (p = 0.066). Pre-trends are flat and jointly insignificant (p = 0.93).</p>
 
 
 </section>

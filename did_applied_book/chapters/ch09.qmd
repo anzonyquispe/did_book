@@ -60,9 +60,10 @@ All counties have `total_hurricane` ∈ {0, 1} — confirming the one-shot desig
 ### Python
 
 ```python
-# pip install did-multiplegt-dyn pandas pyarrow
+# pip install py-did-multiplegt-dyn pandas pyarrow
 import pandas as pd
-from did_multiplegt_dyn import did_multiplegt_dyn
+import polars as pl
+from did_multiplegt_dyn import DidMultiplegtDyn
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet")
 
@@ -95,8 +96,7 @@ All counties have `total_hurricane` ∈ {0, 1} — confirming the one-shot desig
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.dta" "deryugina_2017.dta", replace
 use "deryugina_2017.dta", clear
 
-did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips year hurricane, ///
-    effects(11) placebo(11) cluster(county_fips)
+did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips year hurricane, effects(11) placebo(11) cluster(county_fips)
 ```
 
 ```
@@ -123,12 +123,6 @@ Test of joint nullity of the effects : p-value = 0
   Av_tot_eff |  .3190721   .0406001   .2394973   .3986468      31470       3971
 Average number of time periods over which a treatment's effect is accumulated = 11
 
---------------------------------------------------------------------------------
-          Testing the parallel trends and no anticipation assumptions
---------------------------------------------------------------------------------
-
-             |  Estimate         SE      LB CI      UB CI          N  Switchers
--------------+------------------------------------------------------------------
    Placebo_1 | -.0055903   .0013173   -.008172  -.0030085      14154        361
    Placebo_2 | -.0083554   .0020689  -.0124104  -.0043003      13826        361
    Placebo_3 | -.0128183    .002977  -.0186532  -.0069834      13567        361
@@ -149,9 +143,10 @@ Test of joint nullity of the placebos : p-value = 1.517e-06
 ### R
 
 ```r
-# install.packages(c("DIDmultiplegtDYN", "polars"))
+# install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))
 library(DIDmultiplegtDYN)
 library(polars)
+library(ggplot2)
 
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"))
 
@@ -191,10 +186,6 @@ Test of joint nullity of the effects  : p-value = 0.0000000
   Av_tot_eff |  0.31907  0.04060  0.23950  0.39865  31,470  3,971
 Average number of time periods over which a treatment effect is accumulated: 11
 
-----------------------------------------------------------------------
-     Testing the parallel trends and no anticipation assumptions
-----------------------------------------------------------------------
-             Estimate SE      LB CI    UB CI    N      Switchers
 Placebo_1    -0.00559 0.00132 -0.00817 -0.00301 14,154 361
 Placebo_2    -0.00836 0.00207 -0.01241 -0.00430 13,826 361
 Placebo_3    -0.01282 0.00298 -0.01865 -0.00698 13,567 361
@@ -210,69 +201,68 @@ Placebo_11   -0.00359 0.00669 -0.01671  0.00952 10,012 282
 Test of joint nullity of the placebos : p-value = 0.0000015
 ```
 
+![Figure 9.1: Effects of Hurricane Hits on Government Transfers Per Capita (No Controls)](../figures/ch09_fig1_hurricane_nocontrols_R.png)
+
 ### Python
 
 ```python
-# pip install did-multiplegt-dyn pandas pyarrow
+# pip install py-did-multiplegt-dyn pandas pyarrow
 import pandas as pd
-from did_multiplegt_dyn import did_multiplegt_dyn
+import polars as pl
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from did_multiplegt_dyn import DidMultiplegtDyn
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet")
 
-res_t2 = did_multiplegt_dyn(
-    df        = df,
-    outcome   = "log_curr_trans_ind_gov_pc",
-    group     = "county_fips",
-    time      = "year",
-    treatment = "hurricane",
-    effects   = 11,
-    placebo   = 11,
-    cluster   = "county_fips"
+res_t2 = DidMultiplegtDyn(
+    df=pl.from_pandas(df),
+    outcome="log_curr_trans_ind_gov_pc", group="county_fips",
+    time="year", treatment="hurricane",
+    effects=11, placebo=11, cluster="county_fips"
 )
-print(res_t2)
-res_t2.plot
+res_t2.fit()
+res_t2.summary()
+res_t2.plot()
+plt.savefig("ch09_fig1_hurricane_nocontrols_py.png", dpi=150, bbox_inches="tight")
+plt.close()
 ```
 
 ```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N      Switchers
-Effect_1     0.010863  0.001617 0.007694  0.014032 14240  361
-Effect_2     0.012792  0.002365 0.008156  0.017427 13953  361
-Effect_3     0.015801  0.003008 0.009906  0.021695 13766  361
-Effect_4     0.016389  0.003393 0.009739  0.023039 13620  361
-Effect_5     0.023070  0.003897 0.015432  0.030708 13462  361
-Effect_6     0.026829  0.004251 0.018497  0.035160 13253  361
-Effect_7     0.037715  0.004493 0.028910  0.046520 13038  361
-Effect_8     0.039292  0.005039 0.029415  0.049169 12929  361
-Effect_9     0.035109  0.005519 0.024293  0.045925 12840  361
-Effect_10    0.049402  0.006029 0.037585  0.061218 12741  361
-Effect_11    0.051812  0.006106 0.039846  0.063779 12619  361
-
-Test of joint nullity of the effects  : p-value = 0.000000
-
-  Av_tot_eff |  0.319072  0.040600  0.239497  0.398647  31470  3971
-Average number of time periods over which a treatment's effect is accumulated = 11
-
-----------------------------------------------------------------------
-     Testing the parallel trends and no anticipation assumptions
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI     N      Switchers
-Placebo_1    -0.005590 0.001317 -0.008172 -0.003009 14154  361
-Placebo_2    -0.008355 0.002069 -0.012410 -0.004300 13826  361
-Placebo_3    -0.012818 0.002977 -0.018653 -0.006983 13567  361
-Placebo_4    -0.009143 0.003369 -0.015745 -0.002541 13302  361
-Placebo_5    -0.007555 0.003982 -0.015359  0.000249 13005  361
-Placebo_6    -0.007312 0.004375 -0.015886  0.001263 12682  361
-Placebo_7    -0.007958 0.004757 -0.017281  0.001365 12431  361
-Placebo_8    -0.008841 0.005318 -0.019265  0.001583 12214  361
-Placebo_9    -0.014382 0.005836 -0.025820 -0.002943 11829  361
-Placebo_10   -0.008650 0.006128 -0.020661  0.003361 10807  299
-Placebo_11   -0.003592 0.006690 -0.016705  0.009521 10012  282
-
-Test of joint nullity of the placebos : p-value = 0.000002
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI     UB CI       N  Switchers
+            Effect_1  0.010863 0.001617  0.007694  0.014032 14240.0      361.0
+            Effect_2  0.012792 0.002365  0.008156  0.017427 13953.0      361.0
+            Effect_3  0.015800 0.003007  0.009906  0.021695 13766.0      361.0
+            Effect_4  0.016389 0.003393  0.009739  0.023039 13620.0      361.0
+            Effect_5  0.023070 0.003897  0.015432  0.030708 13462.0      361.0
+            Effect_6  0.026829 0.004251  0.018497  0.035160 13253.0      361.0
+            Effect_7  0.037715 0.004493  0.028909  0.046520 13038.0      361.0
+            Effect_8  0.039292 0.005039  0.029415  0.049169 12929.0      361.0
+            Effect_9  0.035109 0.005519  0.024293  0.045925 12840.0      361.0
+           Effect_10  0.049402 0.006029  0.037585  0.061218 12741.0      361.0
+           Effect_11  0.051812 0.006105  0.039846  0.063779 12619.0      361.0
+Average_Total_Effect  0.319072 0.040600  0.239497  0.398647 31470.0     3971.0
+           Placebo_1 -0.005590 0.001317 -0.008172 -0.003008 14154.0      361.0
+           Placebo_2 -0.008355 0.002069 -0.012410 -0.004300 13826.0      361.0
+           Placebo_3 -0.012818 0.002977 -0.018653 -0.006983 13567.0      361.0
+           Placebo_4 -0.009143 0.003369 -0.015745 -0.002541 13302.0      361.0
+           Placebo_5 -0.007555 0.003982 -0.015359  0.000249 13005.0      361.0
+           Placebo_6 -0.007312 0.004375 -0.015886  0.001263 12682.0      361.0
+           Placebo_7 -0.007958 0.004757 -0.017281  0.001365 12431.0      361.0
+           Placebo_8 -0.008841 0.005318 -0.019265  0.001583 12214.0      361.0
+           Placebo_9 -0.014382 0.005836 -0.025820 -0.002943 11829.0      361.0
+          Placebo_10 -0.008650 0.006128 -0.020661  0.003361 10807.0      299.0
+          Placebo_11 -0.003592 0.006690 -0.016705  0.009521 10012.0      282.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000002
 ```
+
+![Figure 9.1: Effects of Hurricane Hits on Government Transfers Per Capita (No Controls)](../figures/ch09_fig1_hurricane_nocontrols_py.png)
 
 :::
 
@@ -299,8 +289,7 @@ foreach v of local vars {
     local controls `controls' `v'_year
 }
 
-did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips year hurricane, ///
-    effects(11) placebo(11) cluster(county_fips) controls(`controls')
+did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips year hurricane, effects(11) placebo(11) cluster(county_fips) controls(`controls')
 ```
 
 ```
@@ -346,9 +335,10 @@ Test of joint nullity of the placebos : p-value = 3.280e-07
 ### R
 
 ```r
-# install.packages(c("DIDmultiplegtDYN", "polars"))
+# install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))
 library(DIDmultiplegtDYN)
 library(polars)
+library(ggplot2)
 
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"))
 
@@ -408,12 +398,18 @@ Placebo_11    0.01773 0.00601  0.00595  0.02951  9,948 282
 Test of joint nullity of the placebos : p-value = 0.0000003
 ```
 
+![Figure 9.2: Effects of Hurricane Hits on Government Transfers Per Capita (With Controls)](../figures/ch09_fig2_hurricane_controls_R.png)
+
 ### Python
 
 ```python
-# pip install did-multiplegt-dyn pandas pyarrow
+# pip install py-did-multiplegt-dyn pandas pyarrow
 import pandas as pd
-from did_multiplegt_dyn import did_multiplegt_dyn
+import polars as pl
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from did_multiplegt_dyn import DidMultiplegtDyn
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet")
 
@@ -423,57 +419,55 @@ for v in vars_list:
     df[f"{v}_year"] = df[v] * df["year"]
 controls_list = [f"{v}_year" for v in vars_list]
 
-res_t3 = did_multiplegt_dyn(
-    df        = df,
-    outcome   = "log_curr_trans_ind_gov_pc",
-    group     = "county_fips",
-    time      = "year",
-    treatment = "hurricane",
-    effects   = 11,
-    placebo   = 11,
-    cluster   = "county_fips",
-    controls  = controls_list
+res_t3 = DidMultiplegtDyn(
+    df=pl.from_pandas(df),
+    outcome="log_curr_trans_ind_gov_pc", group="county_fips",
+    time="year", treatment="hurricane",
+    effects=11, placebo=11, cluster="county_fips",
+    controls=controls_list
 )
-print(res_t3)
-res_t3.plot
+res_t3.fit()
+res_t3.summary()
+res_t3.plot()
+plt.savefig("ch09_fig2_hurricane_controls_py.png", dpi=150, bbox_inches="tight")
+plt.close()
 ```
 
 ```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N      Switchers
-Effect_1     0.009242  0.001584 0.006138  0.012346 14077  361
-Effect_2     0.009593  0.002271 0.005141  0.014044 13794  361
-Effect_3     0.010977  0.002866 0.005359  0.016595 13609  361
-Effect_4     0.009737  0.003247 0.003373  0.016100 13464  361
-Effect_5     0.014430  0.003715 0.007148  0.021712 13305  361
-Effect_6     0.016443  0.004035 0.008533  0.024352 13097  361
-Effect_7     0.025460  0.004296 0.017040  0.033880 12884  361
-Effect_8     0.025165  0.004861 0.015637  0.034692 12775  361
-Effect_9     0.019218  0.005348 0.008737  0.029699 12685  361
-Effect_10    0.031657  0.005865 0.020163  0.043151 12587  361
-Effect_11    0.031740  0.005965 0.020049  0.043432 12465  361
-
-Test of joint nullity of the effects  : p-value = 0.000000
-
-  Av_tot_eff |  0.203660  0.038535  0.128133  0.279187  31123  3971
-
-Placebo_1    -0.003917 0.001309 -0.006483 -0.001352 14000 361
-Placebo_2    -0.005100 0.002035 -0.009089 -0.001111 13679 361
-Placebo_3    -0.007751 0.002925 -0.013484 -0.002018 13430 361
-Placebo_4    -0.002494 0.003301 -0.008964  0.003976 13181 361
-Placebo_5     0.001130 0.003760 -0.006239  0.008500 12893 361
-Placebo_6     0.003105 0.004033 -0.004799  0.011009 12577 361
-Placebo_7     0.004438 0.004378 -0.004142  0.013018 12337 361
-Placebo_8     0.005478 0.004886 -0.004099  0.015055 12126 361
-Placebo_9     0.001804 0.005274 -0.008533  0.012140 11749 361
-Placebo_10    0.010289 0.005656 -0.000797  0.021375 10734 299
-Placebo_11    0.017729 0.006012  0.005946  0.029511  9948 282
-
-Test of joint nullity of the placebos : p-value = 0.000000
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI     UB CI       N  Switchers
+            Effect_1  0.009242 0.001584  0.006138  0.012346 14077.0      361.0
+            Effect_2  0.009593 0.002271  0.005141  0.014044 13794.0      361.0
+            Effect_3  0.010977 0.002866  0.005360  0.016595 13609.0      361.0
+            Effect_4  0.009737 0.003247  0.003374  0.016100 13464.0      361.0
+            Effect_5  0.014430 0.003715  0.007148  0.021712 13305.0      361.0
+            Effect_6  0.016443 0.004035  0.008534  0.024352 13097.0      361.0
+            Effect_7  0.025460 0.004296  0.017040  0.033880 12884.0      361.0
+            Effect_8  0.025165 0.004861  0.015638  0.034693 12775.0      361.0
+            Effect_9  0.019219 0.005348  0.008738  0.029699 12685.0      361.0
+           Effect_10  0.031658 0.005864  0.020163  0.043152 12587.0      361.0
+           Effect_11  0.031741 0.005965  0.020050  0.043433 12465.0      361.0
+Average_Total_Effect  0.203664 0.038535  0.128137  0.279191 31123.0     3971.0
+           Placebo_1 -0.003917 0.001309 -0.006483 -0.001352 14000.0      361.0
+           Placebo_2 -0.005100 0.002035 -0.009089 -0.001111 13679.0      361.0
+           Placebo_3 -0.007752 0.002925 -0.013485 -0.002018 13430.0      361.0
+           Placebo_4 -0.002494 0.003301 -0.008964  0.003975 13181.0      361.0
+           Placebo_5  0.001130 0.003760 -0.006240  0.008499 12893.0      361.0
+           Placebo_6  0.003104 0.004033 -0.004799  0.011008 12577.0      361.0
+           Placebo_7  0.004437 0.004377 -0.004142  0.013017 12337.0      361.0
+           Placebo_8  0.005478 0.004886 -0.004099  0.015054 12126.0      361.0
+           Placebo_9  0.001803 0.005274 -0.008533  0.012139 11749.0      361.0
+          Placebo_10  0.010288 0.005656 -0.000798  0.021374 10734.0      299.0
+          Placebo_11  0.017728 0.006011  0.005946  0.029510  9948.0      282.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
 ```
+
+![Figure 9.2: Effects of Hurricane Hits on Government Transfers Per Capita (With Controls)](../figures/ch09_fig2_hurricane_controls_py.png)
 
 :::
 
-**Interpretation:** After including controls, effects remain positive and significant (Av_tot_eff ≈ 0.204–0.266 vs. 0.319 without controls). Pre-trends improve but the joint test remains significant (p ≈ 3.3e-07), suggesting a persistent differential trend even after conditioning on covariates.
+**Interpretation:** After including controls, effects remain positive and significant (Av_tot_eff ≈ 0.204 vs. 0.319 without controls). Pre-trends improve but the joint test remains significant (p ≈ 3.3e-07), suggesting a persistent differential trend even after conditioning on covariates.

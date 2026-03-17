@@ -228,7 +228,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ------------+-----------------------------------
    .0427696 |          1        2.00        2.00
    .0435282 |          1        2.00        4.00
-        ...
+   .0538973 |          1        2.00        6.00
+   .0552416 |          1        2.00        8.00
+   .0580446 |          1        2.00       10.00
+   .0590862 |          1        2.00       12.00
+   .0598038 |          1        2.00       14.00
+    .065449 |          1        2.00       16.00
+   .0698274 |          1        2.00       18.00
+   .0710992 |          1        2.00       20.00
+   .0711747 |          1        2.00       22.00
+   .0725171 |          1        2.00       24.00
+   .0756276 |          1        2.00       26.00
+   .0775356 |          1        2.00       28.00
+   .0826772 |          1        2.00       30.00
+    .083517 |          1        2.00       32.00
+   .0871058 |          1        2.00       34.00
+   .0888268 |          1        2.00       36.00
+   .0929196 |          1        2.00       38.00
+   .0931799 |          1        2.00       40.00
+   .1006551 |          1        2.00       42.00
+   .1007792 |          1        2.00       44.00
+   .1015849 |          1        2.00       46.00
+   .1038133 |          1        2.00       48.00
+   .1041829 |          1        2.00       50.00
+   .1087641 |          1        2.00       52.00
+   .1092862 |          1        2.00       54.00
+   .1114295 |          1        2.00       56.00
+   .1138055 |          1        2.00       58.00
+   .1214893 |          1        2.00       60.00
+   .1217976 |          1        2.00       62.00
+   .1221933 |          1        2.00       64.00
+   .1243087 |          1        2.00       66.00
+   .1318409 |          1        2.00       68.00
+   .1325508 |          1        2.00       70.00
+   .1402154 |          1        2.00       72.00
+   .1486803 |          1        2.00       74.00
+   .1520717 |          1        2.00       76.00
+    .154815 |          1        2.00       78.00
+    .169334 |          1        2.00       80.00
+   .1700918 |          1        2.00       82.00
+   .1719924 |          1        2.00       84.00
+   .1795388 |          1        2.00       86.00
+   .1812458 |          1        2.00       88.00
+    .185354 |          1        2.00       90.00
+   .1957995 |          1        2.00       92.00
+    .198558 |          1        2.00       94.00
+   .2038389 |          1        2.00       96.00
+   .2061362 |          1        2.00       98.00
    .2127634 |          1        2.00      100.00
 ------------+-----------------------------------
       Total |         50      100.00</code></pre>
@@ -243,14 +289,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.RData"</span>))</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(dob_y_p <span class="sc">==</span> <span class="dv">1975</span>) <span class="sc">%&gt;%</span> <span class="fu">count</span>(newsimeli) <span class="sc">%&gt;%</span> <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code># A tibble: 50 × 2
-   newsimeli     n
-       &lt;dbl&gt; &lt;int&gt;
- 1    0.0428     1
- 2    0.0435     1
- 3    0.0501     1
- ...</code></pre>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dob_y_p <span class="sc">==</span> <span class="dv">1975</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(newsimeli) <span class="sc">%&gt;%</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">"Freq."</span> <span class="ot">=</span> n) <span class="sc">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Percent =</span> <span class="fl">2.0</span>, <span class="at">Cum. =</span> <span class="fu">cumsum</span>(Percent)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">50</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code># A tibble: 50 × 4
+   newsimeli Freq. Percent  Cum.
+       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;
+ 1    0.0428     1       2     2
+ 2    0.0435     1       2     4
+ 3    0.0539     1       2     6
+ 4    0.0552     1       2     8
+ 5    0.0580     1       2    10
+ 6    0.0591     1       2    12
+ 7    0.0598     1       2    14
+ 8    0.0654     1       2    16
+ 9    0.0698     1       2    18
+10    0.0711     1       2    20
+11    0.0712     1       2    22
+12    0.0725     1       2    24
+13    0.0756     1       2    26
+14    0.0775     1       2    28
+15    0.0827     1       2    30
+16    0.0835     1       2    32
+17    0.0871     1       2    34
+18    0.0888     1       2    36
+19    0.0929     1       2    38
+20    0.0932     1       2    40
+21    0.101      1       2    42
+22    0.101      1       2    44
+23    0.102      1       2    46
+24    0.104      1       2    48
+25    0.104      1       2    50
+26    0.109      1       2    52
+27    0.109      1       2    54
+28    0.111      1       2    56
+29    0.114      1       2    58
+30    0.121      1       2    60
+31    0.122      1       2    62
+32    0.122      1       2    64
+33    0.124      1       2    66
+34    0.132      1       2    68
+35    0.133      1       2    70
+36    0.140      1       2    72
+37    0.149      1       2    74
+38    0.152      1       2    76
+39    0.155      1       2    78
+40    0.169      1       2    80
+41    0.170      1       2    82
+42    0.172      1       2    84
+43    0.180      1       2    86
+44    0.181      1       2    88
+45    0.185      1       2    90
+46    0.196      1       2    92
+47    0.199      1       2    94
+48    0.204      1       2    96
+49    0.206      1       2    98
+50    0.213      1       2   100</code></pre>
 <p>All 50 states have different values — confirming continuous treatment in period 1.</p>
 </div>
 <div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
@@ -260,9 +357,69 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet"</span>)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>vals <span class="op">=</span> df.loc[df[<span class="st">"dob_y_p"</span>] <span class="op">==</span> <span class="dv">1975</span>, <span class="st">"newsimeli"</span>].value_counts()</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Unique values: </span><span class="sc">{</span><span class="bu">len</span>(vals)<span class="sc">}</span><span class="ss">, all freq=1: </span><span class="sc">{</span>(vals <span class="op">==</span> <span class="dv">1</span>)<span class="sc">.</span><span class="bu">all</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Unique values: 50, all freq=1: True</code></pre>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>tab <span class="op">=</span> (df.loc[df[<span class="st">"dob_y_p"</span>] <span class="op">==</span> <span class="dv">1975</span>, <span class="st">"newsimeli"</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>         .value_counts()</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>         .reset_index()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>         .rename(columns<span class="op">=</span>{<span class="st">"count"</span>: <span class="st">"Freq."</span>})</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>         .sort_values(<span class="st">"newsimeli"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>         .reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>tab[<span class="st">"Percent"</span>] <span class="op">=</span> <span class="fl">2.0</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>tab[<span class="st">"Cum."</span>] <span class="op">=</span> tab[<span class="st">"Percent"</span>].cumsum()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tab.to_string(index<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Total: </span><span class="sc">{</span>tab[<span class="st">'Freq.'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code> newsimeli  Freq.  Percent  Cum.
+  0.042770      1      2.0   2.0
+  0.043528      1      2.0   4.0
+  0.053897      1      2.0   6.0
+  0.055242      1      2.0   8.0
+  0.058045      1      2.0  10.0
+  0.059086      1      2.0  12.0
+  0.059804      1      2.0  14.0
+  0.065449      1      2.0  16.0
+  0.069827      1      2.0  18.0
+  0.071099      1      2.0  20.0
+  0.071175      1      2.0  22.0
+  0.072517      1      2.0  24.0
+  0.075628      1      2.0  26.0
+  0.077536      1      2.0  28.0
+  0.082677      1      2.0  30.0
+  0.083517      1      2.0  32.0
+  0.087106      1      2.0  34.0
+  0.088827      1      2.0  36.0
+  0.092920      1      2.0  38.0
+  0.093180      1      2.0  40.0
+  0.100655      1      2.0  42.0
+  0.100779      1      2.0  44.0
+  0.101585      1      2.0  46.0
+  0.103813      1      2.0  48.0
+  0.104183      1      2.0  50.0
+  0.108764      1      2.0  52.0
+  0.109286      1      2.0  54.0
+  0.111429      1      2.0  56.0
+  0.113805      1      2.0  58.0
+  0.121489      1      2.0  60.0
+  0.121798      1      2.0  62.0
+  0.122193      1      2.0  64.0
+  0.124309      1      2.0  66.0
+  0.131841      1      2.0  68.0
+  0.132551      1      2.0  70.0
+  0.140215      1      2.0  72.0
+  0.148680      1      2.0  74.0
+  0.152072      1      2.0  76.0
+  0.154815      1      2.0  78.0
+  0.169334      1      2.0  80.0
+  0.170092      1      2.0  82.0
+  0.171992      1      2.0  84.0
+  0.179539      1      2.0  86.0
+  0.181246      1      2.0  88.0
+  0.185354      1      2.0  90.0
+  0.195800      1      2.0  92.0
+  0.198558      1      2.0  94.0
+  0.203839      1      2.0  96.0
+  0.206136      1      2.0  98.0
+  0.212763      1      2.0 100.0
+
+Total: 50</code></pre>
 <p>All 50 states have different values — confirming continuous treatment in period 1.</p>
 </div>
 </div>
@@ -279,13 +436,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.dta"</span> <span class="st">"east_et_al_2023.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"east_et_al_2023.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">global</span> stcontrols stmarried stblack stother sthsdrop <span class="co">///</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 <span class="co">///</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    pop45_64 urate incpc maxafdc abortconsent abortmedr</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, <span class="co">///</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(5) placebo(5) continuous(1) <span class="co">///</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    controls(<span class="ot">$stcontrols</span>) <span class="kw">weight</span>(births) effects_equal(<span class="st">"all"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">global</span> stcontrols stmarried stblack stother sthsdrop sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 pop45_64 urate incpc maxafdc abortconsent abortmedr</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, <span class="kw">effects</span>(5) placebo(5) continuous(1) controls(<span class="ot">$stcontrols</span>) <span class="kw">weight</span>(births) effects_equal(<span class="st">"all"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -375,31 +528,31 @@ Test of joint nullity of the placebos : p-value = 0.7775</code></pre>
 </div>
 </div>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet"</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>stcontrols <span class="op">=</span> [<span class="st">"stmarried"</span>, <span class="st">"stblack"</span>, <span class="st">"stother"</span>, <span class="st">"sthsdrop"</span>, <span class="st">"sthsgrad"</span>,</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>              <span class="st">"stsomecoll"</span>, <span class="st">"pop0_4"</span>, <span class="st">"pop5_17"</span>, <span class="st">"pop18_24"</span>, <span class="st">"pop25_44"</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>              <span class="st">"pop45_64"</span>, <span class="st">"urate"</span>, <span class="st">"incpc"</span>, <span class="st">"maxafdc"</span>, <span class="st">"abortconsent"</span>, <span class="st">"abortmedr"</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet"</span>)</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>res_t5 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    df            <span class="op">=</span> df,</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    outcome       <span class="op">=</span> <span class="st">"lbw_detrend81"</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    group         <span class="op">=</span> <span class="st">"plborn"</span>,</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    time          <span class="op">=</span> <span class="st">"dob_y_p"</span>,</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    treatment     <span class="op">=</span> <span class="st">"newsimeli"</span>,</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    effects       <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    placebo       <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    continuous    <span class="op">=</span> <span class="dv">1</span>,</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    controls      <span class="op">=</span> stcontrols,</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    weight        <span class="op">=</span> <span class="st">"births"</span>,</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    effects_equal <span class="op">=</span> <span class="st">"all"</span></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t5)</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>res_t5.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>stcontrols <span class="op">=</span> [<span class="st">"stmarried"</span>, <span class="st">"stblack"</span>, <span class="st">"stother"</span>, <span class="st">"sthsdrop"</span>, <span class="st">"sthsgrad"</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>              <span class="st">"stsomecoll"</span>, <span class="st">"pop0_4"</span>, <span class="st">"pop5_17"</span>, <span class="st">"pop18_24"</span>, <span class="st">"pop25_44"</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>              <span class="st">"pop45_64"</span>, <span class="st">"urate"</span>, <span class="st">"incpc"</span>, <span class="st">"maxafdc"</span>, <span class="st">"abortconsent"</span>, <span class="st">"abortmedr"</span>]</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>res_t5 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>pl.from_pandas(df),</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"lbw_detrend81"</span>, group<span class="op">=</span><span class="st">"plborn"</span>, time<span class="op">=</span><span class="st">"dob_y_p"</span>, treatment<span class="op">=</span><span class="st">"newsimeli"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">5</span>, placebo<span class="op">=</span><span class="dv">5</span>, continuous<span class="op">=</span><span class="dv">1</span>, controls<span class="op">=</span>stcontrols,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    weight<span class="op">=</span><span class="st">"births"</span>, effects_equal<span class="op">=</span><span class="va">True</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>res_t5.fit()</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>res_t5.summary()</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>res_t5.plot()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig3_medicaid_nonnorm_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -423,6 +576,12 @@ Placebo_4    -0.006457 0.047526 -0.099606  0.086692 176 28
 Placebo_5    -0.060837 0.048084 -0.155080  0.033405 106 18
 
 Test of joint nullity of the placebos : p-value = 0.720988</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig3_medicaid_nonnorm_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 10.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </div>
@@ -439,14 +598,9 @@ Test of joint nullity of the placebos : p-value = 0.720988</code></pre>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.dta"</span> <span class="st">"east_et_al_2023.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"east_et_al_2023.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">global</span> stcontrols stmarried stblack stother sthsdrop <span class="co">///</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 <span class="co">///</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    pop45_64 urate incpc maxafdc abortconsent abortmedr</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, <span class="co">///</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(5) placebo(5) continuous(1) <span class="co">///</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    controls(<span class="ot">$stcontrols</span>) <span class="kw">weight</span>(births) normalized normalized_weights <span class="co">///</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    effects_equal(<span class="st">"all"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">global</span> stcontrols stmarried stblack stother sthsdrop sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 pop45_64 urate incpc maxafdc abortconsent abortmedr</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, <span class="kw">effects</span>(5) placebo(5) continuous(1) controls(<span class="ot">$stcontrols</span>) <span class="kw">weight</span>(births) normalized normalized_weights effects_equal(<span class="st">"all"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -546,33 +700,31 @@ Total 1.000 1.000 1.000 1.000 1.000</code></pre>
 </div>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>stcontrols <span class="op">=</span> [<span class="st">"stmarried"</span>, <span class="st">"stblack"</span>, <span class="st">"stother"</span>, <span class="st">"sthsdrop"</span>, <span class="st">"sthsgrad"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>              <span class="st">"stsomecoll"</span>, <span class="st">"pop0_4"</span>, <span class="st">"pop5_17"</span>, <span class="st">"pop18_24"</span>, <span class="st">"pop25_44"</span>,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>              <span class="st">"pop45_64"</span>, <span class="st">"urate"</span>, <span class="st">"incpc"</span>, <span class="st">"maxafdc"</span>, <span class="st">"abortconsent"</span>, <span class="st">"abortmedr"</span>]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet"</span>)</span>
 <span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>res_t6 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    df                 <span class="op">=</span> df,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    outcome            <span class="op">=</span> <span class="st">"lbw_detrend81"</span>,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    group              <span class="op">=</span> <span class="st">"plborn"</span>,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    time               <span class="op">=</span> <span class="st">"dob_y_p"</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    treatment          <span class="op">=</span> <span class="st">"newsimeli"</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    effects            <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    placebo            <span class="op">=</span> <span class="dv">5</span>,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    continuous         <span class="op">=</span> <span class="dv">1</span>,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    controls           <span class="op">=</span> stcontrols,</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    weight             <span class="op">=</span> <span class="st">"births"</span>,</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    normalized         <span class="op">=</span> <span class="va">True</span>,</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    normalized_weights <span class="op">=</span> <span class="va">True</span>,</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    effects_equal      <span class="op">=</span> <span class="st">"all"</span></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t6)</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>res_t6.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>stcontrols <span class="op">=</span> [<span class="st">"stmarried"</span>, <span class="st">"stblack"</span>, <span class="st">"stother"</span>, <span class="st">"sthsdrop"</span>, <span class="st">"sthsgrad"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>              <span class="st">"stsomecoll"</span>, <span class="st">"pop0_4"</span>, <span class="st">"pop5_17"</span>, <span class="st">"pop18_24"</span>, <span class="st">"pop25_44"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>              <span class="st">"pop45_64"</span>, <span class="st">"urate"</span>, <span class="st">"incpc"</span>, <span class="st">"maxafdc"</span>, <span class="st">"abortconsent"</span>, <span class="st">"abortmedr"</span>]</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>res_t6 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>pl.from_pandas(df),</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"lbw_detrend81"</span>, group<span class="op">=</span><span class="st">"plborn"</span>, time<span class="op">=</span><span class="st">"dob_y_p"</span>, treatment<span class="op">=</span><span class="st">"newsimeli"</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">5</span>, placebo<span class="op">=</span><span class="dv">5</span>, continuous<span class="op">=</span><span class="dv">1</span>, controls<span class="op">=</span>stcontrols,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    weight<span class="op">=</span><span class="st">"births"</span>, normalized<span class="op">=</span><span class="va">True</span>, normalized_weights<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>res_t6.fit()</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>res_t6.summary()</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>res_t6.plot()</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig4_medicaid_norm_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -587,6 +739,12 @@ Test of joint nullity of the effects  : p-value = 0.013565
 Test of equality of the effects       : p-value = 0.581004
 
   Av_tot_eff | -2.674365  0.771115  -4.185722  -1.163007  405  133</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig4_medicaid_norm_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 10.2: Normalized Effects of Prenatal Medicaid on LBW Rate</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </div>

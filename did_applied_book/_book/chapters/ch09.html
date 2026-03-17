@@ -251,14 +251,15 @@ total_hurr~e |     49,698    .3163709    .4650642          0          1</code></
 <p>All counties have <code>total_hurricane</code> ∈ {0, 1} — confirming the one-shot design.</p>
 </div>
 <div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> df.groupby(<span class="st">"county_fips"</span>)[<span class="st">"hurricane"</span>].<span class="bu">sum</span>().reset_index(name<span class="op">=</span><span class="st">"total_hurricane"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(total[<span class="st">"total_hurricane"</span>].describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> df.groupby(<span class="st">"county_fips"</span>)[<span class="st">"hurricane"</span>].<span class="bu">sum</span>().reset_index(name<span class="op">=</span><span class="st">"total_hurricane"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(total[<span class="st">"total_hurricane"</span>].describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>count    4518.000000
 mean        0.316371
 std         0.465064
@@ -280,8 +281,7 @@ max         1.000000</code></pre>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.dta"</span> <span class="st">"deryugina_2017.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"deryugina_2017.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips <span class="fu">year</span> hurricane, <span class="co">///</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(11) placebo(11) <span class="kw">cluster</span>(county_fips)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips <span class="fu">year</span> hurricane, <span class="kw">effects</span>(11) placebo(11) <span class="kw">cluster</span>(county_fips)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -305,12 +305,6 @@ Test of joint nullity of the effects : p-value = 0
   Av_tot_eff |  .3190721   .0406001   .2394973   .3986468      31470       3971
 Average number of time periods over which a treatment's effect is accumulated = 11
 
---------------------------------------------------------------------------------
-          Testing the parallel trends and no anticipation assumptions
---------------------------------------------------------------------------------
-
-             |  Estimate         SE      LB CI      UB CI          N  Switchers
--------------+------------------------------------------------------------------
    Placebo_1 | -.0055903   .0013173   -.008172  -.0030085      14154        361
    Placebo_2 | -.0083554   .0020689  -.0124104  -.0043003      13826        361
    Placebo_3 | -.0128183    .002977  -.0186532  -.0069834      13567        361
@@ -332,24 +326,25 @@ Test of joint nullity of the placebos : p-value = 1.517e-06</code></pre>
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DIDmultiplegtDYN)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polars)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"</span>))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>res_t2 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"hurricane"</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">11</span>,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">11</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"county_fips"</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t2)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>res_t2<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>res_t2 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"county_fips"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"hurricane"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">11</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">11</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"county_fips"</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t2)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>res_t2<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -371,10 +366,6 @@ Test of joint nullity of the effects  : p-value = 0.0000000
   Av_tot_eff |  0.31907  0.04060  0.23950  0.39865  31,470  3,971
 Average number of time periods over which a treatment effect is accumulated: 11
 
-----------------------------------------------------------------------
-     Testing the parallel trends and no anticipation assumptions
-----------------------------------------------------------------------
-             Estimate SE      LB CI    UB CI    N      Switchers
 Placebo_1    -0.00559 0.00132 -0.00817 -0.00301 14,154 361
 Placebo_2    -0.00836 0.00207 -0.01241 -0.00430 13,826 361
 Placebo_3    -0.01282 0.00298 -0.01865 -0.00698 13,567 361
@@ -388,64 +379,71 @@ Placebo_10   -0.00865 0.00613 -0.02066  0.00336 10,807 299
 Placebo_11   -0.00359 0.00669 -0.01671  0.00952 10,012 282
 
 Test of joint nullity of the placebos : p-value = 0.0000015</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig1_hurricane_nocontrols_R.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9.1: Effects of Hurricane Hits on Government Transfers Per Capita (No Controls)</figcaption>
+</figure>
+</div>
 </div>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>res_t2 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    df        <span class="op">=</span> df,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    outcome   <span class="op">=</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    group     <span class="op">=</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    time      <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    treatment <span class="op">=</span> <span class="st">"hurricane"</span>,</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    effects   <span class="op">=</span> <span class="dv">11</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    placebo   <span class="op">=</span> <span class="dv">11</span>,</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    cluster   <span class="op">=</span> <span class="st">"county_fips"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>res_t2 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>pl.from_pandas(df),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"log_curr_trans_ind_gov_pc"</span>, group<span class="op">=</span><span class="st">"county_fips"</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"hurricane"</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">11</span>, placebo<span class="op">=</span><span class="dv">11</span>, cluster<span class="op">=</span><span class="st">"county_fips"</span></span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t2)</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>res_t2.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N      Switchers
-Effect_1     0.010863  0.001617 0.007694  0.014032 14240  361
-Effect_2     0.012792  0.002365 0.008156  0.017427 13953  361
-Effect_3     0.015801  0.003008 0.009906  0.021695 13766  361
-Effect_4     0.016389  0.003393 0.009739  0.023039 13620  361
-Effect_5     0.023070  0.003897 0.015432  0.030708 13462  361
-Effect_6     0.026829  0.004251 0.018497  0.035160 13253  361
-Effect_7     0.037715  0.004493 0.028910  0.046520 13038  361
-Effect_8     0.039292  0.005039 0.029415  0.049169 12929  361
-Effect_9     0.035109  0.005519 0.024293  0.045925 12840  361
-Effect_10    0.049402  0.006029 0.037585  0.061218 12741  361
-Effect_11    0.051812  0.006106 0.039846  0.063779 12619  361
-
-Test of joint nullity of the effects  : p-value = 0.000000
-
-  Av_tot_eff |  0.319072  0.040600  0.239497  0.398647  31470  3971
-Average number of time periods over which a treatment's effect is accumulated = 11
-
-----------------------------------------------------------------------
-     Testing the parallel trends and no anticipation assumptions
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI     N      Switchers
-Placebo_1    -0.005590 0.001317 -0.008172 -0.003009 14154  361
-Placebo_2    -0.008355 0.002069 -0.012410 -0.004300 13826  361
-Placebo_3    -0.012818 0.002977 -0.018653 -0.006983 13567  361
-Placebo_4    -0.009143 0.003369 -0.015745 -0.002541 13302  361
-Placebo_5    -0.007555 0.003982 -0.015359  0.000249 13005  361
-Placebo_6    -0.007312 0.004375 -0.015886  0.001263 12682  361
-Placebo_7    -0.007958 0.004757 -0.017281  0.001365 12431  361
-Placebo_8    -0.008841 0.005318 -0.019265  0.001583 12214  361
-Placebo_9    -0.014382 0.005836 -0.025820 -0.002943 11829  361
-Placebo_10   -0.008650 0.006128 -0.020661  0.003361 10807  299
-Placebo_11   -0.003592 0.006690 -0.016705  0.009521 10012  282
-
-Test of joint nullity of the placebos : p-value = 0.000002</code></pre>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>res_t2.fit()</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>res_t2.summary()</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>res_t2.plot()</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig1_hurricane_nocontrols_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI     UB CI       N  Switchers
+            Effect_1  0.010863 0.001617  0.007694  0.014032 14240.0      361.0
+            Effect_2  0.012792 0.002365  0.008156  0.017427 13953.0      361.0
+            Effect_3  0.015800 0.003007  0.009906  0.021695 13766.0      361.0
+            Effect_4  0.016389 0.003393  0.009739  0.023039 13620.0      361.0
+            Effect_5  0.023070 0.003897  0.015432  0.030708 13462.0      361.0
+            Effect_6  0.026829 0.004251  0.018497  0.035160 13253.0      361.0
+            Effect_7  0.037715 0.004493  0.028909  0.046520 13038.0      361.0
+            Effect_8  0.039292 0.005039  0.029415  0.049169 12929.0      361.0
+            Effect_9  0.035109 0.005519  0.024293  0.045925 12840.0      361.0
+           Effect_10  0.049402 0.006029  0.037585  0.061218 12741.0      361.0
+           Effect_11  0.051812 0.006105  0.039846  0.063779 12619.0      361.0
+Average_Total_Effect  0.319072 0.040600  0.239497  0.398647 31470.0     3971.0
+           Placebo_1 -0.005590 0.001317 -0.008172 -0.003008 14154.0      361.0
+           Placebo_2 -0.008355 0.002069 -0.012410 -0.004300 13826.0      361.0
+           Placebo_3 -0.012818 0.002977 -0.018653 -0.006983 13567.0      361.0
+           Placebo_4 -0.009143 0.003369 -0.015745 -0.002541 13302.0      361.0
+           Placebo_5 -0.007555 0.003982 -0.015359  0.000249 13005.0      361.0
+           Placebo_6 -0.007312 0.004375 -0.015886  0.001263 12682.0      361.0
+           Placebo_7 -0.007958 0.004757 -0.017281  0.001365 12431.0      361.0
+           Placebo_8 -0.008841 0.005318 -0.019265  0.001583 12214.0      361.0
+           Placebo_9 -0.014382 0.005836 -0.025820 -0.002943 11829.0      361.0
+          Placebo_10 -0.008650 0.006128 -0.020661  0.003361 10807.0      299.0
+          Placebo_11 -0.003592 0.006690 -0.016705  0.009521 10012.0      282.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000002</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig1_hurricane_nocontrols_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9.1: Effects of Hurricane Hits on Government Transfers Per Capita (No Controls)</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </div>
@@ -470,8 +468,7 @@ Test of joint nullity of the placebos : p-value = 0.000002</code></pre>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">local</span> controls <span class="ot">`controls'</span> <span class="ot">`v'</span>_year</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips <span class="fu">year</span> hurricane, <span class="co">///</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">effects</span>(11) placebo(11) <span class="kw">cluster</span>(county_fips) controls(<span class="ot">`controls'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn log_curr_trans_ind_gov_pc county_fips <span class="fu">year</span> hurricane, <span class="kw">effects</span>(11) placebo(11) <span class="kw">cluster</span>(county_fips) controls(<span class="ot">`controls'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>--------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -515,30 +512,31 @@ Test of joint nullity of the placebos : p-value = 3.280e-07</code></pre>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("DIDmultiplegtDYN", "polars", "ggplot2"))</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DIDmultiplegtDYN)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polars)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"</span>))</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"coastal"</span>, <span class="st">"land_area1970"</span>, <span class="st">"log_pop1969"</span>, <span class="st">"frac_young1969"</span>,</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>          <span class="st">"frac_old1969"</span>, <span class="st">"frac_black1969"</span>, <span class="st">"log_wage_pc1969"</span>, <span class="st">"emp_rate1969"</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (v <span class="cf">in</span> vars) df[[<span class="fu">paste0</span>(v, <span class="st">"_year"</span>)]] <span class="ot">&lt;-</span> df[[v]] <span class="sc">*</span> df<span class="sc">$</span>year</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>controls_list <span class="ot">&lt;-</span> <span class="fu">paste0</span>(vars, <span class="st">"_year"</span>)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>res_t3 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"hurricane"</span>,</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">11</span>,</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">11</span>,</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">controls  =</span> controls_list</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t3)</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>res_t3<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.RData"</span>))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"coastal"</span>, <span class="st">"land_area1970"</span>, <span class="st">"log_pop1969"</span>, <span class="st">"frac_young1969"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>          <span class="st">"frac_old1969"</span>, <span class="st">"frac_black1969"</span>, <span class="st">"log_wage_pc1969"</span>, <span class="st">"emp_rate1969"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (v <span class="cf">in</span> vars) df[[<span class="fu">paste0</span>(v, <span class="st">"_year"</span>)]] <span class="ot">&lt;-</span> df[[v]] <span class="sc">*</span> df<span class="sc">$</span>year</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>controls_list <span class="ot">&lt;-</span> <span class="fu">paste0</span>(vars, <span class="st">"_year"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>res_t3 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">df        =</span> df,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome   =</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">group     =</span> <span class="st">"county_fips"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">time      =</span> <span class="st">"year"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="st">"hurricane"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">effects   =</span> <span class="dv">11</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">placebo   =</span> <span class="dv">11</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster   =</span> <span class="st">"county_fips"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">controls  =</span> controls_list</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res_t3)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>res_t3<span class="sc">$</span>plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -572,70 +570,82 @@ Placebo_10    0.01029 0.00566 -0.00080  0.02137 10,734 299
 Placebo_11    0.01773 0.00601  0.00595  0.02951  9,948 282
 
 Test of joint nullity of the placebos : p-value = 0.0000003</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig2_hurricane_controls_R.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9.2: Effects of Hurricane Hits on Government Transfers Per Capita (With Controls)</figcaption>
+</figure>
+</div>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install did-multiplegt-dyn pandas pyarrow</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install py-did-multiplegt-dyn pandas pyarrow</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> did_multiplegt_dyn</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>vars_list <span class="op">=</span> [<span class="st">"coastal"</span>, <span class="st">"land_area1970"</span>, <span class="st">"log_pop1969"</span>, <span class="st">"frac_young1969"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>             <span class="st">"frac_old1969"</span>, <span class="st">"frac_black1969"</span>, <span class="st">"log_wage_pc1969"</span>, <span class="st">"emp_rate1969"</span>]</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> v <span class="kw">in</span> vars_list:</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    df[<span class="ss">f"</span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">_year"</span>] <span class="op">=</span> df[v] <span class="op">*</span> df[<span class="st">"year"</span>]</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>controls_list <span class="op">=</span> [<span class="ss">f"</span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">_year"</span> <span class="cf">for</span> v <span class="kw">in</span> vars_list]</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>res_t3 <span class="op">=</span> did_multiplegt_dyn(</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    df        <span class="op">=</span> df,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    outcome   <span class="op">=</span> <span class="st">"log_curr_trans_ind_gov_pc"</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    group     <span class="op">=</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    time      <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    treatment <span class="op">=</span> <span class="st">"hurricane"</span>,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    effects   <span class="op">=</span> <span class="dv">11</span>,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    placebo   <span class="op">=</span> <span class="dv">11</span>,</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    cluster   <span class="op">=</span> <span class="st">"county_fips"</span>,</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    controls  <span class="op">=</span> controls_list</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>matplotlib.use(<span class="st">'Agg'</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.parquet"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>vars_list <span class="op">=</span> [<span class="st">"coastal"</span>, <span class="st">"land_area1970"</span>, <span class="st">"log_pop1969"</span>, <span class="st">"frac_young1969"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>             <span class="st">"frac_old1969"</span>, <span class="st">"frac_black1969"</span>, <span class="st">"log_wage_pc1969"</span>, <span class="st">"emp_rate1969"</span>]</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> v <span class="kw">in</span> vars_list:</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    df[<span class="ss">f"</span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">_year"</span>] <span class="op">=</span> df[v] <span class="op">*</span> df[<span class="st">"year"</span>]</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>controls_list <span class="op">=</span> [<span class="ss">f"</span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">_year"</span> <span class="cf">for</span> v <span class="kw">in</span> vars_list]</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>res_t3 <span class="op">=</span> DidMultiplegtDyn(</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>pl.from_pandas(df),</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    outcome<span class="op">=</span><span class="st">"log_curr_trans_ind_gov_pc"</span>, group<span class="op">=</span><span class="st">"county_fips"</span>,</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"hurricane"</span>,</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    effects<span class="op">=</span><span class="dv">11</span>, placebo<span class="op">=</span><span class="dv">11</span>, cluster<span class="op">=</span><span class="st">"county_fips"</span>,</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    controls<span class="op">=</span>controls_list</span>
 <span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res_t3)</span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>res_t3.plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N      Switchers
-Effect_1     0.009242  0.001584 0.006138  0.012346 14077  361
-Effect_2     0.009593  0.002271 0.005141  0.014044 13794  361
-Effect_3     0.010977  0.002866 0.005359  0.016595 13609  361
-Effect_4     0.009737  0.003247 0.003373  0.016100 13464  361
-Effect_5     0.014430  0.003715 0.007148  0.021712 13305  361
-Effect_6     0.016443  0.004035 0.008533  0.024352 13097  361
-Effect_7     0.025460  0.004296 0.017040  0.033880 12884  361
-Effect_8     0.025165  0.004861 0.015637  0.034692 12775  361
-Effect_9     0.019218  0.005348 0.008737  0.029699 12685  361
-Effect_10    0.031657  0.005865 0.020163  0.043151 12587  361
-Effect_11    0.031740  0.005965 0.020049  0.043432 12465  361
-
-Test of joint nullity of the effects  : p-value = 0.000000
-
-  Av_tot_eff |  0.203660  0.038535  0.128133  0.279187  31123  3971
-
-Placebo_1    -0.003917 0.001309 -0.006483 -0.001352 14000 361
-Placebo_2    -0.005100 0.002035 -0.009089 -0.001111 13679 361
-Placebo_3    -0.007751 0.002925 -0.013484 -0.002018 13430 361
-Placebo_4    -0.002494 0.003301 -0.008964  0.003976 13181 361
-Placebo_5     0.001130 0.003760 -0.006239  0.008500 12893 361
-Placebo_6     0.003105 0.004033 -0.004799  0.011009 12577 361
-Placebo_7     0.004438 0.004378 -0.004142  0.013018 12337 361
-Placebo_8     0.005478 0.004886 -0.004099  0.015055 12126 361
-Placebo_9     0.001804 0.005274 -0.008533  0.012140 11749 361
-Placebo_10    0.010289 0.005656 -0.000797  0.021375 10734 299
-Placebo_11    0.017729 0.006012  0.005946  0.029511  9948 282
-
-Test of joint nullity of the placebos : p-value = 0.000000</code></pre>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>res_t3.fit()</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>res_t3.summary()</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>res_t3.plot()</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"ch09_fig2_hurricane_controls_py.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI     UB CI       N  Switchers
+            Effect_1  0.009242 0.001584  0.006138  0.012346 14077.0      361.0
+            Effect_2  0.009593 0.002271  0.005141  0.014044 13794.0      361.0
+            Effect_3  0.010977 0.002866  0.005360  0.016595 13609.0      361.0
+            Effect_4  0.009737 0.003247  0.003374  0.016100 13464.0      361.0
+            Effect_5  0.014430 0.003715  0.007148  0.021712 13305.0      361.0
+            Effect_6  0.016443 0.004035  0.008534  0.024352 13097.0      361.0
+            Effect_7  0.025460 0.004296  0.017040  0.033880 12884.0      361.0
+            Effect_8  0.025165 0.004861  0.015638  0.034693 12775.0      361.0
+            Effect_9  0.019219 0.005348  0.008738  0.029699 12685.0      361.0
+           Effect_10  0.031658 0.005864  0.020163  0.043152 12587.0      361.0
+           Effect_11  0.031741 0.005965  0.020050  0.043433 12465.0      361.0
+Average_Total_Effect  0.203664 0.038535  0.128137  0.279191 31123.0     3971.0
+           Placebo_1 -0.003917 0.001309 -0.006483 -0.001352 14000.0      361.0
+           Placebo_2 -0.005100 0.002035 -0.009089 -0.001111 13679.0      361.0
+           Placebo_3 -0.007752 0.002925 -0.013485 -0.002018 13430.0      361.0
+           Placebo_4 -0.002494 0.003301 -0.008964  0.003975 13181.0      361.0
+           Placebo_5  0.001130 0.003760 -0.006240  0.008499 12893.0      361.0
+           Placebo_6  0.003104 0.004033 -0.004799  0.011008 12577.0      361.0
+           Placebo_7  0.004437 0.004377 -0.004142  0.013017 12337.0      361.0
+           Placebo_8  0.005478 0.004886 -0.004099  0.015054 12126.0      361.0
+           Placebo_9  0.001803 0.005274 -0.008533  0.012139 11749.0      361.0
+          Placebo_10  0.010288 0.005656 -0.000798  0.021374 10734.0      299.0
+          Placebo_11  0.017728 0.006011  0.005946  0.029510  9948.0      282.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000</code></pre>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/ch09_fig2_hurricane_controls_py.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9.2: Effects of Hurricane Hits on Government Transfers Per Capita (With Controls)</figcaption>
+</figure>
 </div>
 </div>
 </div>
-<p><strong>Interpretation:</strong> After including controls, effects remain positive and significant (Av_tot_eff ≈ 0.204–0.266 vs.&nbsp;0.319 without controls). Pre-trends improve but the joint test remains significant (p ≈ 3.3e-07), suggesting a persistent differential trend even after conditioning on covariates.</p>
+</div>
+<p><strong>Interpretation:</strong> After including controls, effects remain positive and significant (Av_tot_eff ≈ 0.204 vs.&nbsp;0.319 without controls). Pre-trends improve but the joint test remains significant (p ≈ 3.3e-07), suggesting a persistent differential trend even after conditioning on covariates.</p>
 
 
 </section>

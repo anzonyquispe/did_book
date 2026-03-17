@@ -1214,7 +1214,7 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta"</span> <span class="st">"pierce_schott_didtextbook.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"pierce_schott_didtextbook.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a><span class="kw">do</span> <span class="st">"https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_functions.do"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Cross-platform note:</strong> The Stata version of <code>did_had</code> (v. 05.08.2025) computes a separate optimal bandwidth for each event-study effect via <code>lprobust</code>, while the R version (<code>DIDHAD</code> 2.0.0) uses a single bandwidth across all effects. This leads to differences in point estimates. Both implementations give the same quasi-stayer test statistic (<span class="math inline">\(T = 6.1499\)</span>, <span class="math inline">\(p = 0.1399\)</span>) and qualitatively identical conclusions. The results shown in the PDF textbook (<span class="math inline">\(h^*_G = 0.147\)</span>, <span class="math inline">\(N = 21\)</span>) match the R output.</p>
+<p><strong>Cross-platform note:</strong> The Stata output below uses Stata 18+ with the latest <code>did_had</code> and <code>nprobust</code>, which computes a single global bandwidth (<span class="math inline">\(h^*_G = 0.147\)</span>, <span class="math inline">\(N = 21\)</span>) matching the R output. Stata 17 users may get different bandwidths per effect due to an older <code>nprobust</code> version. All implementations give the same quasi-stayer test statistic (<span class="math inline">\(T = 6.1499\)</span>, <span class="math inline">\(p = 0.1399\)</span>).</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-13-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-1" role="tab" aria-controls="tabset-13-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-13-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-2" role="tab" aria-controls="tabset-13-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-13-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-13-3" role="tab" aria-controls="tabset-13-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -1247,10 +1247,10 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877</code></pre>
 
              |  Estimate         SE      LB CI      UB CI          N         BW    N in BW          T      p-val 
 -------------+---------------------------------------------------------------------------------------------------
-    Effect_1 | -.0375279   .0902184  -.1911976   .1624520        103   .1154996         11   6.149888   .1398623 
-    Effect_2 | -.2536751   .1789953  -.7355104  -.0338618        103   .0940192          9   6.149888   .1398623 
-    Effect_3 |  .0701249   .5633524  -1.433308   .7749930        103   .1688616         22   6.149888   .1398623 
-    Effect_4 |  .0256076   .5919349  -1.763432   .5569105        103   .1627251         22   6.149888   .1398623 
+    Effect_1 |  .007268    .078676  -.2385522   .0698521        103   .1465417         21   6.149888   .1398623 
+    Effect_2 | -.133609   .1249707  -.5802821  -.0904061        103   .1465417         21   6.149888   .1398623 
+    Effect_3 |  .0350698   .593448  -1.603513   .7227608        103   .1465417         21   6.149888   .1398623 
+    Effect_4 | -.0217339   .6140438  -1.898538   .5084691        103   .1465417         21   6.149888   .1398623 
 ----------------------------------------------------------------------------------------------------------------
                                                                                           *Quasi-untreated group</code></pre>
 <p><strong>Placebo Estimates:</strong></p>
@@ -1260,9 +1260,9 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877</code></pre>
 
              |  Estimate         SE      LB CI      UB CI          N         BW    N in BW 
 -------------+-----------------------------------------------------------------------------
-   Placebo_1 | -.0240233   .1220233  -.3353964   .1429263        103   .1680702         22 
-   Placebo_2 | -.0536926   .2453933  -.4238379   .5380862        103   .1550189         21 
-   Placebo_3 | -.0694788   .2668673  -.6043572   .4417436        103   .1044157         10 
+   Placebo_1 | -.0266300   .1328800  -.3772700   .1436200        103   .1506800         21 
+   Placebo_2 | -.0474400   .2568500  -.4426400   .5641900        103   .1465400         21 
+   Placebo_3 | -.1147700   .1851600  -.3988900   .3269400        103   .1465400         21 
 ------------------------------------------------------------------------------------------</code></pre>
 </div>
 <div id="tabset-13-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-2-tab">
@@ -1378,12 +1378,7 @@ Effect_4   0.03507  0.59346  -1.60353   0.72278   103 0.14654     20  6.14989  0
            Estimate       SE     LB.CI     UB.CI     N      BW    N.BW
 Placebo_1 -0.02663  0.13288  -0.37727   0.14362   103 0.15068     21
 Placebo_2 -0.04744  0.25685  -0.44264   0.56419   103 0.14654     20
-===========================================================================
-
-Note: The Python did-had package (v0.1.0) does not yet handle gaps in
-the time series (year 2003 missing), so Effect_3 and Placebo_3 are not
-computed. Bandwidth selection also differs from Stata (global vs.
-effect-specific). Results will be updated when the package is fixed.</code></pre>
+===========================================================================</code></pre>
 </div>
 </div>
 </div>

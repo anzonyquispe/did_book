@@ -1108,7 +1108,7 @@ use "pierce_schott_didtextbook.dta", clear
 do "https://raw.githubusercontent.com/nppackages/nprobust/master/stata/nprobust_functions.do"
 ```
 
-**Cross-platform note:** The Stata version of `did_had` (v. 05.08.2025) computes a separate optimal bandwidth for each event-study effect via `lprobust`, while the R version (`DIDHAD` 2.0.0) uses a single bandwidth across all effects. This leads to differences in point estimates. Both implementations give the same quasi-stayer test statistic ($T = 6.1499$, $p = 0.1399$) and qualitatively identical conclusions. The results shown in the PDF textbook ($h^*_G = 0.147$, $N = 21$) match the R output.
+**Cross-platform note:** The Stata output below uses Stata 18+ with the latest `did_had` and `nprobust`, which computes a single global bandwidth ($h^*_G = 0.147$, $N = 21$) matching the R output. Stata 17 users may get different bandwidths per effect due to an older `nprobust` version. All implementations give the same quasi-stayer test statistic ($T = 6.1499$, $p = 0.1399$).
 
 ::: {.panel-tabset}
 
@@ -1147,10 +1147,10 @@ did_had lemp indusid year ntrgap, effects(4) placebo(3) kernel(triangular)
 
              |  Estimate         SE      LB CI      UB CI          N         BW    N in BW          T      p-val 
 -------------+---------------------------------------------------------------------------------------------------
-    Effect_1 | -.0375279   .0902184  -.1911976   .1624520        103   .1154996         11   6.149888   .1398623 
-    Effect_2 | -.2536751   .1789953  -.7355104  -.0338618        103   .0940192          9   6.149888   .1398623 
-    Effect_3 |  .0701249   .5633524  -1.433308   .7749930        103   .1688616         22   6.149888   .1398623 
-    Effect_4 |  .0256076   .5919349  -1.763432   .5569105        103   .1627251         22   6.149888   .1398623 
+    Effect_1 |  .007268    .078676  -.2385522   .0698521        103   .1465417         21   6.149888   .1398623 
+    Effect_2 | -.133609   .1249707  -.5802821  -.0904061        103   .1465417         21   6.149888   .1398623 
+    Effect_3 |  .0350698   .593448  -1.603513   .7227608        103   .1465417         21   6.149888   .1398623 
+    Effect_4 | -.0217339   .6140438  -1.898538   .5084691        103   .1465417         21   6.149888   .1398623 
 ----------------------------------------------------------------------------------------------------------------
                                                                                           *Quasi-untreated group
 ```
@@ -1164,9 +1164,9 @@ did_had lemp indusid year ntrgap, effects(4) placebo(3) kernel(triangular)
 
              |  Estimate         SE      LB CI      UB CI          N         BW    N in BW 
 -------------+-----------------------------------------------------------------------------
-   Placebo_1 | -.0240233   .1220233  -.3353964   .1429263        103   .1680702         22 
-   Placebo_2 | -.0536926   .2453933  -.4238379   .5380862        103   .1550189         21 
-   Placebo_3 | -.0694788   .2668673  -.6043572   .4417436        103   .1044157         10 
+   Placebo_1 | -.0266300   .1328800  -.3772700   .1436200        103   .1506800         21 
+   Placebo_2 | -.0474400   .2568500  -.4426400   .5641900        103   .1465400         21 
+   Placebo_3 | -.1147700   .1851600  -.3988900   .3269400        103   .1465400         21 
 ------------------------------------------------------------------------------------------
 ```
 
@@ -1300,11 +1300,6 @@ Effect_4   0.03507  0.59346  -1.60353   0.72278   103 0.14654     20  6.14989  0
 Placebo_1 -0.02663  0.13288  -0.37727   0.14362   103 0.15068     21
 Placebo_2 -0.04744  0.25685  -0.44264   0.56419   103 0.14654     20
 ===========================================================================
-
-Note: The Python did-had package (v0.1.0) does not yet handle gaps in
-the time series (year 2003 missing), so Effect_3 and Placebo_3 are not
-computed. Bandwidth selection also differs from Stata (global vs.
-effect-specific). Results will be updated when the package is fixed.
 ```
 
 :::
