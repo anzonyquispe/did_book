@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Study Plotter</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --accent: #be4bdb;
@@ -23,7 +24,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background: var(--bg); }
 
-/* ============ INPUT PAGE ============ */
 #input-page {
   min-height: 100vh;
   background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -54,15 +54,6 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 .form-textarea { resize: vertical; min-height: 70px; }
 .form-input::placeholder, .form-textarea::placeholder { color: #555; }
 
-.token-row { display: flex; gap: 8px; margin-bottom: 20px; }
-.token-row .form-input { margin-bottom: 0; flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-.token-toggle {
-  background: none; border: 1px solid rgba(255,255,255,0.1); color: #888;
-  border-radius: 8px; padding: 0 14px; cursor: pointer; font-size: 13px; white-space: nowrap;
-  transition: all 0.2s;
-}
-.token-toggle:hover { border-color: #be9b7b; color: #be9b7b; }
-
 .ci-group { display: flex; gap: 8px; margin-bottom: 24px; }
 .ci-btn {
   flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);
@@ -77,7 +68,6 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 }
 .upload-zone:hover { border-color: #be9b7b; }
 .upload-zone.loaded { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
-.upload-zone.error { border-color: rgba(220,38,38,0.4); }
 .upload-zone p { font-size: 14px; color: #888; }
 .upload-zone.loaded p { color: #22c55e; }
 
@@ -98,145 +88,6 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 }
 .submit-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(190,155,123,0.4); }
 
-/* ============ OUTPUT PAGE ============ */
-#output-page { display: none; }
-#output-page.active { display: flex; }
-
-.book-sidebar {
-  width: 280px; min-height: 100vh; background: var(--sidebar-bg);
-  border-right: 1px solid var(--border); padding: 24px 20px; position: fixed; top: 0; left: 0;
-  overflow-y: auto;
-}
-.book-sidebar h2 {
-  font-family: 'Source Sans 3', sans-serif; font-size: 14px; font-weight: 700;
-  color: var(--text); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-}
-.sidebar-nav a {
-  display: block; padding: 6px 10px; font-size: 14px; color: var(--text-muted);
-  text-decoration: none; border-radius: 4px; margin-bottom: 2px; transition: all 0.15s;
-}
-.sidebar-nav a:hover { background: rgba(0,0,0,0.04); color: var(--text); }
-.sidebar-nav a.active { background: rgba(190,75,219,0.08); color: var(--accent); font-weight: 600; }
-.sidebar-back {
-  display: inline-block; font-size: 13px; color: var(--accent); text-decoration: none;
-  margin-bottom: 20px; cursor: pointer;
-}
-.sidebar-back:hover { text-decoration: underline; }
-
-/* GitHub status in sidebar */
-.gh-status {
-  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
-}
-.gh-status-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.gh-badge {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
-  padding: 4px 10px; border-radius: 20px; font-weight: 600;
-}
-.gh-badge.pending { background: #fff3cd; color: #856404; }
-.gh-badge.saved { background: #d1fae5; color: #065f46; }
-.gh-badge.error { background: #fee2e2; color: #991b1b; }
-.gh-files { margin-top: 8px; }
-.gh-file-link {
-  display: block; font-size: 12px; color: var(--accent); text-decoration: none;
-  font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;
-  word-break: break-all;
-}
-.gh-file-link:hover { text-decoration: underline; }
-
-.book-main {
-  margin-left: 280px; max-width: 900px; padding: 48px 60px 80px;
-}
-.book-main h1 {
-  font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900;
-  color: var(--text); line-height: 1.2; margin-bottom: 8px;
-}
-.book-authors {
-  font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 32px;
-}
-.book-section { margin-bottom: 36px; }
-.book-section h2 {
-  font-family: 'Source Sans 3', sans-serif; font-size: 22px; font-weight: 700;
-  color: var(--text); margin-bottom: 12px; padding-bottom: 6px;
-  border-bottom: 2px solid var(--accent-light);
-}
-.book-section p { font-size: 16px; line-height: 1.75; color: #495057; }
-
-.method-box {
-  background: var(--code-bg); border-left: 4px solid var(--accent);
-  padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 12px 0;
-}
-.method-box p { font-size: 15px; color: #495057; }
-
-/* Code block */
-.code-block {
-  background: #1e1e2e; border-radius: 8px; padding: 20px 24px; margin: 12px 0;
-  overflow-x: auto;
-}
-.code-block pre {
-  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #cdd6f4;
-  line-height: 1.7; white-space: pre-wrap; word-break: break-all;
-}
-.code-tabs { display: flex; gap: 4px; margin-bottom: -1px; }
-.code-tab {
-  padding: 6px 16px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600;
-  cursor: pointer; border: 1px solid transparent; background: #2a2a3e; color: #888;
-  font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
-}
-.code-tab.active { background: #1e1e2e; color: #cdd6f4; border-color: #333; }
-
-.plot-container {
-  background: #fff; border: 1px solid var(--border); border-radius: 8px;
-  padding: 24px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.plot-caption {
-  text-align: center; font-size: 13px; color: var(--text-muted);
-  font-style: italic; margin-top: 10px;
-}
-
-.results-table {
-  width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0;
-}
-.results-table th {
-  text-align: right; padding: 8px 12px; border-bottom: 2px solid var(--border);
-  font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
-}
-.results-table td {
-  text-align: right; padding: 7px 12px; border-bottom: 1px solid #f1f3f5;
-  font-variant-numeric: tabular-nums;
-}
-.results-table tr.effect { background: rgba(192,57,43,0.04); }
-.results-table tr.placebo { background: rgba(37,99,235,0.04); }
-.results-table td:first-child { text-align: left; font-weight: 600; }
-
-/* ============ ACCEPT / REJECT BAR ============ */
-.decision-bar {
-  position: fixed; bottom: 0; left: 280px; right: 0;
-  background: #fff; border-top: 1px solid var(--border);
-  padding: 16px 60px; display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100;
-}
-.decision-bar .decision-label {
-  font-size: 15px; color: var(--text-muted);
-}
-.decision-bar .decision-label strong { color: var(--text); }
-.decision-btns { display: flex; gap: 12px; }
-.btn-accept {
-  padding: 10px 28px; border-radius: 8px; border: none; cursor: pointer;
-  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
-  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
-  transition: all 0.2s; box-shadow: 0 2px 12px rgba(34,197,94,0.3);
-}
-.btn-accept:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(34,197,94,0.4); }
-.btn-accept:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn-reject {
-  padding: 10px 28px; border-radius: 8px; border: 1px solid #fca5a5; cursor: pointer;
-  background: #fff; color: #ef4444;
-  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
-  transition: all 0.2s;
-}
-.btn-reject:hover { background: #fee2e2; }
-
-/* Saving overlay */
 .saving-overlay {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   z-index: 200; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
@@ -249,7 +100,6 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 @keyframes spin { to { transform: rotate(360deg); } }
 .saving-text { color: #fff; font-size: 18px; font-weight: 600; }
 
-/* Toast */
 .toast {
   position: fixed; bottom: 90px; right: 32px; padding: 14px 20px;
   border-radius: 10px; font-size: 15px; font-weight: 600; z-index: 300;
@@ -260,20 +110,43 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 .toast.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
 .toast.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
-@media (max-width: 860px) {
-  .book-sidebar { display: none; }
-  .book-main { margin-left: 0; padding: 32px 24px 120px; }
-  .decision-bar { left: 0; padding: 16px 24px; }
+.btn-accept {
+  padding: 10px 28px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+  transition: all 0.2s; box-shadow: 0 2px 12px rgba(34,197,94,0.3);
 }
+.btn-accept:hover { transform: translateY(-1px); }
+.btn-accept:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-reject {
+  padding: 10px 28px; border-radius: 8px; border: 1px solid #fca5a5; cursor: pointer;
+  background: #fff; color: #ef4444;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+}
+.btn-reject:hover { background: #fee2e2; }
+
+/* Google Drive status badge */
+.gdrive-status {
+  margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+}
+.gdrive-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  padding: 4px 12px; border-radius: 20px; font-weight: 600;
+}
+.gdrive-badge.pending { background: #fff3cd; color: #856404; }
+.gdrive-badge.saved   { background: #d1fae5; color: #065f46; }
+.gdrive-badge.error   { background: #fee2e2; color: #991b1b; }
+.gdrive-link { color: #be9b7b; font-size: 12px; word-break: break-all; display: block; margin-top: 6px; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<!-- ========== INPUT PAGE ========== -->
 <div id="input-page">
   <div class="form-card">
     <h1>Event Study Plotter</h1>
-    <p class="subtitle">Upload a CSV, visualize the event study, and save results to GitHub automatically.</p>
+    <p class="subtitle">Upload a CSV, visualize the event study, and save results to Google Drive automatically.</p>
 
     <label class="form-label">Paper Title *</label>
     <input id="f-title" class="form-input" placeholder="e.g. Effect of Newspapers on Voter Turnout">
@@ -326,116 +199,19 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
       <p style="text-align:center; font-size:13px; color:#6c757d; font-style:italic; margin-top:10px;" id="plot-caption"></p>
     </div>
 
-    <!-- ACCEPT / REJECT BUTTONS -->
+    <!-- ACCEPT / REJECT -->
     <div style="display:flex; align-items:center; justify-content:space-between; margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
-      <p style="color:#aaa; font-size:15px;">Accept to save to GitHub &mdash; Reject to go back and modify.</p>
+      <p style="color:#aaa; font-size:15px;">Accept to save to Google Drive — Reject to go back and modify.</p>
       <div style="display:flex; gap:12px;">
         <button class="btn-reject" onclick="rejectStudy()">✕ Reject</button>
-        <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save</button>
+        <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save to Drive</button>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ========== OUTPUT PAGE (hidden, kept for compatibility) ========== -->
-<div id="output-page">
-  <nav class="book-sidebar">
-    <a class="sidebar-back" onclick="goBack()">← Back to form</a>
-    <h2 id="sidebar-title">Paper</h2>
-    <div class="sidebar-nav">
-      <a href="#sec-overview" class="active">Overview</a>
-      <a href="#sec-method">Identification</a>
-      <a href="#sec-code">Code</a>
-      <a href="#sec-plot">Event Study Plot</a>
-      <a href="#sec-results">Results Table</a>
-      <a href="#sec-qa">Reviewer Q&A</a>
-    </div>
-
-    <div class="gh-status">
-      <div class="gh-status-label">GitHub Status</div>
-      <span id="gh-badge" class="gh-badge pending">⏳ Pending decision</span>
-      <div class="gh-files" id="gh-files"></div>
-    </div>
-  </nav>
-
-  <main class="book-main" style="padding-bottom: 100px;">
-    <h1 id="out-title"></h1>
-    <p class="book-authors" id="out-authors"></p>
-
-    <section class="book-section" id="sec-overview">
-      <h2>Overview</h2>
-      <p id="out-desc"></p>
-    </section>
-
-    <section class="book-section" id="sec-method">
-      <h2>Identification Strategy</h2>
-      <div class="method-box">
-        <p id="out-method"></p>
-      </div>
-    </section>
-
-    <section class="book-section" id="sec-code">
-      <h2>Code</h2>
-      <div class="code-tabs">
-        <div id="tab-label" class="code-tab active">Stata</div>
-      </div>
-      <div class="code-block">
-        <pre id="out-code"></pre>
-      </div>
-    </section>
-
-    <section class="book-section" id="sec-plot">
-      <h2>Event Study Plot</h2>
-      <div class="plot-container">
-        <canvas id="es-canvas" width="560" height="380" style="width:100%;height:auto;"></canvas>
-        <p class="plot-caption" id="plot-caption"></p>
-      </div>
-    </section>
-
-    <section class="book-section" id="sec-results">
-      <h2>Results</h2>
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th style="text-align:left">Period</th>
-            <th>Estimate</th>
-            <th>Std. Error</th>
-            <th id="th-lb">LB 95%</th>
-            <th id="th-ub">UB 95%</th>
-          </tr>
-        </thead>
-        <tbody id="results-body"></tbody>
-      </table>
-    </section>
-
-    <section class="book-section" id="sec-qa">
-      <h2>Reviewer Q&A</h2>
-      <div id="qa-content" style="display:none">
-        <div class="method-box" style="margin-bottom:12px">
-          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reviewer</p>
-          <p id="out-reviewer" style="font-weight:600"></p>
-        </div>
-        <div class="method-box" style="border-left-color:#2563eb;margin-bottom:12px">
-          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reviewer Comments</p>
-          <p id="out-reviewer-comments"></p>
-        </div>
-        <div class="method-box" style="border-left-color:#22c55e">
-          <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Author Response</p>
-          <p id="out-author-response"></p>
-        </div>
-      </div>
-      <p id="qa-empty" style="color:#999;font-style:italic">No reviewer feedback provided.</p>
-    </section>
-  </main>
-
-  <!-- DECISION BAR -->
-  <div class="decision-bar">
-    <div class="decision-label">
-      <strong>Review results</strong> — Accept to save CSV, plot, and metadata to GitHub
-    </div>
-    <div class="decision-btns">
-      <button class="btn-reject" onclick="rejectStudy()">✕ Reject</button>
-      <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save to GitHub</button>
+    <!-- GDRIVE STATUS -->
+    <div class="gdrive-status" id="gdrive-status" style="display:none;">
+      <span id="gdrive-badge" class="gdrive-badge pending">⏳ Pending</span>
+      <a id="gdrive-link" class="gdrive-link" href="#" target="_blank" style="display:none;"></a>
     </div>
   </div>
 </div>
@@ -443,23 +219,25 @@ body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background:
 <!-- SAVING OVERLAY -->
 <div class="saving-overlay" id="saving-overlay">
   <div class="saving-spinner"></div>
-  <div class="saving-text" id="saving-text">Saving to GitHub...</div>
+  <div class="saving-text" id="saving-text">Saving to Google Drive...</div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
+// ============ CONFIG ============
+const GDRIVE_CLIENT_ID = '394339651565-bi6i0me7k8gl4u3ootcv5tluno3bikoq.apps.googleusercontent.com';
+const GDRIVE_FOLDER_NAME = 'event_study_results'; // carpeta en el Drive del usuario
+
 // ============ STATE ============
 let parsedData = null;
 let ciLevel = 95;
 let codeLang = 'stata';
 let csvRawText = '';
 let currentId = null;
+let gdriveToken = null;
 const zMap = {90: 1.645, 95: 1.96, 99: 2.576};
-
-const GITHUB_REPO = 'damianrojasjhosbel-sudo/event_study_results';
-const GITHUB_BRANCH = 'main';
 
 const demoData = [
   {time:-4, coef:0.00022, se:0.00496},
@@ -471,7 +249,6 @@ const demoData = [
   {time:3,  coef:0.02073, se:0.00689},
   {time:4,  coef:0.02729, se:0.00834},
 ];
-
 const demoCSV = `time_to_treatment,coefficient,standard_error
 -4,0.00022,0.00496
 -3,-0.00079,0.00412
@@ -487,173 +264,120 @@ function setCI(lv) {
   ciLevel = lv;
   document.querySelectorAll('.ci-btn[data-ci]').forEach(b => b.classList.toggle('active', +b.dataset.ci === lv));
 }
-
 function setLang(lang) {
   codeLang = lang;
   document.querySelectorAll('.ci-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
 }
-
-function toggleToken() {}
-
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(() => { t.className = 'toast'; }, 4000);
 }
 
-// ============ CSV PARSING ============
-function parseCSV(text) {
-  const lines = text.trim().split('\n').filter(l => l.trim());
-  const sep = lines[0].includes('\t') ? '\t' : lines[0].includes(';') ? ';' : ',';
-  const header = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/"/g,''));
-
-  let ti = header.findIndex(h => /time|period|^t$|event/.test(h));
-  let ci = header.findIndex(h => /coef|estimate|beta|effect/.test(h));
-  let si = header.findIndex(h => /^se$|std|error|stderr/.test(h));
-
-  if (ti===-1||ci===-1||si===-1) { if (header.length>=3) { ti=0; ci=1; si=2; } else return null; }
-
-  return lines.slice(1).map(l => {
-    const v = l.split(sep).map(x => parseFloat(x.trim().replace(/"/g,'')));
-    return {time: v[ti], coef: v[ci], se: v[si]};
-  }).filter(d => !isNaN(d.time) && !isNaN(d.coef) && !isNaN(d.se));
-}
-
+// ============ FILE HANDLING ============
 function handleFile(e) {
-  const file = e.target.files[0]; if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => {
-    csvRawText = ev.target.result;
-    const d = parseCSV(csvRawText);
-    const zone = document.getElementById('upload-zone');
-    const txt = document.getElementById('upload-text');
-    const err = document.getElementById('error-msg');
-    if (!d || d.length === 0) {
-      parsedData = null;
-      zone.className = 'upload-zone error';
-      err.textContent = 'Could not parse CSV. Need 3 columns: time_to_treatment, coefficient, standard_error';
-      err.style.display = 'block';
-      txt.textContent = 'Click to upload CSV or TSV file';
-    } else {
-      parsedData = d;
-      zone.className = 'upload-zone loaded';
-      txt.innerHTML = '✓ <strong>' + file.name + '</strong> — ' + d.length + ' observations loaded';
-      err.style.display = 'none';
-    }
-    checkReady();
-  };
+  reader.onload = ev => parseCSV(ev.target.result, file.name);
   reader.readAsText(file);
 }
-
 function loadDemo() {
-  document.getElementById('f-title').value = 'Effect of Newspapers on Voter Turnout';
-  document.getElementById('f-authors').value = 'Gentzkow, Shapiro & Sinkinson (2011)';
-  document.getElementById('f-desc').value = 'This paper estimates the effect of newspaper entry on political participation in US elections from 1868 to 1928, using county-level panel data on daily newspapers and presidential voter turnout.';
-  document.getElementById('f-method').value = "Non-normalized event-study DID using did_multiplegt_dyn (de Chaisemartin & D'Haultfœuille, 2024). Standard errors clustered at county level.";
-  document.getElementById('f-code').value = "did_multiplegt_dyn lnVoters lnPapers year county, graph_off placebo(4) effects(4) cluster(county)";
   parsedData = demoData;
   csvRawText = demoCSV;
-  const zone = document.getElementById('upload-zone');
-  zone.className = 'upload-zone loaded';
-  document.getElementById('upload-text').innerHTML = '✓ <strong>demo_data.csv</strong> — 8 observations loaded';
-  document.getElementById('error-msg').style.display = 'none';
-  checkReady();
+  document.getElementById('f-title').value = 'Newspapers and Voter Turnout';
+  document.getElementById('f-authors').value = 'Gentzkow, Shapiro & Sinkinson (2011)';
+  document.getElementById('f-desc').value = 'Effect of daily newspapers on presidential voter turnout using US county-year panel 1868–1928.';
+  document.getElementById('f-method').value = 'did_multiplegt_dyn with on-and-off treatment (numdailies).';
+  document.getElementById('f-code').value = 'did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) effects_equal("all")';
+  document.getElementById('upload-zone').classList.add('loaded');
+  document.getElementById('upload-text').textContent = '✓ Demo data loaded (8 observations)';
+  document.getElementById('submit-btn').classList.add('ready');
 }
-
+function parseCSV(text, filename) {
+  try {
+    const lines = text.trim().split(/\r?\n/);
+    const sep = lines[0].includes('\t') ? '\t' : ',';
+    const header = lines[0].toLowerCase().split(sep).map(h => h.trim().replace(/"/g,''));
+    const tIdx = header.findIndex(h => h.includes('time') || h === 't' || h === 'period');
+    const cIdx = header.findIndex(h => h.includes('coef') || h.includes('estimate') || h === 'b');
+    const sIdx = header.findIndex(h => h.includes('se') || h.includes('std') || h.includes('error'));
+    if (tIdx<0||cIdx<0||sIdx<0) throw new Error('Could not detect columns. Need: time, coefficient, standard_error');
+    const rows = [];
+    for (let i=1;i<lines.length;i++) {
+      const c = lines[i].split(sep).map(x=>x.trim().replace(/"/g,''));
+      if (c.length < 3) continue;
+      const t=parseFloat(c[tIdx]), co=parseFloat(c[cIdx]), se=parseFloat(c[sIdx]);
+      if (isNaN(t)||isNaN(co)||isNaN(se)) continue;
+      rows.push({time:t,coef:co,se});
+    }
+    if (rows.length < 2) throw new Error('Need at least 2 data rows');
+    parsedData = rows;
+    csvRawText = text;
+    document.getElementById('upload-zone').classList.add('loaded');
+    document.getElementById('upload-text').textContent = `✓ ${filename} (${rows.length} observations)`;
+    document.getElementById('error-msg').style.display='none';
+    checkReady();
+  } catch(e) {
+    document.getElementById('upload-zone').classList.add('error');
+    document.getElementById('error-msg').textContent = e.message;
+    document.getElementById('error-msg').style.display='block';
+  }
+}
 function checkReady() {
-  const ok = document.getElementById('f-title').value.trim() &&
-             document.getElementById('f-authors').value.trim() &&
-             parsedData;
-  const btn = document.getElementById('submit-btn');
-  btn.className = ok ? 'submit-btn ready' : 'submit-btn';
-}
-document.querySelectorAll('.form-input,.form-textarea').forEach(el => el.addEventListener('input', checkReady));
-
-// ============ GENERATE ============
-function generate() {
   const title = document.getElementById('f-title').value.trim();
   const authors = document.getElementById('f-authors').value.trim();
-  if (!title || !authors || !parsedData) return;
+  const btn = document.getElementById('submit-btn');
+  btn.classList.toggle('ready', !!(title && authors && parsedData));
+}
+document.getElementById('f-title').addEventListener('input', checkReady);
+document.getElementById('f-authors').addEventListener('input', checkReady);
 
-  // Generate unique ID
-  currentId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+// ============ GENERATE PLOT ============
+function generate() {
+  if (!parsedData || !document.getElementById('f-title').value.trim()) return;
+  currentId = 'es_' + Date.now();
+  document.getElementById('inline-title').textContent = document.getElementById('f-title').value.trim();
+  document.getElementById('inline-authors').textContent = document.getElementById('f-authors').value.trim();
 
-  document.getElementById('inline-title').textContent = title;
-  document.getElementById('inline-authors').textContent = authors;
+  const sorted = [...parsedData].sort((a,b)=>a.time-b.time);
+  const times = sorted.map(d=>d.time);
+  const effects = sorted.filter(d=>d.time>0);
+  const placebos = sorted.filter(d=>d.time<0);
 
   const z = zMap[ciLevel];
-  document.getElementById('th-lb').textContent = 'LB ' + ciLevel + '%';
-  document.getElementById('th-ub').textContent = 'UB ' + ciLevel + '%';
-  document.getElementById('plot-caption').textContent =
-    'Figure 1. Event-study estimates with ' + ciLevel + '% confidence intervals. Blue = pre-treatment placebos. Red = post-treatment effects.';
-
-  // Table
-  const tbody = document.getElementById('results-body');
-  tbody.innerHTML = '';
-  const sorted = [...parsedData].sort((a,b) => a.time - b.time);
-  sorted.forEach(d => {
-    const tr = document.createElement('tr');
-    tr.className = d.time > 0 ? 'effect' : d.time < 0 ? 'placebo' : '';
-    const lb = d.coef - z * d.se, ub = d.coef + z * d.se;
-    tr.innerHTML = `<td>${d.time}</td><td>${d.coef.toFixed(5)}</td><td>${d.se.toFixed(5)}</td><td>${lb.toFixed(5)}</td><td>${ub.toFixed(5)}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  // Plot
-  drawPlot(sorted, z);
-
-  // Reset GH status
-  document.getElementById('gh-badge').className = 'gh-badge pending';
-  document.getElementById('gh-badge').textContent = '⏳ Pending decision';
-  document.getElementById('gh-files').innerHTML = '';
-  document.getElementById('btn-accept').disabled = false;
-
-  // Show plot inline
-  document.getElementById('inline-plot-section').style.display = 'block';
-  document.getElementById('inline-plot-section').scrollIntoView({behavior: 'smooth'});
-}
-
-function goBack() {
-  document.getElementById('output-page').classList.remove('active');
-  document.getElementById('input-page').style.display = 'flex';
-}
-
-// ============ PLOT ============
-function drawPlot(data, z) {
   const canvas = document.getElementById('es-canvas');
-  const ctx = canvas.getContext('2d');
   const W = 540, H = 340;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = '100%'; canvas.style.height = 'auto';
   canvas.style.maxWidth = W + 'px';
+  const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-
-  const pad = {top:25, right:35, bottom:55, left:72};
-  const pw = W - pad.left - pad.right;
-  const ph = H - pad.top - pad.bottom;
-
-  const allY = data.flatMap(d => [d.coef + z*d.se, d.coef - z*d.se, 0]);
-  const yMin = Math.min(...allY), yMax = Math.max(...allY);
-  const yPad = (yMax - yMin) * 0.15;
-
-  const xMin = Math.min(...data.map(d=>d.time)) - 0.6;
-  const xMax = Math.max(...data.map(d=>d.time)) + 0.6;
-
-  const sx = t => pad.left + ((t - xMin) / (xMax - xMin)) * pw;
-  const sy = v => pad.top + ((yMax + yPad - v) / (yMax - yMin + 2*yPad)) * ph;
-
   ctx.fillStyle = '#fff'; ctx.fillRect(0,0,W,H);
 
+  // Original drawPlot logic
+  const pad = {top:25, right:35, bottom:55, left:72};
+  const pw2 = W - pad.left - pad.right;
+  const ph2 = H - pad.top - pad.bottom;
+
+  const allY = sorted.flatMap(d => [d.coef + z*d.se, d.coef - z*d.se, 0]);
+  const yMin2 = Math.min(...allY), yMax2 = Math.max(...allY);
+  const yPad2 = (yMax2 - yMin2) * 0.15;
+  const xMin2 = Math.min(...sorted.map(d=>d.time)) - 0.6;
+  const xMax2 = Math.max(...sorted.map(d=>d.time)) + 0.6;
+
+  const sx = t => pad.left + ((t - xMin2) / (xMax2 - xMin2)) * pw2;
+  const sy = v => pad.top + ((yMax2 + yPad2 - v) / (yMax2 - yMin2 + 2*yPad2)) * ph2;
+
   // Grid
-  const yRange = yMax - yMin + 2*yPad;
+  const yRange = yMax2 - yMin2 + 2*yPad2;
   const rawStep = yRange / 6;
   const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const step = Math.ceil(rawStep/mag)*mag;
   ctx.strokeStyle = '#e9ecef'; ctx.lineWidth = 0.5;
-  ctx.fillStyle = '#868e96'; ctx.font = '11px Source Sans 3';
-  ctx.textAlign = 'right';
-  for (let v = Math.floor((yMin-yPad)/step)*step; v <= yMax+yPad; v+=step) {
+  ctx.fillStyle = '#868e96'; ctx.font = '11px Source Sans 3'; ctx.textAlign = 'right';
+  for (let v = Math.floor((yMin2-yPad2)/step)*step; v <= yMax2+yPad2; v+=step) {
     const y = sy(v);
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W-pad.right, y); ctx.stroke();
     ctx.fillText(v.toFixed(Math.abs(v)<0.1?4:3), pad.left-8, y+4);
@@ -669,14 +393,19 @@ function drawPlot(data, z) {
   ctx.beginPath(); ctx.moveTo(sx(0), pad.top); ctx.lineTo(sx(0), H-pad.bottom); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Connecting line
+  // Connecting line — include t=0 point
+  const sortedWithZero = [...sorted];
+  if (!sortedWithZero.find(d => d.time === 0)) {
+    sortedWithZero.push({time: 0, coef: 0, se: 0});
+    sortedWithZero.sort((a,b) => a.time - b.time);
+  }
   ctx.strokeStyle = '#adb5bd'; ctx.lineWidth = 1.2;
   ctx.beginPath();
-  data.forEach((d,i) => { i===0 ? ctx.moveTo(sx(d.time),sy(d.coef)) : ctx.lineTo(sx(d.time),sy(d.coef)); });
+  sortedWithZero.forEach((d,i) => { i===0 ? ctx.moveTo(sx(d.time),sy(d.coef)) : ctx.lineTo(sx(d.time),sy(d.coef)); });
   ctx.stroke();
 
   // CI bars and points
-  data.forEach(d => {
+  sorted.forEach(d => {
     const x = sx(d.time), yTop = sy(d.coef+z*d.se), yBot = sy(d.coef-z*d.se), yC = sy(d.coef);
     const color = d.time > 0 ? '#c0392b' : '#2563eb';
     ctx.strokeStyle = color; ctx.lineWidth = 2.2;
@@ -688,12 +417,12 @@ function drawPlot(data, z) {
     ctx.beginPath(); ctx.arc(x, yC, 4.5, 0, Math.PI*2); ctx.fill();
   });
 
-  // Zero reference point
-  ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(sx(0), sy(0), 3, 0, Math.PI*2); ctx.fill();
+  // Zero reference point (black dot at t=0)
+  ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(sx(0), sy(0), 4.5, 0, Math.PI*2); ctx.fill();
 
   // X labels
   ctx.fillStyle = '#495057'; ctx.font = '12px Source Sans 3'; ctx.textAlign = 'center';
-  data.forEach(d => ctx.fillText(d.time, sx(d.time), H-pad.bottom+20));
+  sorted.forEach(d => ctx.fillText(d.time, sx(d.time), H-pad.bottom+20));
   ctx.fillText('0', sx(0), H-pad.bottom+20);
 
   // Axis labels
@@ -710,221 +439,166 @@ function drawPlot(data, z) {
   ctx.fillText('Placebos (pre)', lx+10, pad.top+16);
   ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(lx+96, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#495057'; ctx.fillText('Effects (post)', lx+106, pad.top+16);
+
+  document.getElementById('plot-caption').textContent =
+    'Figure 1. Event-study estimates with ' + ciLevel + '% confidence intervals. Blue = pre-treatment placebos. Red = post-treatment effects.';
+
+  document.getElementById('inline-plot-section').style.display='block';
+  document.getElementById('gdrive-status').style.display='none';
+  document.getElementById('btn-accept').disabled=false;
+  document.getElementById('inline-plot-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ============ GOOGLE DRIVE AUTH ============
+function getGdriveToken() {
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        if (resp.error) reject(new Error(resp.error));
+        else resolve(resp.access_token);
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+// ============ GDRIVE API HELPERS ============
+async function gdriveCreateFolder(token, name) {
+  // Check if folder already exists
+  const search = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name)`,
+    { headers: { Authorization: 'Bearer ' + token } }
+  );
+  const sj = await search.json();
+  if (sj.files && sj.files.length > 0) return sj.files[0].id;
+
+  // Create folder
+  const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+  });
+  const rj = await res.json();
+  return rj.id;
+}
+
+async function gdriveUploadText(token, folderId, filename, content, mimeType) {
+  const meta = { name: filename, parents: [folderId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', new Blob([content], {type: mimeType}));
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token },
+    body: form
+  });
+  return res.json();
+}
+
+async function gdriveUploadPng(token, folderId, filename, canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async blob => {
+      if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+      const meta = { name: filename, parents: [folderId] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+      form.append('file', blob);
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: form
+      });
+      resolve(await res.json());
+    }, 'image/png');
+  });
 }
 
 // ============ ACCEPT / REJECT ============
 async function acceptStudy() {
-  let token = sessionStorage.getItem('gh_token') || '';
-  if (!token) {
-    token = window.prompt('Enter your GitHub token to save to repository:');
-    if (!token) return;
-    sessionStorage.setItem('gh_token', token);
-  }
-
   document.getElementById('btn-accept').disabled = true;
   const overlay = document.getElementById('saving-overlay');
   overlay.classList.add('active');
 
   try {
+    // 1. Google Auth (popup)
+    document.getElementById('saving-text').textContent = 'Connecting to Google Drive...';
+    const token = await getGdriveToken();
+
+    // 2. Get or create folder
+    document.getElementById('saving-text').textContent = 'Creating folder...';
+    const folderId = await gdriveCreateFolder(token, GDRIVE_FOLDER_NAME);
+
     const id = currentId;
-    const title = document.getElementById('out-title').textContent;
-    const authors = document.getElementById('out-authors').textContent;
-    const desc = document.getElementById('out-desc').textContent;
-    const method = document.getElementById('out-method').textContent;
-    const code = document.getElementById('out-code').textContent;
+    const title = document.getElementById('f-title').value.trim();
+    const authors = document.getElementById('f-authors').value.trim();
+    const desc = document.getElementById('f-desc').value.trim();
+    const method = document.getElementById('f-method').value.trim();
+    const code = document.getElementById('f-code').value.trim();
     const ts = new Date().toISOString();
 
-    const folderBase = `event_study`;
-
-    // 1. Save CSV
+    // 3. Upload CSV
     document.getElementById('saving-text').textContent = 'Saving CSV...';
-    const csvPath = `${folderBase}/csv/${id}.csv`;
-    await ghPut(token, csvPath, csvRawText, `Add event study CSV [${id}]`);
+    await gdriveUploadText(token, folderId, `${id}.csv`, csvRawText, 'text/csv');
 
-    // 2. Save PNG
+    // 4. Upload PNG
     document.getElementById('saving-text').textContent = 'Saving plot PNG...';
     const canvas = document.getElementById('es-canvas');
-    const pngB64 = await canvasToBase64(canvas);
-    const pngPath = `${folderBase}/plots/${id}.png`;
-    await ghPutB64(token, pngPath, pngB64, `Add event study plot [${id}]`);
+    const pngFile = await gdriveUploadPng(token, folderId, `${id}.png`, canvas);
 
-    // 3. Save JSON (metadata + Q&A)
+    // 5. Upload JSON
     document.getElementById('saving-text').textContent = 'Saving metadata JSON...';
-    const reviewerName = '';
-    const reviewerComments = '';
-    const authorResponse = '';
-
     const jsonObj = {
-      id,
-      timestamp: ts,
+      id, timestamp: ts,
       paper: { title, authors, description: desc },
       methodology: { identification_strategy: method, code_language: codeLang, code },
-      qa: {
-        reviewer_name: reviewerName || null,
-        reviewer_comments: reviewerComments || null,
-        author_response: authorResponse || null
-      },
       results: {
         confidence_level: ciLevel,
         observations: parsedData.length,
         data: [...parsedData].sort((a,b)=>a.time-b.time).map(d => {
           const z = zMap[ciLevel];
-          return { period: d.time, estimate: d.coef, std_error: d.se,
-                   lb: d.coef - z*d.se, ub: d.coef + z*d.se };
+          return { period: d.time, estimate: d.coef, std_error: d.se, lb: d.coef-z*d.se, ub: d.coef+z*d.se };
         })
-      },
-      github: {
-        repo: GITHUB_REPO,
-        csv_path: csvPath,
-        plot_path: pngPath,
-        json_path: `${folderBase}/json/${id}.json`
       },
       decision: { accepted: true, accepted_at: ts }
     };
-    const jsonPath = `${folderBase}/json/${id}.json`;
-    await ghPut(token, jsonPath, JSON.stringify(jsonObj, null, 2), `Add event study metadata [${id}]`);
+    await gdriveUploadText(token, folderId, `${id}.json`, JSON.stringify(jsonObj, null, 2), 'application/json');
 
     overlay.classList.remove('active');
 
-    // Update sidebar status
-    const badge = document.getElementById('gh-badge');
-    badge.className = 'gh-badge saved';
-    badge.textContent = '✓ Saved to GitHub';
+    // Update status
+    const statusDiv = document.getElementById('gdrive-status');
+    statusDiv.style.display = 'block';
+    const badge = document.getElementById('gdrive-badge');
+    badge.className = 'gdrive-badge saved';
+    badge.textContent = '✓ Saved to Google Drive';
+    if (pngFile.webViewLink) {
+      const link = document.getElementById('gdrive-link');
+      link.style.display = 'block';
+      link.href = pngFile.webViewLink;
+      link.textContent = '🖼 Open plot in Google Drive';
+    }
 
-    const filesDiv = document.getElementById('gh-files');
-    const baseUrl = `https://github.com/${GITHUB_REPO}/blob/${GITHUB_BRANCH}`;
-    filesDiv.innerHTML = `
-      <a class="gh-file-link" href="${baseUrl}/${csvPath}" target="_blank">📄 ${id}.csv</a>
-      <a class="gh-file-link" href="${baseUrl}/${pngPath}" target="_blank">🖼 ${id}.png</a>
-      <a class="gh-file-link" href="${baseUrl}/${jsonPath}" target="_blank">📋 ${id}.json</a>
-    `;
-
-    showToast('✓ Saved to GitHub successfully!', 'success');
+    showToast('✓ Saved to Google Drive successfully!', 'success');
 
   } catch(err) {
     overlay.classList.remove('active');
     document.getElementById('btn-accept').disabled = false;
-    const badge = document.getElementById('gh-badge');
-    badge.className = 'gh-badge error';
+    const statusDiv = document.getElementById('gdrive-status');
+    statusDiv.style.display = 'block';
+    const badge = document.getElementById('gdrive-badge');
+    badge.className = 'gdrive-badge error';
     badge.textContent = '✗ Save failed';
-    showToast('Error saving to GitHub: ' + err.message, 'error');
+    showToast('Error: ' + err.message, 'error');
     console.error(err);
   }
 }
 
 function rejectStudy() {
-  document.getElementById('inline-plot-section').style.display = 'none';
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  document.getElementById('inline-plot-section').style.display='none';
+  window.scrollTo({top:0, behavior:'smooth'});
   showToast('Results rejected. Modify your inputs and try again.', 'error');
-}
-
-// ============ CANVAS TO BASE64 (manual encoder, no btoa) ============
-function uint8ToBase64(bytes) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  const len = bytes.length;
-  const parts = [];
-  for (let i = 0; i < len; i += 3) {
-    const a = bytes[i];
-    const b = i + 1 < len ? bytes[i + 1] : 0;
-    const c = i + 2 < len ? bytes[i + 2] : 0;
-    parts.push(
-      chars[a >> 2],
-      chars[((a & 3) << 4) | (b >> 4)],
-      i + 1 < len ? chars[((b & 15) << 2) | (c >> 6)] : '=',
-      i + 2 < len ? chars[c & 63] : '='
-    );
-  }
-  return parts.join('');
-}
-
-function canvasToBase64(canvas) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(blob => {
-      if (!blob) { reject(new Error('Canvas toBlob returned null')); return; }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const bytes = new Uint8Array(reader.result);
-        resolve(uint8ToBase64(bytes));
-      };
-      reader.onerror = () => reject(new Error('FileReader failed'));
-      reader.readAsArrayBuffer(blob);
-    }, 'image/png');
-  });
-}
-
-// ============ GITHUB API ============
-
-// Safe UTF-8 to Base64 (replaces broken btoa+unescape combo)
-function utf8ToBase64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
-async function ghGetSha(token, url) {
-  try {
-    const res = await fetch(url, {
-      headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github.v3+json' }
-    });
-    if (res.ok) { const j = await res.json(); return j.sha; }
-  } catch(e) {}
-  return null;
-}
-
-async function ghPut(token, path, content, message) {
-  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
-  const sha = await ghGetSha(token, url);
-
-  const body = { message, content: utf8ToBase64(content), branch: GITHUB_BRANCH };
-  if (sha) body.sha = sha;
-
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: 'token ' + token,
-      Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'GitHub API error ' + res.status);
-  }
-  return res.json();
-}
-
-async function ghPutB64(token, path, b64content, message) {
-  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
-  const sha = await ghGetSha(token, url);
-
-  const cleanB64 = b64content.replace(/[\s\r\n]/g, '');
-
-  const body = { message, content: cleanB64, branch: GITHUB_BRANCH };
-  if (sha) body.sha = sha;
-
-  // Send body as Blob to prevent browser extensions from modifying the content
-  const jsonStr = JSON.stringify(body);
-  const bodyBlob = new Blob([jsonStr], { type: 'application/json' });
-
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: 'token ' + token,
-      Accept: 'application/vnd.github.v3+json'
-    },
-    body: bodyBlob
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'GitHub API error ' + res.status);
-  }
-  return res.json();
 }
 </script>
 </body>
