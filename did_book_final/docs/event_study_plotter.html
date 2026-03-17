@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Study Plotter</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root {
+  --accent: #be4bdb;
+  --accent-light: #e599f7;
+  --bg: #fff;
+  --sidebar-bg: #f8f9fa;
+  --text: #212529;
+  --text-muted: #6c757d;
+  --border: #dee2e6;
+  --code-bg: #f1f3f5;
+  --effect-color: #c0392b;
+  --placebo-color: #2563eb;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Source Sans 3', sans-serif; color: var(--text); background: var(--bg); }
+
+#input-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px;
+}
+.form-card {
+  width: 100%; max-width: 660px; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+  padding: 48px 44px; backdrop-filter: blur(12px);
+}
+.form-card h1 {
+  font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900;
+  color: #f0ead6; margin-bottom: 6px;
+}
+.form-card .subtitle { font-size: 15px; color: #888; margin-bottom: 32px; }
+.form-label {
+  display: block; font-size: 15px; color: #be9b7b; text-transform: uppercase;
+  letter-spacing: 1.2px; font-weight: 600; margin-bottom: 8px;
+}
+.form-label span { font-weight: 400; color: #aaa; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.form-input, .form-textarea {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+  color: #eee; font-family: 'Source Sans 3', sans-serif; font-size: 15px;
+  margin-bottom: 20px; outline: none; transition: border 0.2s;
+}
+.form-input:focus, .form-textarea:focus { border-color: #be9b7b; }
+.form-textarea { resize: vertical; min-height: 70px; }
+.form-input::placeholder, .form-textarea::placeholder { color: #555; }
+
+.ci-group { display: flex; gap: 8px; margin-bottom: 24px; }
+.ci-btn {
+  flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);
+  background: transparent; color: #888; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.ci-btn.active { border-color: #be9b7b; background: rgba(190,155,123,0.15); color: #be9b7b; }
+
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.12); border-radius: 10px; padding: 28px 20px;
+  text-align: center; cursor: pointer; margin-bottom: 8px; transition: all 0.2s;
+}
+.upload-zone:hover { border-color: #be9b7b; }
+.upload-zone.loaded { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
+.upload-zone p { font-size: 14px; color: #888; }
+.upload-zone.loaded p { color: #22c55e; }
+
+.error-msg { color: #ef4444; font-size: 13px; margin-bottom: 16px; }
+.demo-btn {
+  background: none; border: none; color: #be9b7b; font-size: 13px; cursor: pointer;
+  padding: 4px 0; margin-bottom: 28px; text-decoration: underline; text-underline-offset: 3px;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.submit-btn {
+  width: 100%; padding: 14px 0; border-radius: 8px; border: none;
+  background: rgba(255,255,255,0.06); color: #555; font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; cursor: not-allowed; letter-spacing: 0.5px; transition: all 0.3s;
+}
+.submit-btn.ready {
+  background: linear-gradient(135deg, #be9b7b, #a07a5a); color: #fff; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(190,155,123,0.3);
+}
+.submit-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(190,155,123,0.4); }
+
+.saving-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 200; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.saving-overlay.active { display: flex; }
+.saving-spinner {
+  width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.saving-text { color: #fff; font-size: 18px; font-weight: 600; }
+
+.toast {
+  position: fixed; bottom: 90px; right: 32px; padding: 14px 20px;
+  border-radius: 10px; font-size: 15px; font-weight: 600; z-index: 300;
+  opacity: 0; transform: translateY(12px); transition: all 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.toast.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+.btn-accept {
+  padding: 10px 28px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+  transition: all 0.2s; box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+}
+.btn-accept:hover { transform: translateY(-1px); }
+.btn-accept:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-reject {
+  padding: 10px 28px; border-radius: 8px; border: 1px solid #fca5a5; cursor: pointer;
+  background: #fff; color: #ef4444;
+  font-family: 'Source Sans 3', sans-serif; font-size: 15px; font-weight: 700;
+}
+.btn-reject:hover { background: #fee2e2; }
+
+/* Google Drive status badge */
+.gdrive-status {
+  margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+}
+.gdrive-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  padding: 4px 12px; border-radius: 20px; font-weight: 600;
+}
+.gdrive-badge.pending { background: #fff3cd; color: #856404; }
+.gdrive-badge.saved   { background: #d1fae5; color: #065f46; }
+.gdrive-badge.error   { background: #fee2e2; color: #991b1b; }
+.gdrive-link { color: #be9b7b; font-size: 12px; word-break: break-all; display: block; margin-top: 6px; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div id="input-page">
+  <div class="form-card">
+    <h1>Event Study Plotter</h1>
+    <p class="subtitle">Upload a CSV, visualize the event study, and save results to Google Drive automatically.</p>
+
+    <label class="form-label">Paper Title *</label>
+    <input id="f-title" class="form-input" placeholder="e.g. Effect of Newspapers on Voter Turnout">
+
+    <label class="form-label">Authors *</label>
+    <input id="f-authors" class="form-input" placeholder="e.g. Gentzkow, Shapiro & Sinkinson (2011)">
+
+    <label class="form-label">Description</label>
+    <textarea id="f-desc" class="form-textarea" rows="3" placeholder="Brief description of the paper and research question..."></textarea>
+
+    <label class="form-label">Identification Strategy</label>
+    <textarea id="f-method" class="form-textarea" rows="2" placeholder="e.g. Difference-in-differences with staggered treatment..."></textarea>
+
+    <label class="form-label">DiD Code <span>— paste the code that generated this CSV</span></label>
+    <textarea id="f-code" class="form-textarea" rows="8" placeholder="e.g. did_multiplegt_dyn Y G T D, graph_off placebo(4) ..."></textarea>
+
+    <label class="form-label">Code Language</label>
+    <div class="ci-group">
+      <button class="ci-btn active" data-lang="stata" onclick="setLang('stata')">Stata</button>
+      <button class="ci-btn" data-lang="r" onclick="setLang('r')">R</button>
+      <button class="ci-btn" data-lang="python" onclick="setLang('python')">Python</button>
+    </div>
+
+    <label class="form-label">Confidence Level</label>
+    <div class="ci-group">
+      <button class="ci-btn" data-ci="90" onclick="setCI(90)">90%</button>
+      <button class="ci-btn active" data-ci="95" onclick="setCI(95)">95%</button>
+      <button class="ci-btn" data-ci="99" onclick="setCI(99)">99%</button>
+    </div>
+
+    <label class="form-label">CSV Data * <span>— columns: time_to_treatment, coefficient, standard_error</span></label>
+    <div id="upload-zone" class="upload-zone" onclick="document.getElementById('file-input').click()">
+      <input type="file" id="file-input" accept=".csv,.tsv,.txt" style="display:none" onchange="handleFile(event)">
+      <p id="upload-text">Click to upload CSV or TSV file</p>
+    </div>
+    <p id="error-msg" class="error-msg" style="display:none"></p>
+
+    <button class="demo-btn" onclick="loadDemo()">Load demo data (Gentzkow et al., 2011)</button><br>
+
+    <button id="submit-btn" class="submit-btn" onclick="generate()">Generate Event Study →</button>
+  </div>
+
+  <!-- INLINE PLOT SECTION -->
+  <div id="inline-plot-section" style="display:none; width:100%; max-width:660px; margin-top:24px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px 44px; box-sizing:border-box;">
+    <h2 style="font-family:'Playfair Display',serif; color:#f0ead6; font-size:26px; margin-bottom:6px;" id="inline-title"></h2>
+    <p style="color:#be9b7b; font-weight:600; margin-bottom:24px;" id="inline-authors"></p>
+
+    <div style="background:#fff; border-radius:8px; padding:16px; margin-bottom:16px; overflow:hidden; width:100%; box-sizing:border-box;">
+      <canvas id="es-canvas" style="width:100%; height:auto; display:block;"></canvas>
+      <p style="text-align:center; font-size:13px; color:#6c757d; font-style:italic; margin-top:10px;" id="plot-caption"></p>
+    </div>
+
+    <!-- ACCEPT / REJECT -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
+      <p style="color:#aaa; font-size:15px;">Accept to save to Google Drive — Reject to go back and modify.</p>
+      <div style="display:flex; gap:12px;">
+        <button class="btn-reject" onclick="rejectStudy()">✕ Reject</button>
+        <button class="btn-accept" id="btn-accept" onclick="acceptStudy()">✓ Accept & Save to Drive</button>
+      </div>
+    </div>
+
+    <!-- GDRIVE STATUS -->
+    <div class="gdrive-status" id="gdrive-status" style="display:none;">
+      <span id="gdrive-badge" class="gdrive-badge pending">⏳ Pending</span>
+      <a id="gdrive-link" class="gdrive-link" href="#" target="_blank" style="display:none;"></a>
+    </div>
+  </div>
+</div>
+
+<!-- SAVING OVERLAY -->
+<div class="saving-overlay" id="saving-overlay">
+  <div class="saving-spinner"></div>
+  <div class="saving-text" id="saving-text">Saving to Google Drive...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ CONFIG ============
+const GDRIVE_CLIENT_ID = '394339651565-bi6i0me7k8gl4u3ootcv5tluno3bikoq.apps.googleusercontent.com';
+const GDRIVE_FOLDER_NAME = 'event_study_results'; // carpeta en el Drive del usuario
+
+// ============ STATE ============
+let parsedData = null;
+let ciLevel = 95;
+let codeLang = 'stata';
+let csvRawText = '';
+let currentId = null;
+let gdriveToken = null;
+const zMap = {90: 1.645, 95: 1.96, 99: 2.576};
+
+const demoData = [
+  {time:-4, coef:0.00022, se:0.00496},
+  {time:-3, coef:-0.00079, se:0.00412},
+  {time:-2, coef:0.00142, se:0.00459},
+  {time:-1, coef:-0.00060, se:0.00563},
+  {time:1,  coef:0.01436, se:0.00530},
+  {time:2,  coef:0.01910, se:0.00598},
+  {time:3,  coef:0.02073, se:0.00689},
+  {time:4,  coef:0.02729, se:0.00834},
+];
+const demoCSV = `time_to_treatment,coefficient,standard_error
+-4,0.00022,0.00496
+-3,-0.00079,0.00412
+-2,0.00142,0.00459
+-1,-0.00060,0.00563
+1,0.01436,0.00530
+2,0.01910,0.00598
+3,0.02073,0.00689
+4,0.02729,0.00834`;
+
+// ============ UI HELPERS ============
+function setCI(lv) {
+  ciLevel = lv;
+  document.querySelectorAll('.ci-btn[data-ci]').forEach(b => b.classList.toggle('active', +b.dataset.ci === lv));
+}
+function setLang(lang) {
+  codeLang = lang;
+  document.querySelectorAll('.ci-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+}
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 4000);
+}
+
+// ============ FILE HANDLING ============
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => parseCSV(ev.target.result, file.name);
+  reader.readAsText(file);
+}
+function loadDemo() {
+  parsedData = demoData;
+  csvRawText = demoCSV;
+  document.getElementById('f-title').value = 'Newspapers and Voter Turnout';
+  document.getElementById('f-authors').value = 'Gentzkow, Shapiro & Sinkinson (2011)';
+  document.getElementById('f-desc').value = 'Effect of daily newspapers on presidential voter turnout using US county-year panel 1868–1928.';
+  document.getElementById('f-method').value = 'did_multiplegt_dyn with on-and-off treatment (numdailies).';
+  document.getElementById('f-code').value = 'did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) effects_equal("all")';
+  document.getElementById('upload-zone').classList.add('loaded');
+  document.getElementById('upload-text').textContent = '✓ Demo data loaded (8 observations)';
+  document.getElementById('submit-btn').classList.add('ready');
+}
+function parseCSV(text, filename) {
+  try {
+    const lines = text.trim().split(/\r?\n/);
+    const sep = lines[0].includes('\t') ? '\t' : ',';
+    const header = lines[0].toLowerCase().split(sep).map(h => h.trim().replace(/"/g,''));
+    const tIdx = header.findIndex(h => h.includes('time') || h === 't' || h === 'period');
+    const cIdx = header.findIndex(h => h.includes('coef') || h.includes('estimate') || h === 'b');
+    const sIdx = header.findIndex(h => h.includes('se') || h.includes('std') || h.includes('error'));
+    if (tIdx<0||cIdx<0||sIdx<0) throw new Error('Could not detect columns. Need: time, coefficient, standard_error');
+    const rows = [];
+    for (let i=1;i<lines.length;i++) {
+      const c = lines[i].split(sep).map(x=>x.trim().replace(/"/g,''));
+      if (c.length < 3) continue;
+      const t=parseFloat(c[tIdx]), co=parseFloat(c[cIdx]), se=parseFloat(c[sIdx]);
+      if (isNaN(t)||isNaN(co)||isNaN(se)) continue;
+      rows.push({time:t,coef:co,se});
+    }
+    if (rows.length < 2) throw new Error('Need at least 2 data rows');
+    parsedData = rows;
+    csvRawText = text;
+    document.getElementById('upload-zone').classList.add('loaded');
+    document.getElementById('upload-text').textContent = `✓ ${filename} (${rows.length} observations)`;
+    document.getElementById('error-msg').style.display='none';
+    checkReady();
+  } catch(e) {
+    document.getElementById('upload-zone').classList.add('error');
+    document.getElementById('error-msg').textContent = e.message;
+    document.getElementById('error-msg').style.display='block';
+  }
+}
+function checkReady() {
+  const title = document.getElementById('f-title').value.trim();
+  const authors = document.getElementById('f-authors').value.trim();
+  const btn = document.getElementById('submit-btn');
+  btn.classList.toggle('ready', !!(title && authors && parsedData));
+}
+document.getElementById('f-title').addEventListener('input', checkReady);
+document.getElementById('f-authors').addEventListener('input', checkReady);
+
+// ============ GENERATE PLOT ============
+function generate() {
+  if (!parsedData || !document.getElementById('f-title').value.trim()) return;
+  currentId = 'es_' + Date.now();
+  document.getElementById('inline-title').textContent = document.getElementById('f-title').value.trim();
+  document.getElementById('inline-authors').textContent = document.getElementById('f-authors').value.trim();
+
+  const sorted = [...parsedData].sort((a,b)=>a.time-b.time);
+  const times = sorted.map(d=>d.time);
+  const effects = sorted.filter(d=>d.time>0);
+  const placebos = sorted.filter(d=>d.time<0);
+
+  const z = zMap[ciLevel];
+  const canvas = document.getElementById('es-canvas');
+  const W = 540, H = 340;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = '100%'; canvas.style.height = 'auto';
+  canvas.style.maxWidth = W + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,W,H);
+
+  // Original drawPlot logic
+  const pad = {top:25, right:35, bottom:55, left:72};
+  const pw2 = W - pad.left - pad.right;
+  const ph2 = H - pad.top - pad.bottom;
+
+  const allY = sorted.flatMap(d => [d.coef + z*d.se, d.coef - z*d.se, 0]);
+  const yMin2 = Math.min(...allY), yMax2 = Math.max(...allY);
+  const yPad2 = (yMax2 - yMin2) * 0.15;
+  const xMin2 = Math.min(...sorted.map(d=>d.time)) - 0.6;
+  const xMax2 = Math.max(...sorted.map(d=>d.time)) + 0.6;
+
+  const sx = t => pad.left + ((t - xMin2) / (xMax2 - xMin2)) * pw2;
+  const sy = v => pad.top + ((yMax2 + yPad2 - v) / (yMax2 - yMin2 + 2*yPad2)) * ph2;
+
+  // Grid
+  const yRange = yMax2 - yMin2 + 2*yPad2;
+  const rawStep = yRange / 6;
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = Math.ceil(rawStep/mag)*mag;
+  ctx.strokeStyle = '#e9ecef'; ctx.lineWidth = 0.5;
+  ctx.fillStyle = '#868e96'; ctx.font = '11px Source Sans 3'; ctx.textAlign = 'right';
+  for (let v = Math.floor((yMin2-yPad2)/step)*step; v <= yMax2+yPad2; v+=step) {
+    const y = sy(v);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W-pad.right, y); ctx.stroke();
+    ctx.fillText(v.toFixed(Math.abs(v)<0.1?4:3), pad.left-8, y+4);
+  }
+
+  // Zero line
+  ctx.strokeStyle = '#495057'; ctx.lineWidth = 1; ctx.setLineDash([6,3]);
+  ctx.beginPath(); ctx.moveTo(pad.left, sy(0)); ctx.lineTo(W-pad.right, sy(0)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Vertical at t=0
+  ctx.strokeStyle = '#ced4da'; ctx.lineWidth = 0.8; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(sx(0), pad.top); ctx.lineTo(sx(0), H-pad.bottom); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Connecting line — include t=0 point
+  const sortedWithZero = [...sorted];
+  if (!sortedWithZero.find(d => d.time === 0)) {
+    sortedWithZero.push({time: 0, coef: 0, se: 0});
+    sortedWithZero.sort((a,b) => a.time - b.time);
+  }
+  ctx.strokeStyle = '#adb5bd'; ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  sortedWithZero.forEach((d,i) => { i===0 ? ctx.moveTo(sx(d.time),sy(d.coef)) : ctx.lineTo(sx(d.time),sy(d.coef)); });
+  ctx.stroke();
+
+  // CI bars and points
+  sorted.forEach(d => {
+    const x = sx(d.time), yTop = sy(d.coef+z*d.se), yBot = sy(d.coef-z*d.se), yC = sy(d.coef);
+    const color = d.time > 0 ? '#c0392b' : '#2563eb';
+    ctx.strokeStyle = color; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(x, yTop); ctx.lineTo(x, yBot); ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x-4, yTop); ctx.lineTo(x+4, yTop); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-4, yBot); ctx.lineTo(x+4, yBot); ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x, yC, 4.5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Zero reference point (black dot at t=0)
+  ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(sx(0), sy(0), 4.5, 0, Math.PI*2); ctx.fill();
+
+  // X labels
+  ctx.fillStyle = '#495057'; ctx.font = '12px Source Sans 3'; ctx.textAlign = 'center';
+  sorted.forEach(d => ctx.fillText(d.time, sx(d.time), H-pad.bottom+20));
+  ctx.fillText('0', sx(0), H-pad.bottom+20);
+
+  // Axis labels
+  ctx.font = '13px Source Sans 3'; ctx.fillStyle = '#495057';
+  ctx.fillText('Periods since treatment', W/2, H-6);
+  ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Estimate and ' + ciLevel + '% CI', 0, 0);
+  ctx.restore();
+
+  // Legend
+  const lx = W - pad.right - 140;
+  ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(lx, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#495057'; ctx.font = '12px Source Sans 3'; ctx.textAlign = 'left';
+  ctx.fillText('Placebos (pre)', lx+10, pad.top+16);
+  ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(lx+96, pad.top+12, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#495057'; ctx.fillText('Effects (post)', lx+106, pad.top+16);
+
+  document.getElementById('plot-caption').textContent =
+    'Figure 1. Event-study estimates with ' + ciLevel + '% confidence intervals. Blue = pre-treatment placebos. Red = post-treatment effects.';
+
+  document.getElementById('inline-plot-section').style.display='block';
+  document.getElementById('gdrive-status').style.display='none';
+  document.getElementById('btn-accept').disabled=false;
+  document.getElementById('inline-plot-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ============ GOOGLE DRIVE AUTH ============
+function getGdriveToken() {
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        if (resp.error) reject(new Error(resp.error));
+        else resolve(resp.access_token);
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+// ============ GDRIVE API HELPERS ============
+async function gdriveCreateFolder(token, name) {
+  // Check if folder already exists
+  const search = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name)`,
+    { headers: { Authorization: 'Bearer ' + token } }
+  );
+  const sj = await search.json();
+  if (sj.files && sj.files.length > 0) return sj.files[0].id;
+
+  // Create folder
+  const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+  });
+  const rj = await res.json();
+  return rj.id;
+}
+
+async function gdriveUploadText(token, folderId, filename, content, mimeType) {
+  const meta = { name: filename, parents: [folderId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', new Blob([content], {type: mimeType}));
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token },
+    body: form
+  });
+  return res.json();
+}
+
+async function gdriveUploadPng(token, folderId, filename, canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async blob => {
+      if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+      const meta = { name: filename, parents: [folderId] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+      form.append('file', blob);
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: form
+      });
+      resolve(await res.json());
+    }, 'image/png');
+  });
+}
+
+// ============ ACCEPT / REJECT ============
+async function acceptStudy() {
+  document.getElementById('btn-accept').disabled = true;
+  const overlay = document.getElementById('saving-overlay');
+  overlay.classList.add('active');
+
+  try {
+    // 1. Google Auth (popup)
+    document.getElementById('saving-text').textContent = 'Connecting to Google Drive...';
+    const token = await getGdriveToken();
+
+    // 2. Get or create folder
+    document.getElementById('saving-text').textContent = 'Creating folder...';
+    const folderId = await gdriveCreateFolder(token, GDRIVE_FOLDER_NAME);
+
+    const id = currentId;
+    const title = document.getElementById('f-title').value.trim();
+    const authors = document.getElementById('f-authors').value.trim();
+    const desc = document.getElementById('f-desc').value.trim();
+    const method = document.getElementById('f-method').value.trim();
+    const code = document.getElementById('f-code').value.trim();
+    const ts = new Date().toISOString();
+
+    // 3. Upload CSV
+    document.getElementById('saving-text').textContent = 'Saving CSV...';
+    await gdriveUploadText(token, folderId, `${id}.csv`, csvRawText, 'text/csv');
+
+    // 4. Upload PNG
+    document.getElementById('saving-text').textContent = 'Saving plot PNG...';
+    const canvas = document.getElementById('es-canvas');
+    const pngFile = await gdriveUploadPng(token, folderId, `${id}.png`, canvas);
+
+    // 5. Upload JSON
+    document.getElementById('saving-text').textContent = 'Saving metadata JSON...';
+    const jsonObj = {
+      id, timestamp: ts,
+      paper: { title, authors, description: desc },
+      methodology: { identification_strategy: method, code_language: codeLang, code },
+      results: {
+        confidence_level: ciLevel,
+        observations: parsedData.length,
+        data: [...parsedData].sort((a,b)=>a.time-b.time).map(d => {
+          const z = zMap[ciLevel];
+          return { period: d.time, estimate: d.coef, std_error: d.se, lb: d.coef-z*d.se, ub: d.coef+z*d.se };
+        })
+      },
+      decision: { accepted: true, accepted_at: ts }
+    };
+    await gdriveUploadText(token, folderId, `${id}.json`, JSON.stringify(jsonObj, null, 2), 'application/json');
+
+    overlay.classList.remove('active');
+
+    // Update status
+    const statusDiv = document.getElementById('gdrive-status');
+    statusDiv.style.display = 'block';
+    const badge = document.getElementById('gdrive-badge');
+    badge.className = 'gdrive-badge saved';
+    badge.textContent = '✓ Saved to Google Drive';
+    if (pngFile.webViewLink) {
+      const link = document.getElementById('gdrive-link');
+      link.style.display = 'block';
+      link.href = pngFile.webViewLink;
+      link.textContent = '🖼 Open plot in Google Drive';
+    }
+
+    showToast('✓ Saved to Google Drive successfully!', 'success');
+
+  } catch(err) {
+    overlay.classList.remove('active');
+    document.getElementById('btn-accept').disabled = false;
+    const statusDiv = document.getElementById('gdrive-status');
+    statusDiv.style.display = 'block';
+    const badge = document.getElementById('gdrive-badge');
+    badge.className = 'gdrive-badge error';
+    badge.textContent = '✗ Save failed';
+    showToast('Error: ' + err.message, 'error');
+    console.error(err);
+  }
+}
+
+function rejectStudy() {
+  document.getElementById('inline-plot-section').style.display='none';
+  window.scrollTo({top:0, behavior:'smooth'});
+  showToast('Results rejected. Modify your inputs and try again.', 'error');
+}
+</script>
+</body>
+</html>
