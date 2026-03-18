@@ -281,8 +281,7 @@ Test of joint nullity of the placebos: p-value = 0.000002
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/deryugina_2017.dta" "deryugina_2017.dta", replace
 use "deryugina_2017.dta", clear
 
-local vars coastal land_area1970 log_pop1969 frac_young1969 frac_old1969 ///
-           frac_black1969 log_wage_pc1969 emp_rate1969
+local vars coastal land_area1970 log_pop1969 frac_young1969 frac_old1969 frac_black1969 log_wage_pc1969 emp_rate1969
 local controls
 foreach v of local vars {
     gen `v'_year = `v' * year
@@ -374,28 +373,29 @@ Effect_4     0.00974  0.00325 0.00337  0.01610  13,464 361
 Effect_5     0.01443  0.00372 0.00715  0.02171  13,305 361
 Effect_6     0.01644  0.00404 0.00853  0.02435  13,097 361
 Effect_7     0.02546  0.00430 0.01704  0.03388  12,884 361
-Effect_8     0.02516  0.00486 0.01564  0.03469  12,775 361
+Effect_8     0.02517  0.00486 0.01564  0.03469  12,775 361
 Effect_9     0.01922  0.00535 0.00874  0.02970  12,685 361
 Effect_10    0.03166  0.00586 0.02016  0.04315  12,587 361
 Effect_11    0.03174  0.00597 0.02005  0.04343  12,465 361
 
-Test of joint nullity of the effects  : p-value = 0.0000000
+Test of joint nullity of the effects  : p-value = 0.0000
 
-  Av_tot_eff |  0.26585  0.04123  0.18504  0.34666  31,123  3,971
+  Av_tot_eff |  0.20366  0.03853  0.12814  0.27919  31,123  3,971
+Average number of time periods over which a treatment effect is accumulated: 11.0000
 
 Placebo_1    -0.00392 0.00131 -0.00648 -0.00135 14,000 361
 Placebo_2    -0.00510 0.00204 -0.00909 -0.00111 13,679 361
 Placebo_3    -0.00775 0.00293 -0.01348 -0.00202 13,430 361
 Placebo_4    -0.00249 0.00330 -0.00896  0.00398 13,181 361
 Placebo_5     0.00113 0.00376 -0.00624  0.00850 12,893 361
-Placebo_6     0.00311 0.00403 -0.00480  0.01101 12,577 361
+Placebo_6     0.00310 0.00403 -0.00480  0.01101 12,577 361
 Placebo_7     0.00444 0.00438 -0.00414  0.01302 12,337 361
-Placebo_8     0.00548 0.00489 -0.00410  0.01506 12,126 361
+Placebo_8     0.00548 0.00489 -0.00410  0.01505 12,126 361
 Placebo_9     0.00180 0.00527 -0.00853  0.01214 11,749 361
 Placebo_10    0.01029 0.00566 -0.00080  0.02137 10,734 299
 Placebo_11    0.01773 0.00601  0.00595  0.02951  9,948 282
 
-Test of joint nullity of the placebos : p-value = 0.0000003
+Test of joint nullity of the placebos : p-value = 0.0000
 ```
 
 ![Figure 9.2: Effects of Hurricane Hits on Government Transfers Per Capita (With Controls)](../figures/ch09_fig2_hurricane_controls_R.png)

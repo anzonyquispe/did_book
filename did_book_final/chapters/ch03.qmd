@@ -20,9 +20,7 @@ The Trading with the Enemy Act (TWEA) allowed US firms to use German-owned paten
 * ssc install panelview, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
-panelview patents twea, i(subclass) t(year) type(treat) ///
-    title("Treatment Status: Moser & Voena (2012)") ///
-    ylabel(none) ytitle("")
+panelview patents twea, i(subclass) t(year) type(treat) title("Treatment Status: Moser & Voena (2012)") ylabel(none) ytitle("")
 graph export "figures/ch03_panelview_stata.png", replace width(1200)
 ```
 
@@ -459,11 +457,7 @@ reltimeplus1 coef:        0.02352017
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
-coefplot, keep(reltimeminus* reltimeplus*) vertical ///
-    yline(0) xline(18.5, lpattern(dash)) ///
-    xtitle("Relative time to year before TWEA") ///
-    ytitle("Effect") title("TWFE Event-study estimates") ///
-    ciopts(recast(rcap) color(cranberry))
+coefplot, keep(reltimeminus* reltimeplus*) vertical yline(0) xline(18.5, lpattern(dash)) xtitle("Relative time to year before TWEA") ytitle("Effect") title("TWFE Event-study estimates") ciopts(recast(rcap) color(cranberry))
 graph export "figures/ch03_fig32_es_twfe.png", replace width(1200)
 ```
 

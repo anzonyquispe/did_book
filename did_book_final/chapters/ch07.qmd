@@ -35,8 +35,7 @@ copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtext
 use "pierce_schott_didtextbook.dta", clear
 preserve
 reshape long delta deltalintrend, i(indusid) j(year)
-panelview delta ntrgap, i(indusid) t(year) type(treat) ///
-    title("Treatment Dose: Pierce & Schott (2016)") legend(off)
+panelview delta ntrgap, i(indusid) t(year) type(treat) title("Treatment Dose: Pierce & Schott (2016)") legend(off)
 graph export "$FIGDIR\ch07_panelview_stata.png", replace width(1200)
 restore
 ```

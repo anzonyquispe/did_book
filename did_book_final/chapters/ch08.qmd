@@ -43,9 +43,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 * ssc install panelview, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-panelview prestout numdailies, i(cnty90) t(year) type(treat) ///
-    title("Gentzkow et al. (2011)") legend(off) ///
-    ylabel(none) ytitle("")
+panelview prestout numdailies, i(cnty90) t(year) type(treat) title("Gentzkow et al. (2011)") legend(off) ylabel(none) ytitle("")
 graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ```
 
@@ -131,12 +129,10 @@ N = 15,629
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 * Decompose beta on numdailies
-twowayfeweights prestout cnty90 year numdailies, ///
-    other_treatments(lag_numdailies) type(feTR)
+twowayfeweights prestout cnty90 year numdailies, other_treatments(lag_numdailies) type(feTR)
 
 * Decompose beta on lag_numdailies
-twowayfeweights prestout cnty90 year lag_numdailies, ///
-    other_treatments(numdailies) type(feTR)
+twowayfeweights prestout cnty90 year lag_numdailies, other_treatments(numdailies) type(feTR)
 ```
 
 ```
@@ -261,8 +257,7 @@ Total                   10056       0.0000
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_dyn prestout cnty90 year numdailies, ///
-    effects(4) placebo(4) cluster(cnty90)
+did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) cluster(cnty90)
 graph export "$FIGDIR\ch08_fig81_nonnormalized_es.png", replace width(1200)
 ```
 
@@ -387,14 +382,11 @@ Joint nullity of placebos : p = 0.992198
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_dyn prestout cnty90 year numdailies, ///
-    effects(1) design(0.8,console) graph_off
+did_multiplegt_dyn prestout cnty90 year numdailies, effects(1) design(0.8,console) graph_off
 
-did_multiplegt_dyn prestout cnty90 year numdailies, ///
-    effects(2) design(0.8,console) graph_off
+did_multiplegt_dyn prestout cnty90 year numdailies, effects(2) design(0.8,console) graph_off
 
-did_multiplegt_dyn prestout cnty90 year numdailies, ///
-    effects(4) design(0.8,console) graph_off
+did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) design(0.8,console) graph_off
 ```
 
 ```
@@ -590,8 +582,7 @@ All effects and treatment paths match Stata/R.
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_dyn prestout cnty90 year numdailies, ///
-    effects(4) placebo(4) normalized effects_equal(all) cluster(cnty90)
+did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) normalized effects_equal(all) cluster(cnty90)
 graph export "$FIGDIR\ch08_fig82_normalized_es.png", replace width(1200)
 ```
 
@@ -723,8 +714,7 @@ Equality of effects : p = 0.165258
 * ssc install did_multiplegt_stat, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_stat prestout cnty90 year numdailies, ///
-    placebo(1) exact_match
+did_multiplegt_stat prestout cnty90 year numdailies, placebo(1) exact_match
 ```
 
 ```
@@ -761,15 +751,6 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 141 switchers dropped (baseline treatment not in stayers' support)
 22 stayers dropped (baseline treatment not in switchers' support)
 ```
-
-### R
-
-```
-Note: The R DIDmultiplegtSTAT and Python py_did_multiplegt_stat packages
-are not yet updated to match the current Stata version. Results will be
-added when the packages are synchronized.
-```
-
 :::
 
 **Interpretation:** The ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response.
@@ -788,20 +769,28 @@ added when the packages are synchronized.
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_dyn prestout cnty90 year numdailies ///
-    if year<=first_change | same_treat_after_first_change==1, ///
-    effects(2) effects_equal(all) same_switchers graph_off
+did_multiplegt_dyn prestout cnty90 year numdailies if year<first_change | same_treat_after_first_change==1, effects(2) effects_equal(all) same_switchers graph_off
 ```
 
 ```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate SE      LB CI   UB CI   N     Switchers
-Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
-Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
-
-Test of equality of the effects : p-value = 0.8301
+--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |    .01525   .0058956   .0036949   .0268052       5019        512
+    Effect_2 |  .0164091   .0073633   .0019773   .0308409       4101        512
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = .0291303
+Test of equality of the effects : p-value = .83016664
+--------------------------------------------------------------------------------
+               Average cumulative (total) effect per treatment unit
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
+-------------+--------------------------------------------------------------------------
+  Av_tot_eff |  .0138306   .0053281   .0033878   .0242734       5605       1024
+--------------------------------------------------------------------------------
+Average number of time periods over which a treatment's effect is accumulated = 1.5
 ```
 
 ### R
@@ -809,7 +798,7 @@ Test of equality of the effects : p-value = 0.8301
 ```r
 library(haven); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-df_sub <- subset(df, year <= first_change | same_treat_after_first_change == 1)
+df_sub <- subset(df, year < first_change | same_treat_after_first_change == 1)
 bonus <- did_multiplegt_dyn(
     df = df_sub, outcome = "prestout", group = "cnty90",
     time = "year", treatment = "numdailies",
@@ -818,11 +807,22 @@ bonus <- did_multiplegt_dyn(
 ```
 
 ```
+----------------------------------------------------------------------
+       Estimation of treatment effects: Event-study effects
+----------------------------------------------------------------------
              Estimate SE      LB CI   UB CI   N     Switchers
-Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
-Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
+Effect_1     0.01525  0.00590 0.00369 0.02681 5,019 512
+Effect_2     0.01641  0.00736 0.00198 0.03084 4,101 512
 
-Test of equality of the effects : p-value = 0.8301
+Test of joint nullity of the effects : p-value = 0.0291
+Test of equality of the effects : p-value = 0.8302
+
+----------------------------------------------------------------------
+    Average cumulative (total) effect per treatment unit
+----------------------------------------------------------------------
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.01383   0.00533   0.00339   0.02427     5,605     1,024
+Average number of time periods over which a treatment effect is accumulated: 1.5000
 ```
 
 ### Python
@@ -832,7 +832,8 @@ import pandas as pd
 import polars as pl
 from did_multiplegt_dyn import DidMultiplegtDyn
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-df_pl = pl.from_pandas(df)
+df_sub = df[(df['year'] < df['first_change']) | (df['same_treat_after_first_change'] == 1)].copy()
+df_pl = pl.from_pandas(df_sub)
 bonus = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=2,
     same_switchers=True, effects_equal=True, cluster="cnty90")
@@ -840,10 +841,13 @@ bonus.fit(); bonus.summary()
 ```
 
 ```
-             Estimate SE      LB CI   UB CI   N     Switchers
-Effect_1     0.01526  0.00549 0.00449 0.02603 3,718   512
-Effect_2     0.01637  0.00645 0.00374 0.02901 3,718   512
-Equality of effects : p = 0.8301
+               Block  Estimate       SE     LB CI    UB CI      N  Switchers
+            Effect_1  0.015250 0.005896  0.003695 0.026805 5019.0      512.0
+            Effect_2  0.016409 0.007363  0.001977 0.030841 4101.0      512.0
+Average_Total_Effect  0.013831 0.005328  0.003388 0.024273 5605.0     1024.0
+
+Test of joint nullity of the effects: p-value = 0.029130
+Test of equality of the effects: p-value = 0.830167
 ```
 
 :::
