@@ -1973,9 +1973,61 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 12                     -0.4521018      0.2176622      -2.08   [  -0.8787197,   -0.0254840]
 ```
 
+### Python
+
+```python
+# pip install pyfixest
+# Place did_imputation.py (from the book's GitHub repo) in your working directory
+import pandas as pd
+import numpy as np
+from did_imputation import did_imputation
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
+df['gname'] = df['cohort'].replace(0, np.nan)
+result = did_imputation(
+    data=df, yname='div_rate', gname='gname',
+    tname='year', idname='state', wname='stpop',
+    horizon=list(range(13)), pretrends=list(range(-1, -14, -1)),
+    cluster_var='state')
+for _, row in result.iterrows():
+    t_stat = row['estimate'] / row['std_error'] if row['std_error'] != 0 else 0
+    print(f"{row['term']:<25s} {row['estimate']:>14.7f} {row['std_error']:>14.7f} {t_stat:>10.2f}   [{row['conf_low']:>12.7f}, {row['conf_high']:>12.7f}]")
+```
+
+```
+Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
+------------------------------------------------------------------------------------------
+-13                    -0.0784114      0.0749666      -1.05   [  -0.2253459,    0.0685231]
+-12                     0.0019235      0.1081033       0.02   [  -0.2099590,    0.2138059]
+-11                     0.0641364      0.1280345       0.50   [  -0.1868113,    0.3150841]
+-10                     0.1016090      0.1268239       0.80   [  -0.1469659,    0.3501840]
+-9                      0.0540569      0.1106308       0.49   [  -0.1627794,    0.2708932]
+-8                      0.0361219      0.1392147       0.26   [  -0.2367389,    0.3089827]
+-7                     -0.0011134      0.1299378      -0.01   [  -0.2557915,    0.2535647]
+-6                      0.0054861      0.1348073       0.04   [  -0.2587362,    0.2697083]
+-5                      0.0819759      0.1898627       0.43   [  -0.2901550,    0.4541067]
+-4                      0.0996774      0.1585096       0.63   [  -0.2110014,    0.4103562]
+-3                      0.0404018      0.1681945       0.24   [  -0.2892593,    0.3700630]
+-2                      0.0311516      0.1776892       0.18   [  -0.3171191,    0.3794224]
+-1                     -0.0063006      0.1703617      -0.04   [  -0.3402096,    0.3276083]
+0                       0.2649143      0.0972983       2.72   [   0.0742096,    0.4556189]
+1                       0.3228134      0.1024412       3.15   [   0.1220285,    0.5235982]
+2                       0.2508751      0.1159300       2.16   [   0.0236522,    0.4780980]
+3                       0.1689505      0.1309897       1.29   [  -0.0877893,    0.4256903]
+4                       0.1251743      0.1501367       0.83   [  -0.1690937,    0.4194423]
+5                       0.1701535      0.1670765       1.02   [  -0.1573165,    0.4976234]
+6                       0.1720832      0.1716382       1.00   [  -0.1643276,    0.5084940]
+7                       0.1102613      0.1627624       0.68   [  -0.2087529,    0.4292755]
+8                      -0.0933049      0.1659981      -0.56   [  -0.4186611,    0.2320513]
+9                      -0.2215375      0.1856457      -1.19   [  -0.5854030,    0.1423280]
+10                     -0.2458112      0.1985794      -1.24   [  -0.6350269,    0.1434044]
+11                     -0.4276657      0.1972440      -2.17   [  -0.8142639,   -0.0410675]
+12                     -0.4520999      0.2176621      -2.08   [  -0.8787177,   -0.0254821]
+```
+
 :::
 
-**Interpretation:** Pre-treatment placebos (pre1–pre13) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward. The `did_imputation` package is available in Stata and R only.
+**Interpretation:** All three implementations produce virtually identical estimates. Pre-treatment placebos (pre1–pre13) are all small and insignificant, supporting parallel trends. Post-treatment effects follow the same pattern as the other estimators: positive effects for 0–7 years, turning negative from year 8 onward.
 
 ---
 
@@ -2126,17 +2178,17 @@ dev.off()
 ```python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
-# Three-panel plot (BJS/did_imputation not available in Python)
-fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-es_plot(axes[0], rt_fig62, co_fig62, lo_fig62, hi_fig62, "TWFE estimates", xlim=(-9.5, 16.5))
-es_plot(axes[1], sa_rt, sa_co, sa_lo, sa_hi, "Sun & Abraham")
-es_plot(axes[2], cs_rt, cs_co, cs_lo, cs_hi, "Callaway & Sant'Anna")
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+es_plot(axes[0, 0], rt_fig62, co_fig62, lo_fig62, hi_fig62, "TWFE estimates", xlim=(-9.5, 16.5))
+es_plot(axes[0, 1], sa_rt, sa_co, sa_lo, sa_hi, "Sun & Abraham")
+es_plot(axes[1, 0], cs_rt, cs_co, cs_lo, cs_hi, "Callaway & Sant'Anna")
+es_plot(axes[1, 1], bjs_rt, bjs_co, bjs_lo, bjs_hi, "Borusyak, Jaravel & Spiess")
 plt.suptitle("Effects of Unilateral Divorce Laws", fontsize=14)
 fig.text(0.5, 0.01,
-    "95% CIs shown in red. Weighted by state population. SEs clustered at state level.\nNote: BJS panel omitted (did_imputation not available in Python).",
+    "95% CIs shown in red. Weighted by state population. SEs clustered at state level.",
     ha='center', fontsize=9, style='italic')
-plt.tight_layout(rect=[0, 0.05, 1, 0.95])
-plt.savefig(FIGDIR / "ch06_fig63_3panel_Python.png", dpi=150)
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig(FIGDIR / "ch06_fig63_4panel_Python.png", dpi=150)
 ```
 
 :::

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Credible Answers — Heterogeneity-Robust DiD</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f7f6f2;--white:#fff;--border:#e2e0d8;
+  --text:#1a1a18;--muted:#6b6860;
+  --green:#1a4a3a;--green-light:#e8f0ec;--green-border:#c3d9ce;
+  --orange:#c8400a;
+  --serif:'DM Serif Display',serif;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(247,246,242,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px}
+.logo{font-family:var(--serif);font-size:1.2rem;color:var(--green);text-decoration:none}
+.nav-r{display:flex;gap:1.4rem;align-items:center}
+.nav-r a{text-decoration:none;color:var(--muted);font-size:.875rem;font-weight:500}
+.nav-r a:hover{color:var(--text)}
+.btn-g{background:var(--green);color:#fff;padding:.38rem 1rem;border-radius:4px;font-size:.8rem;font-weight:600;text-decoration:none}
+.btn-o{background:var(--orange);color:#fff;padding:.38rem 1rem;border-radius:4px;font-size:.8rem;font-weight:600;border:none;cursor:pointer}
+
+/* HERO */
+.hero{max-width:860px;margin:0 auto;padding:6rem 2rem 4.5rem;text-align:center;animation:fadeUp .7s ease both}
+.eyebrow{display:inline-block;font-family:var(--mono);font-size:.7rem;color:var(--green);background:var(--green-light);border:1px solid var(--green-border);border-radius:100px;padding:.28rem .9rem;margin-bottom:1.4rem;letter-spacing:.05em;text-transform:uppercase}
+h1{font-family:var(--serif);font-size:clamp(2.4rem,5vw,3.8rem);line-height:1.08;letter-spacing:-.02em;margin-bottom:1.2rem}
+h1 em{font-style:italic;color:var(--green)}
+.hero p{font-size:1.05rem;color:var(--muted);max-width:560px;margin:0 auto 2.5rem;font-weight:300;line-height:1.78}
+.hero-btns{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--green);color:#fff;padding:.72rem 1.6rem;border-radius:5px;text-decoration:none;font-weight:600;font-size:.9rem;transition:opacity .2s,transform .15s}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-sec{background:transparent;color:var(--text);padding:.72rem 1.6rem;border-radius:5px;border:1px solid var(--border);text-decoration:none;font-weight:500;font-size:.9rem}
+.btn-sec:hover{border-color:var(--text);background:var(--white)}
+.btn-chat{background:var(--orange);color:#fff;padding:.72rem 1.6rem;border-radius:5px;font-weight:600;font-size:.9rem;border:none;cursor:pointer;transition:opacity .2s,transform .15s}
+.btn-chat:hover{opacity:.88;transform:translateY(-1px)}
+
+/* INSTALL */
+.install{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.8rem 2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.iblock{background:#f0eeea;border:1px solid var(--border);border-radius:6px;padding:.55rem 1.1rem;display:flex;align-items:center;gap:.6rem}
+.ilabel{font-family:var(--mono);font-size:.72rem;color:var(--muted);font-weight:500}
+.icmd{font-family:var(--mono);font-size:.8rem;color:var(--orange);font-weight:500;white-space:nowrap}
+.copybtn{cursor:pointer;opacity:.4;font-size:.85rem;border:none;background:none;color:var(--muted);padding:0;transition:opacity .2s}
+.copybtn:hover{opacity:1}
+hr{border:none;border-top:1px solid var(--border)}
+
+/* SECTION */
+.sec{max-width:1080px;margin:0 auto;padding:5rem 2rem}
+.sec-label{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+h2{font-family:var(--serif);font-size:clamp(1.7rem,3vw,2.4rem);letter-spacing:-.02em;margin-bottom:.9rem;line-height:1.15}
+.sec-sub{color:var(--muted);max-width:520px;font-weight:300;line-height:1.72;margin-bottom:2.8rem}
+
+/* PACKAGES */
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pkg-card{background:var(--white);padding:1.65rem;display:flex;flex-direction:column;gap:.7rem;text-decoration:none;color:inherit;transition:background .2s}
+.pkg-card:hover{background:#fafaf8}
+.pkg-card:hover .pkg-arrow{opacity:1;transform:translateX(0)}
+.pkg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem}
+.pkg-name{font-family:var(--mono);font-size:.88rem;font-weight:500;color:var(--green)}
+.pkg-tags{display:flex;gap:.3rem;flex-wrap:wrap}
+.tag{font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:.17rem .46rem;border-radius:3px;text-transform:uppercase;font-family:var(--mono)}
+.t-stata{background:#e8edf8;color:#2a4aaa}
+.t-r{background:#fde8ef;color:#a01848}
+.t-py{background:#e8f4e8;color:#186818}
+.t-cpp{background:#f0e8f8;color:#6018a0}
+.pkg-desc{font-size:.845rem;color:var(--muted);line-height:1.62;flex:1}
+.pkg-meta{display:flex;gap:.9rem;align-items:center;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.pkg-arrow{margin-left:auto;opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
+
+/* MISSION */
+.mission{background:var(--green);color:#fff;border-radius:12px;padding:3.5rem;max-width:1080px;margin:0 auto 5rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.mission h2{font-family:var(--serif);font-size:2rem;line-height:1.2;letter-spacing:-.02em;color:#fff}
+.mission h2 em{font-style:italic;opacity:.65}
+.mission p{font-size:.92rem;opacity:.75;line-height:1.8;font-weight:300}
+
+/* TEAM */
+.sub-label{font-size:.7rem;font-family:var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:1.2rem;margin-bottom:2.5rem}
+.tcard{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.55rem;transition:border-color .2s,transform .2s}
+.tcard:hover{border-color:#aaa;transform:translateY(-2px)}
+.tavatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.1rem;margin-bottom:.9rem}
+.tavatar.curr{background:var(--green-light);border:2px solid var(--green-border);color:var(--green)}
+.tavatar.alum{background:#f0eeea;border:2px solid var(--border);color:var(--muted)}
+.tname{font-weight:600;font-size:.9rem;margin-bottom:.16rem}
+.trole{font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:.55rem}
+.taffil{font-size:.75rem;color:var(--muted);line-height:1.5}
+.tlinks{display:flex;gap:.45rem;margin-top:.85rem;flex-wrap:wrap}
+.tlink{font-family:var(--mono);font-size:.67rem;color:var(--green);text-decoration:none;border:1px solid var(--green-border);padding:.2rem .52rem;border-radius:3px;transition:background .15s}
+.tlink:hover{background:var(--green-light)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2.2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.flogo{font-family:var(--serif);font-size:1rem;color:var(--green)}
+.flinks{display:flex;gap:1.4rem}
+.flinks a{text-decoration:none;font-size:.8rem;color:var(--muted)}
+.fcopy{font-size:.72rem;color:var(--muted)}
+
+/* CHAT */
+#fab{position:fixed;bottom:1.8rem;right:1.8rem;z-index:900;background:var(--orange);color:#fff;border:none;border-radius:50px;padding:.72rem 1.35rem;font-family:var(--sans);font-weight:600;font-size:.875rem;cursor:pointer;box-shadow:0 6px 24px rgba(200,64,10,.35);display:flex;align-items:center;gap:.5rem;transition:transform .2s,opacity .2s}
+#fab:hover{transform:translateY(-2px)}
+#fab.hidden{display:none}
+#overlay{position:fixed;inset:0;z-index:1000;background:rgba(10,15,12,.5);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:flex-end;padding:1.5rem}
+#overlay.open{display:flex}
+#chatbox{width:430px;max-height:590px;background:var(--white);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:slideUp .3s ease}
+.chat-head{background:var(--green);color:#fff;padding:1rem 1.2rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between}
+.chat-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+.chat-title{display:flex;align-items:center;gap:.7rem}
+.chat-title h3{font-size:.9rem;font-weight:600}
+.chat-title p{font-size:.7rem;opacity:.68;margin-top:.04rem}
+.close-btn{background:none;border:none;color:#fff;opacity:.65;cursor:pointer;font-size:1.2rem;line-height:1}
+.close-btn:hover{opacity:1}
+#msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;scroll-behavior:smooth}
+.msg{max-width:86%;padding:.62rem .88rem;border-radius:10px;font-size:.835rem;line-height:1.56;word-wrap:break-word}
+.msg.bot{background:#f0eeea;color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.msg.user{background:var(--green);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.typing-dots{display:flex;gap:4px;align-items:center;padding:.62rem .88rem;background:#f0eeea;border-radius:10px;border-bottom-left-radius:3px;align-self:flex-start}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:#6b6860;animation:bounce 1s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+.chat-input{padding:.8rem .9rem;border-top:1px solid var(--border);display:flex;gap:.55rem}
+#msg-input{flex:1;border:1px solid var(--border);border-radius:6px;padding:.48rem .72rem;font-family:var(--sans);font-size:.84rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s}
+#msg-input:focus{border-color:var(--green)}
+#send-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:.48rem .95rem;cursor:pointer;font-size:.82rem;font-weight:600;white-space:nowrap;transition:opacity .2s}
+#send-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.fade-in{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+@media(max-width:720px){nav{padding:0 1.2rem}.mission{grid-template-columns:1fr;padding:2rem;margin:0 1rem 3rem}#chatbox{width:calc(100vw - 2rem);max-height:72vh}#overlay{padding:1rem}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">Credible Answers</a>
+  <div class="nav-r">
+    <a href="#packages">Packages</a>
+    <a href="#team">Team</a>
+    <button class="btn-o" onclick="openChat()">💬 Ask the Bot</button>
+    <a class="btn-g" href="https://github.com/Credible-Answers" target="_blank">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="eyebrow">Open-Source Econometrics · ERC Really Credible</span>
+  <h1>Heterogeneity-Robust<br/><em>Difference-in-Differences</em></h1>
+  <p>An ecosystem of causal inference tools for panel data — available in Stata, R, and Python — built on the research of de Chaisemartin &amp; D'Haultfoeuille.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="#packages">Explore Packages</a>
+    <button class="btn-chat" onclick="openChat()">💬 Ask a Question</button>
+    <a class="btn-sec" href="https://github.com/Credible-Answers" target="_blank">GitHub ↗</a>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div class="install">
+  <div class="iblock"><span class="ilabel">Stata</span><span class="icmd">ssc install did_multiplegt_dyn</span><button class="copybtn" onclick="copy(this,'ssc install did_multiplegt_dyn')">⎘</button></div>
+  <div class="iblock"><span class="ilabel">R</span><span class="icmd">install.packages("DIDmultiplegtDYN")</span><button class="copybtn" onclick="copy(this,'install.packages(\'DIDmultiplegtDYN\')')">⎘</button></div>
+  <div class="iblock"><span class="ilabel">Python</span><span class="icmd">pip install py-did-multiplegt-dyn</span><button class="copybtn" onclick="copy(this,'pip install py-did-multiplegt-dyn')">⎘</button></div>
+</div>
+<hr/>
+
+<!-- PACKAGES -->
+<section class="sec fade-in" id="packages">
+  <p class="sec-label">Libraries</p>
+  <h2>Our Packages</h2>
+  <p class="sec-sub">Interoperable tools for DiD estimation, TWFE diagnostics, linearity testing, and treatment-effect heterogeneity — all sharing a rigorous methodological foundation.</p>
+  <div class="pkg-grid" id="pkg-grid"></div>
+</section>
+<hr/>
+
+<!-- MISSION -->
+<div class="mission fade-in">
+  <h2>Built on <em>rigorous</em><br/>identification theory</h2>
+  <p>All packages implement heterogeneity-robust estimators valid under parallel trends — even with staggered adoption and treatment effect heterogeneity. They provide credible alternatives to TWFE regressions, whose implicit weighting can be negative and cause sign reversals.</p>
+</div>
+
+<!-- TEAM -->
+<section class="sec fade-in" id="team">
+  <p class="sec-label">ERC Really Credible Team</p>
+  <h2>The Team</h2>
+  <p class="sec-sub">Led by Clément de Chaisemartin at Sciences Po and maintained by predoctoral research fellows funded by the ERC Really Credible grant.</p>
+  <p class="sub-label">Principal Investigator &amp; Current Predocs</p>
+  <div class="team-grid" id="team-curr"></div>
+  <p class="sub-label" style="margin-top:1rem">Alumni</p>
+  <div class="team-grid" id="team-alum"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="flogo">Credible Answers</span>
+  <div class="flinks">
+    <a href="https://github.com/Credible-Answers" target="_blank">GitHub</a>
+    <a href="https://github.com/Credible-Answers/did_multiplegt_dyn" target="_blank">Docs</a>
+    <a href="https://github.com/Credible-Answers/ReplicationPackages" target="_blank">Replications</a>
+    <a href="mailto:chaisemartin.packages@gmail.com">Contact</a>
+  </div>
+  <span class="fcopy">© 2026 Credible Answers · ERC Really Credible</span>
+</footer>
+
+<!-- FAB -->
+<button id="fab" onclick="openChat()">💬 Ask the Bot</button>
+
+<!-- CHAT -->
+<div id="overlay" onclick="if(event.target===this)closeChat()">
+  <div id="chatbox">
+    <div class="chat-head">
+      <div class="chat-title">
+        <div class="chat-dot"></div>
+        <div><h3>Credible Answers Bot</h3><p>Expert on all our DiD packages</p></div>
+      </div>
+      <button class="close-btn" onclick="closeChat()">✕</button>
+    </div>
+    <div id="msgs">
+      <div class="msg bot">Hi! I know all the Credible Answers packages — <strong>did_multiplegt_dyn</strong>, <strong>did_had</strong>, <strong>twowayfeweights</strong>, <strong>did_multiplegt_stat</strong>, and more. What would you like to know?</div>
+    </div>
+    <div class="chat-input">
+      <input id="msg-input" type="text" placeholder="e.g. How do I install did_multiplegt_dyn in R?" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <button id="send-btn" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const PKGS = [
+  {name:"did_multiplegt_dyn",tags:["Stata","R"],stars:80,forks:24,desc:"Flagship package. Event-study DiD estimators for multiple groups and periods, with binary or non-binary, absorbing or non-absorbing treatments.",url:"https://github.com/Credible-Answers/did_multiplegt_dyn"},
+  {name:"py_did_multiplegt_dyn",tags:["Python"],stars:2,forks:0,desc:"Python port of did_multiplegt_dyn. Full DiD estimation for multiple groups and periods. BSD-3 licensed.",url:"https://github.com/Credible-Answers/py_did_multiplegt_dyn"},
+  {name:"did_multiplegt_stat",tags:["Stata","R"],stars:10,forks:2,desc:"DiD estimators for continuously distributed treatments and instruments at every period with stayers.",url:"https://github.com/Credible-Answers/did_multiplegt_stat"},
+  {name:"did_had",tags:["Stata","R"],stars:5,forks:4,desc:"Heterogeneity-robust DiD for heterogeneous adoption designs without stayers but with quasi-stayers.",url:"https://github.com/Credible-Answers/did_had"},
+  {name:"twowayfeweights",tags:["Stata","R"],stars:27,forks:3,desc:"Estimates implicit weights in TWFE regressions — reveals when they can be negative under treatment effect heterogeneity.",url:"https://github.com/Credible-Answers/twowayfeweights"},
+  {name:"did_multiplegt",tags:["Stata"],stars:13,forks:7,desc:"Original DiD package for multiple groups and periods. Predecessor to did_multiplegt_dyn, still widely used.",url:"https://github.com/Credible-Answers/did_multiplegt"},
+  {name:"dist_lag_het",tags:["C++"],stars:0,forks:0,desc:"Package for 'Treatment-Effect Estimation in Complex Designs under a Parallel-Trends Assumption'. MIT licensed.",url:"https://github.com/Credible-Answers/dist_lag_het"},
+  {name:"multisite",tags:["Stata"],stars:3,forks:0,desc:"Estimators for treatment-effect heterogeneity across sites in multi-site randomized experiments with few units per site.",url:"https://github.com/Credible-Answers/multisite"},
+  {name:"yatchew_test",tags:["R"],stars:2,forks:2,desc:"Yatchew (1997) and de Chaisemartin & D'Haultfoeuille (2024) linearity test for functional form in panel data.",url:"https://github.com/Credible-Answers/yatchew_test"},
+  {name:"stute_test",tags:["Stata"],stars:2,forks:1,desc:"Stute (1997) linearity test to assess non-linear treatment response in panel regressions.",url:"https://github.com/Credible-Answers/stute_test"},
+  {name:"ReplicationPackages",tags:["Stata"],stars:2,forks:2,desc:"Replication code and data for de Chaisemartin & D'Haultfoeuille published papers and working papers.",url:"https://github.com/Credible-Answers/ReplicationPackages"},
+  {name:"ApplicationData",tags:[],stars:2,forks:1,desc:"Datasets used in empirical applications of de Chaisemartin & D'Haultfoeuille estimators across published papers.",url:"https://github.com/Credible-Answers/ApplicationData"},
+];
+const TAG_CSS = {Stata:"t-stata",R:"t-r",Python:"t-py","C++":"t-cpp"};
+
+const TEAM_CURR = [
+  {i:"C",name:"Clément de Chaisemartin",role:"Principal Investigator",affil:"Sciences Po · NBER Research Associate",links:[{l:"Website",u:"https://sites.google.com/site/clementdechaisemartin/"},{l:"GitHub",u:"https://github.com/Credible-Answers"},{l:"Email",u:"mailto:chaisemartin.packages@gmail.com"}]},
+  {i:"A",name:"Anzony Quispe",role:"Predoc · 2025–2026",affil:"Sciences Po",links:[{l:"Website",u:"https://anzonyquispe.github.io/scientific/science.html"}]},
+  {i:"D",name:"David Arboleda Carcamo",role:"Predoc · 2024–2026",affil:"Sciences Po",links:[{l:"Profile",u:"https://www.sciencespo.fr/department-economics/people/postdocs-and-research-fellows/"}]},
+];
+const TEAM_ALUM = [
+  {i:"R",name:"Romain Angotti",role:"Predoc · 2024–2025",affil:"Now: PhD student, Stanford University",links:[{l:"LinkedIn",u:"https://www.linkedin.com/in/romain-angotti-53787817b/"}]},
+  {i:"B",name:"Bingxue Li",role:"Predoc · 2024–2025",affil:"Now: PhD student, U. Illinois Urbana-Champaign",links:[{l:"Profile",u:"https://www.sciencespo.fr/department-economics/people/postdocs-and-research-fellows/"}]},
+  {i:"D",name:"Diego Ciccia",role:"Predoc · 2023–2024",affil:"Now: PhD student, Northwestern University",links:[{l:"Website",u:"https://diegociccia.github.io/index.html"}]},
+  {i:"F",name:"Felix Knau",role:"Predoc · 2023–2024",affil:"Now: PhD student, LMU Munich",links:[{l:"LinkedIn",u:"https://www.linkedin.com/in/felix-knau-51890726b/"}]},
+  {i:"D",name:"Doulo Sow",role:"Predoc · 2023–2024",affil:"Now: Senior Research Specialist, Princeton",links:[{l:"LinkedIn",u:"https://www.linkedin.com/in/doulosow/"}]},
+  {i:"M",name:"Mélitine Malézieux",role:"Predoc · 2022–2023",affil:"Now: PhD student, Stockholm School of Economics",links:[{l:"LinkedIn",u:"https://www.linkedin.com/in/m%C3%A9litine-mal%C3%A9zieux-2831ba206/"}]},
+];
+
+// ── RENDER PACKAGES ───────────────────────────────────────────────────────
+const grid = document.getElementById('pkg-grid');
+PKGS.forEach(p => {
+  const tags = p.tags.map(t=>`<span class="tag ${TAG_CSS[t]||''}">${t}</span>`).join('');
+  const meta = [p.stars>0?`★ ${p.stars}`:'', p.forks>0?`⑂ ${p.forks}`:''].filter(Boolean).join('<span style="margin:0 .2rem">·</span>');
+  grid.innerHTML += `
+  <a class="pkg-card" href="${p.url}" target="_blank" rel="noopener">
+    <div class="pkg-head"><span class="pkg-name">${p.name}</span><div class="pkg-tags">${tags}</div></div>
+    <p class="pkg-desc">${p.desc}</p>
+    <div class="pkg-meta">${meta}<span class="pkg-arrow" style="margin-left:auto">→</span></div>
+  </a>`;
+});
+
+// ── RENDER TEAM ───────────────────────────────────────────────────────────
+function renderTeam(members, containerId, alumni) {
+  const el = document.getElementById(containerId);
+  members.forEach(m => {
+    const links = m.links.map(l=>`<a class="tlink" href="${l.u}" target="_blank">${l.l}</a>`).join('');
+    el.innerHTML += `
+    <div class="tcard" style="${alumni?'opacity:.83':''}">
+      <div class="tavatar ${alumni?'alum':'curr'}">${m.i}</div>
+      <div class="tname">${m.name}</div>
+      <div class="trole">${m.role}</div>
+      <div class="taffil">${m.affil}</div>
+      <div class="tlinks">${links}</div>
+    </div>`;
+  });
+}
+renderTeam(TEAM_CURR,'team-curr',false);
+renderTeam(TEAM_ALUM,'team-alum',true);
+
+// ── SCROLL FADE ───────────────────────────────────────────────────────────
+const obs = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.07});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// ── COPY ──────────────────────────────────────────────────────────────────
+function copy(btn, text){ navigator.clipboard.writeText(text); const o=btn.textContent; btn.textContent='✓'; setTimeout(()=>btn.textContent=o,1500); }
+
+// ── CHAT OPEN/CLOSE ───────────────────────────────────────────────────────
+function openChat(){ document.getElementById('overlay').classList.add('open'); document.getElementById('fab').classList.add('hidden'); setTimeout(()=>document.getElementById('msg-input').focus(),300); }
+function closeChat(){ document.getElementById('overlay').classList.remove('open'); document.getElementById('fab').classList.remove('hidden'); }
+
+// ── CHATBOT ───────────────────────────────────────────────────────────────
+const SYS = `You are the Credible Answers assistant, expert on all packages from https://github.com/Credible-Answers — heterogeneity-robust DiD estimators by Clément de Chaisemartin & Xavier D'Haultfoeuille.
+
+PACKAGES:
+1. did_multiplegt_dyn (Stata & R) [FLAGSHIP] - ssc install did_multiplegt_dyn / install.packages("DIDmultiplegtDYN"). Event-study DiD for multiple groups/periods, binary or non-binary treatments. Options: effects(#), placebo(#), normalized, controls(), trends_nonparam(), trends_lin, continuous(#), weight(), cluster(), by(), same_switchers, switchers("in"/"out"), ci_level(), save_results(), bootstrap(), less_conservative_se. Example: did_multiplegt_dyn Dl_vloans_b county year inter_bra, effects(8) placebo(3) cluster(state_n). Paper: de Chaisemartin & D'Haultfoeuille (2024).
+2. py_did_multiplegt_dyn (Python) - pip install py-did-multiplegt-dyn. BSD-3.
+3. did_multiplegt_stat (Stata & R) - continuously distributed treatments/instruments with stayers.
+4. did_had (Stata & R) - heterogeneous adoption designs, no stayers but quasi-stayers.
+5. twowayfeweights (Stata & R) - diagnoses TWFE implicit weights, flags negatives. Paper: dC&DH (2020).
+6. did_multiplegt (Stata) - predecessor to did_multiplegt_dyn.
+7. dist_lag_het (C++) - complex designs under parallel-trends. MIT.
+8. multisite (Stata) - HTE across sites in multi-site RCTs.
+9. yatchew_test (R) - linearity test Yatchew 1997 + dC&DH 2024.
+10. stute_test (Stata) - Stute 1997 linearity test.
+11. ReplicationPackages (Stata) - replication code.
+12. ApplicationData - datasets for applications.
+
+KEY: parallel trends + no-anticipation; switchers = groups whose treatment changes; DID_ℓ = avg effect for ℓ periods; normalized divides by total dose; placebos test PT before first change; TWFE can have negative weights.
+TEAM: PI = Clément de Chaisemartin (Sciences Po/NBER). Xavier D'Haultfoeuille (CREST-ENSAE). Predocs: Anzony Quispe (2025-26), David Arboleda (2024-26). Alumni: Diego Ciccia→Northwestern, Felix Knau→LMU, Doulo Sow→Princeton, Mélitine Malézieux→Stockholm, Romain Angotti→Stanford, Bingxue Li→UIUC.
+Contact: chaisemartin.packages@gmail.com
+Reply in the same language the user writes. Be concise. Show code when useful.`;
+
+let history = [];
+let busy = false;
+
+async function sendMsg(){
+  if(busy) return;
+  const inp = document.getElementById('msg-input');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  inp.value='';
+  addMsg(txt,'user');
+  busy=true;
+  document.getElementById('send-btn').disabled=true;
+  const dots = addTyping();
+  try{
+    const r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:SYS,messages:[...history,{role:'user',content:txt}]})
+    });
+    const d = await r.json();
+    const reply = d.content?.find(b=>b.type==='text')?.text || 'No response.';
+    dots.remove(); addMsg(reply,'bot');
+    history.push({role:'user',content:txt},{role:'assistant',content:reply});
+  }catch(e){
+    dots.remove(); addMsg('Error de conexión. Si estás viendo esto desde un archivo local, el bot necesita un servidor web para funcionar. Sube el archivo a Netlify y funcionará perfectamente.','bot');
+  }
+  busy=false; document.getElementById('send-btn').disabled=false; inp.focus();
+}
+
+function addMsg(text,cls){
+  const wrap=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='msg '+cls;
+  d.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`\n]+)`/g,'<code style="background:#e0ddd7;padding:.1rem .28rem;border-radius:3px;font-family:monospace;font-size:.78rem">$1</code>').replace(/\n/g,'<br>');
+  wrap.appendChild(d); wrap.scrollTop=wrap.scrollHeight; return d;
+}
+function addTyping(){
+  const wrap=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='typing-dots';
+  d.innerHTML='<span></span><span></span><span></span>';
+  wrap.appendChild(d); wrap.scrollTop=wrap.scrollHeight; return d;
+}
+</script>
+</body>
+</html>
