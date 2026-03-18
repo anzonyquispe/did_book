@@ -24,9 +24,7 @@ Key topics: decomposition of the static TWFE estimator, event-study TWFE, and fo
 * ssc install panelview, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-panelview div_rate udl, i(state) t(year) type(treat) ///
-    title("Treatment Status: Wolfers (2006)") ///
-    legend(label(1 "No UDL") label(2 "UDL adopted"))
+panelview div_rate udl, i(state) t(year) type(treat) title("Treatment Status: Wolfers (2006)") legend(label(1 "No UDL") label(2 "UDL adopted"))
 ```
 
 ### R
@@ -167,8 +165,7 @@ N = 1631  |  R-sq = 0.9305
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-twowayfeweights div_rate state year udl, type(feTR) ///
-    test_random_weights(exposurelength) weight(stpop)
+twowayfeweights div_rate state year udl, type(feTR) test_random_weights(exposurelength) weight(stpop)
 ```
 
 ```
@@ -313,8 +310,7 @@ bc <- bacon(div_rate ~ udl, data = df_bal,
 ```stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-reg div_rate i.early_late_never if cohort!=1956 & year<=1968 ///
-    [w=stpop], vce(cluster state)
+reg div_rate i.early_late_never if cohort!=1956 & year<=1968 [w=stpop], vce(cluster state)
 ```
 
 ```
@@ -544,9 +540,7 @@ N = 1631  |  R-sq = 0.9351
 * ssc install eventstudyweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-eventstudyweights rel_time1-rel_time16 rel_timeminus1-rel_timeminus9 ///
-    [aweight=stpop], absorb(i.state i.year) cohort(cohort) ///
-    control_cohort(controlgroup) saveweights(Ws)
+eventstudyweights rel_time1-rel_time16 rel_timeminus1-rel_timeminus9 [aweight=stpop], absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) saveweights(Ws)
 ```
 
 Note: `eventstudyweights` produces a large weight matrix (396 × 27) showing how each cohort-by-period cell contributes to the TWFE event-study coefficients. Due to its size, the full output is omitted here. The command confirms that TWFE event-study coefficients can be expressed as weighted averages of cohort-specific effects, with weights that may be negative — motivating the use of robust estimators like Sun & Abraham (2021).
@@ -567,10 +561,7 @@ Note: `eventstudyweights` produces a large weight matrix (396 × 27) showing how
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-twowayfeweights div_rate state year rel_time1, type(feTR) ///
-    test_random_weights(year) weight(stpop) ///
-    other_treatments(rel_time2-rel_time16) ///
-    controls(rel_timeminus1-rel_timeminus9)
+twowayfeweights div_rate state year rel_time1, type(feTR) test_random_weights(year) weight(stpop) other_treatments(rel_time2-rel_time16) controls(rel_timeminus1-rel_timeminus9)
 ```
 
 ```
@@ -1190,13 +1181,7 @@ while R/Python report raw weights (Σ = 0.8724). Structure is identical.
 ```stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
-    (line coef rel_time, lcolor(navy)) ///
-    (rcap ci_hi ci_lo rel_time, lcolor(maroon)), ///
-    title("TWFE estimates") ///
-    xtitle("Relative time to year before law") ytitle("Effect") ///
-    ylabel(-1(.5)0.5) yscale(range(-1.1 0.8)) xlabel(-9(3)15) ///
-    xline(0, lcolor(gs10) lpattern(dash)) yline(0, lcolor(gs10) lpattern(dash))
+twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) (line coef rel_time, lcolor(navy)) (rcap ci_hi ci_lo rel_time, lcolor(maroon)), title("TWFE estimates") xtitle("Relative time to year before law") ytitle("Effect") ylabel(-1(.5)0.5) yscale(range(-1.1 0.8)) xlabel(-9(3)15) xline(0, lcolor(gs10) lpattern(dash)) yline(0, lcolor(gs10) lpattern(dash))
 ```
 
 ### R
@@ -1257,9 +1242,7 @@ plt.savefig(FIGDIR / "ch06_fig62_twfe_es_Python.png", dpi=150)
 * ssc install eventstudyinteract, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-eventstudyinteract div_rate rel_time* [aweight=stpop], ///
-    absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) ///
-    vce(cluster state)
+eventstudyinteract div_rate rel_time* [aweight=stpop], absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) vce(cluster state)
 ```
 
 ```
@@ -1708,8 +1691,7 @@ estimates differ from Stata/R which use regression adjustment with iweights.
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-did_multiplegt_dyn div_rate state year udl, effects(13) placebo(13) ///
-    weight(stpop) graph_off
+did_multiplegt_dyn div_rate state year udl, effects(13) placebo(13) weight(stpop) graph_off
 ```
 
 ```
@@ -1906,8 +1888,7 @@ Placebo_13  0.0256646  0.1832985 -0.3335925  0.3849217  160.0      24.0
 * ssc install did_imputation, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-did_imputation div_rate state year cohort [aweight=stpop], ///
-    horizons(0/12) autosample minn(0) pre(13)
+did_imputation div_rate state year cohort [aweight=stpop], horizons(0/12) autosample minn(0) pre(13)
 ```
 
 ```
@@ -2010,13 +1991,7 @@ Variable              Coefficient      Std. err.          t   [95% Conf. Interva
 * ssc install did2s, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-did2s div_rate, first_stage(i.state i.year) ///
-    second_stage(rel_timeminus9 rel_timeminus8 rel_timeminus7 ///
-    rel_timeminus6 rel_timeminus5 rel_timeminus4 rel_timeminus3 ///
-    rel_timeminus2 rel_time1 rel_time2 rel_time3 rel_time4 ///
-    rel_time5 rel_time6 rel_time7 rel_time8 rel_time9 rel_time10 ///
-    rel_time11 rel_time12 rel_time13 rel_time14 rel_time15 ///
-    rel_time16) treatment(udl) cluster(state)
+did2s div_rate, first_stage(i.state i.year) second_stage(rel_timeminus9 rel_timeminus8 rel_timeminus7 rel_timeminus6 rel_timeminus5 rel_timeminus4 rel_timeminus3 rel_timeminus2 rel_time1 rel_time2 rel_time3 rel_time4 rel_time5 rel_time6 rel_time7 rel_time8 rel_time9 rel_time10 rel_time11 rel_time12 rel_time13 rel_time14 rel_time15 rel_time16) treatment(udl) cluster(state)
 ```
 
 ```
@@ -2122,9 +2097,7 @@ Bin at -9 and +16 differ due to endpoint aggregation.
 ```stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-graph combine fig62 g1 g2 g4, cols(2) ///
-    title("Effects of Unilateral Divorce Laws") ///
-    note("95% CIs shown in red. Weighted by state population. SEs clustered at state level.")
+graph combine fig62 g1 g2 g4, cols(2) title("Effects of Unilateral Divorce Laws") note("95% CIs shown in red. Weighted by state population. SEs clustered at state level.")
 ```
 
 ### R

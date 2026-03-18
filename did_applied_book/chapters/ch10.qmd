@@ -251,9 +251,13 @@ All 50 states have different values — confirming continuous treatment in perio
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.dta" "east_et_al_2023.dta", replace
 use "east_et_al_2023.dta", clear
 
-global stcontrols stmarried stblack stother sthsdrop sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 pop45_64 urate incpc maxafdc abortconsent abortmedr
+global stcontrols stmarried stblack stother sthsdrop ///
+    sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 ///
+    pop45_64 urate incpc maxafdc abortconsent abortmedr
 
-did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, effects(5) placebo(5) continuous(1) controls($stcontrols) weight(births) effects_equal("all")
+did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, ///
+    effects(5) placebo(5) continuous(1) ///
+    controls($stcontrols) weight(births) effects_equal("all")
 ```
 
 ```
@@ -321,25 +325,25 @@ res_t5$plot
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
              Estimate SE      LB CI    UB CI    N   Switchers
-Effect_1     -0.07830 0.04202 -0.16067  0.00406 234 28
-Effect_2     -0.10358 0.04177 -0.18544 -0.02171 209 28
-Effect_3     -0.17260 0.05804 -0.28636 -0.05884 187 28
-Effect_4     -0.21166 0.07942 -0.36732 -0.05599 176 28
-Effect_5     -0.24287 0.09643 -0.43186 -0.05388 138 21
+Effect_1     -0.09478 0.04318 -0.17940 -0.01015 234 28
+Effect_2     -0.13574 0.04795 -0.22971 -0.04176 209 28
+Effect_3     -0.21649 0.05893 -0.33199 -0.10099 187 28
+Effect_4     -0.23994 0.08079 -0.39828 -0.08160 176 28
+Effect_5     -0.28655 0.09958 -0.48173 -0.09137 138 21
 
-Test of joint nullity of the effects  : p-value = 0.0743
-Test of equality of the effects       : p-value = 0.3572
+Test of joint nullity of the effects  : p-value = 0.0136
+Test of equality of the effects       : p-value = 0.1857
 
-  Av_tot_eff | -2.21745  0.72240  -3.63333  -0.80157  405  133
+  Av_tot_eff | -2.67436  0.77112  -4.18572  -1.16301  405  133
 Average number of time periods over which a treatment effect is accumulated: 2.8379
 
-Placebo_1    -0.02443 0.03121 -0.08560  0.03675 234 28
-Placebo_2    -0.00238 0.03145 -0.06402  0.05926 209 28
-Placebo_3     0.02319 0.04563 -0.06624  0.11263 187 28
-Placebo_4    -0.00233 0.04560 -0.09171  0.08706 176 28
-Placebo_5    -0.05702 0.04605 -0.14727  0.03323 106 18
+Placebo_1    -0.03336 0.03225 -0.09658  0.02985 234 28
+Placebo_2    -0.01625 0.03383 -0.08254  0.05005 209 28
+Placebo_3     0.01252 0.04733 -0.08024  0.10529 187 28
+Placebo_4    -0.00646 0.04753 -0.09961  0.08669 176 28
+Placebo_5    -0.06084 0.04808 -0.15508  0.03340 106 18
 
-Test of joint nullity of the placebos : p-value = 0.7775
+Test of joint nullity of the placebos : p-value = 0.7210
 ```
 
 ![Figure 10.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm_R.png)
@@ -347,13 +351,9 @@ Test of joint nullity of the placebos : p-value = 0.7775
 ### Python
 
 ```python
-# pip install py-did-multiplegt-dyn pandas pyarrow
+# pip install did-multiplegt-dyn pandas pyarrow
 import pandas as pd
-import polars as pl
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from did_multiplegt_dyn import DidMultiplegtDyn
+from did_multiplegt_dyn import did_multiplegt_dyn
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet")
 
@@ -361,17 +361,21 @@ stcontrols = ["stmarried", "stblack", "stother", "sthsdrop", "sthsgrad",
               "stsomecoll", "pop0_4", "pop5_17", "pop18_24", "pop25_44",
               "pop45_64", "urate", "incpc", "maxafdc", "abortconsent", "abortmedr"]
 
-res_t5 = DidMultiplegtDyn(
-    df=pl.from_pandas(df),
-    outcome="lbw_detrend81", group="plborn", time="dob_y_p", treatment="newsimeli",
-    effects=5, placebo=5, continuous=1, controls=stcontrols,
-    weight="births", effects_equal=True
+res_t5 = did_multiplegt_dyn(
+    df            = df,
+    outcome       = "lbw_detrend81",
+    group         = "plborn",
+    time          = "dob_y_p",
+    treatment     = "newsimeli",
+    effects       = 5,
+    placebo       = 5,
+    continuous    = 1,
+    controls      = stcontrols,
+    weight        = "births",
+    effects_equal = "all"
 )
-res_t5.fit()
-res_t5.summary()
-res_t5.plot()
-plt.savefig("ch09_fig3_medicaid_nonnorm_py.png", dpi=150, bbox_inches="tight")
-plt.close()
+print(res_t5)
+res_t5.plot
 ```
 
 ```
@@ -400,8 +404,6 @@ Placebo_5    -0.060837 0.048084 -0.155080  0.033405 106 18
 Test of joint nullity of the placebos : p-value = 0.720988
 ```
 
-![Figure 10.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm_py.png)
-
 :::
 
 **Interpretation:** A large increase in prenatal Medicaid eligibility significantly reduces the LBW rate. Effects grow with exposure length (from −0.09 to −0.29 in Stata/Python). Pre-trends are small and jointly insignificant, supporting the parallel-trends assumption.
@@ -419,9 +421,14 @@ Test of joint nullity of the placebos : p-value = 0.720988
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.dta" "east_et_al_2023.dta", replace
 use "east_et_al_2023.dta", clear
 
-global stcontrols stmarried stblack stother sthsdrop sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 pop45_64 urate incpc maxafdc abortconsent abortmedr
+global stcontrols stmarried stblack stother sthsdrop ///
+    sthsgrad stsomecoll pop0_4 pop5_17 pop18_24 pop25_44 ///
+    pop45_64 urate incpc maxafdc abortconsent abortmedr
 
-did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, effects(5) placebo(5) continuous(1) controls($stcontrols) weight(births) normalized normalized_weights effects_equal("all")
+did_multiplegt_dyn lbw_detrend81 plborn dob_y_p newsimeli, ///
+    effects(5) placebo(5) continuous(1) ///
+    controls($stcontrols) weight(births) normalized normalized_weights ///
+    effects_equal("all")
 ```
 
 ```
@@ -488,25 +495,25 @@ res_t6$plot
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
              Estimate SE      LB CI    UB CI    N   Switchers
-Effect_1     -1.07310 0.57593 -2.20190  0.05570 234 28
-Effect_2     -0.70876 0.28582 -1.26895 -0.14857 209 28
-Effect_3     -0.78740 0.26479 -1.30637 -0.26842 187 28
-Effect_4     -0.72264 0.27117 -1.25413 -0.19115 176 28
-Effect_5     -0.95151 0.37778 -1.69194 -0.21108 138 21
+Effect_1     -1.29887 0.59173 -2.45863 -0.13910 234 28
+Effect_2     -0.92882 0.32811 -1.57190 -0.28575 209 28
+Effect_3     -0.98762 0.26883 -1.51452 -0.46072 187 28
+Effect_4     -0.81923 0.27583 -1.35984 -0.27861 176 28
+Effect_5     -1.12265 0.39015 -1.88733 -0.35797 138 21
 
-Test of joint nullity of the effects  : p-value = 0.0743
-Test of equality of the effects       : p-value = 0.7912
+Test of joint nullity of the effects  : p-value = 0.0136
+Test of equality of the effects       : p-value = 0.5810
 
-  Av_tot_eff | -2.21745  0.72240  -3.63333  -0.80157  405  133
+  Av_tot_eff | -2.67436  0.77112  -4.18572  -1.16301  405  133
 Average number of time periods over which a treatment effect is accumulated: 2.8379
 
-Placebo_1    -0.33476 0.42774 -1.17311  0.50360 234 28
-Placebo_2    -0.01628 0.21522 -0.43810  0.40554 209 28
-Placebo_3     0.10581 0.20816 -0.30218  0.51379 187 28
-Placebo_4    -0.00794 0.15571 -0.31312  0.29724 176 28
-Placebo_5    -0.20873 0.16857 -0.53912  0.12165 106 18
+Placebo_1    -0.45721 0.44201 -1.32354  0.40912 234 28
+Placebo_2    -0.11117 0.23147 -0.56484  0.34249 209 28
+Placebo_3     0.05714 0.21592 -0.36607  0.48034 187 28
+Placebo_4    -0.02205 0.16226 -0.34008  0.29599 176 28
+Placebo_5    -0.22271 0.17602 -0.56770  0.12228 106 18
 
-Test of joint nullity of the placebos : p-value = 0.7775
+Test of joint nullity of the placebos : p-value = 0.7210
 
 ------------------------------------------------------------
              Weights on treatment lags
@@ -525,13 +532,9 @@ Total 1.000 1.000 1.000 1.000 1.000
 ### Python
 
 ```python
-# pip install py-did-multiplegt-dyn pandas pyarrow
+# pip install did-multiplegt-dyn pandas pyarrow
 import pandas as pd
-import polars as pl
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from did_multiplegt_dyn import DidMultiplegtDyn
+from did_multiplegt_dyn import did_multiplegt_dyn
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/did_applied_book/data/east_et_al_2023.parquet")
 
@@ -539,17 +542,23 @@ stcontrols = ["stmarried", "stblack", "stother", "sthsdrop", "sthsgrad",
               "stsomecoll", "pop0_4", "pop5_17", "pop18_24", "pop25_44",
               "pop45_64", "urate", "incpc", "maxafdc", "abortconsent", "abortmedr"]
 
-res_t6 = DidMultiplegtDyn(
-    df=pl.from_pandas(df),
-    outcome="lbw_detrend81", group="plborn", time="dob_y_p", treatment="newsimeli",
-    effects=5, placebo=5, continuous=1, controls=stcontrols,
-    weight="births", normalized=True, normalized_weights=True, effects_equal=True
+res_t6 = did_multiplegt_dyn(
+    df                 = df,
+    outcome            = "lbw_detrend81",
+    group              = "plborn",
+    time               = "dob_y_p",
+    treatment          = "newsimeli",
+    effects            = 5,
+    placebo            = 5,
+    continuous         = 1,
+    controls           = stcontrols,
+    weight             = "births",
+    normalized         = True,
+    normalized_weights = True,
+    effects_equal      = "all"
 )
-res_t6.fit()
-res_t6.summary()
-res_t6.plot()
-plt.savefig("ch09_fig4_medicaid_norm_py.png", dpi=150, bbox_inches="tight")
-plt.close()
+print(res_t6)
+res_t6.plot
 ```
 
 ```
@@ -569,8 +578,6 @@ Test of equality of the effects       : p-value = 0.581004
   Av_tot_eff | -2.674365  0.771115  -4.185722  -1.163007  405  133
 ```
 
-![Figure 10.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm_py.png)
-
 :::
 
-**Interpretation:** A 1 percentage point increase in prenatal Medicaid eligibility reduces the LBW rate by ~1 percentage point. One cannot reject equality of effects (p = 0.58 in Stata/Python, p = 0.79 in R).
+**Interpretation:** A 1 percentage point increase in prenatal Medicaid eligibility reduces the LBW rate by ~1 percentage point. One cannot reject equality of effects (p = 0.58).

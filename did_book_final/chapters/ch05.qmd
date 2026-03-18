@@ -25,10 +25,7 @@ No event-study plots in this chapter — only numerical outputs from regressions
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 
-panelview prestout has_newspaper, i(cnty90) t(year) type(treat) ///
-    title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)") ///
-    legend(label(1 "No newspaper") label(2 "Has newspaper")) ///
-    ylabel(none) ytitle("")
+panelview prestout has_newspaper, i(cnty90) t(year) type(treat) title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)") legend(label(1 "No newspaper") label(2 "Has newspaper")) ylabel(none) ytitle("")
 graph export "figures/ch05_panelview_stata.png", replace width(1200)
 ```
 
@@ -286,8 +283,7 @@ copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtext
 use "gentzkowetal_didtextbook.dta", clear
 qui tab styr, gen(styr)
 qui areg prestout i.year i.styr numdailies, absorb(cnty90) cluster(cnty90)
-display "numdailies:  coef = " %12.7f _b[numdailies] ///
-   "  se = " %12.7f _se[numdailies]
+display "numdailies:  coef = " %12.7f _b[numdailies] "  se = " %12.7f _se[numdailies]
 ```
 
 ```
@@ -433,8 +429,7 @@ changedailies |   .0025907   .0009351     2.77   0.006     .0007561    .0044252
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
-    type(fdTR) controls(styr1-styr683)
+twowayfeweights changeprestout cnty90 year changedailies numdailies, type(fdTR) controls(styr1-styr683)
 ```
 
 ```
@@ -456,8 +451,7 @@ Total                      9876        1.0000
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
-twowayfeweights changeprestout cnty90 year changedailies numdailies, ///
-    type(fdTR) controls(styr1-styr683) test_random_weights(year)
+twowayfeweights changeprestout cnty90 year changedailies numdailies, type(fdTR) controls(styr1-styr683) test_random_weights(year)
 ```
 
 ```
