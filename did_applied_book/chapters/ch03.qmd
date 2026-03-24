@@ -1,5 +1,5 @@
 ---
-title: "Chapter 11: Gentzkow et al. (2011) — Newspapers and Voter Turnout"
+title: "Chapter 3: Gentzkow et al. (2011) — Newspapers and Voter Turnout"
 ---
 
 **Research Question:** What is the effect of daily newspapers on presidential voter turnout?

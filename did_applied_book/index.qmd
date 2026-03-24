@@ -13,10 +13,10 @@ All datasets are available for direct download in three formats:
 
 | Example | Paper | `.dta` | `.RData` | `.parquet` |
 |---------|-------|--------|----------|------------|
-| 9.1 | Deryugina (2017) | [deryugina_2017.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.parquet) |
-| 9.2 | East et al. (2023) | [east_et_al_2023.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.parquet) |
-| 9.3 | Gentzkow et al. (2011) | [gentzkowetal_didtextbook.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.parquet) |
-| 9.4 | Hollingsworth et al. (2022) | [hollingsworth_et_al_2022.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.parquet) |
+| 1 | Deryugina (2017) | [deryugina_2017.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/deryugina_2017.parquet) |
+| 2 | East et al. (2023) | [east_et_al_2023.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/east_et_al_2023.parquet) |
+| 3 | Gentzkow et al. (2011) | [gentzkowetal_didtextbook.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/gentzkowetal_didtextbook.parquet) |
+| 4 | Hollingsworth et al. (2022) | [hollingsworth_et_al_2022.dta](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.dta) | [.RData](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.RData) | [.parquet](https://github.com/anzonyquispe/did_book/raw/main/did_applied_book/data/hollingsworth_et_al_2022.parquet) |
 
 Alternatively, datasets are bundled with the `did_multiplegt_dyn` Stata package:
 
@@ -52,10 +52,4 @@ pip install pandas pyarrow    # to read .parquet files
 
 :::
 
-## Source code
 
-All replication scripts are available in the repository:
-
-- **Stata:** `did_applied_book/ch09_applied_examples.do`
-- **R:** `did_applied_book/ch09_ex1_deryugina.R`, `ch09_ex2_east.R`, `ch09_ex3_gentzkow.R`, `ch09_ex4_hollingsworth.R`
-- **Python:** `did_applied_book/ch09_python_all.py`

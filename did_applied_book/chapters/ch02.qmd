@@ -1,5 +1,5 @@
 ---
-title: "Chapter 10: East et al. (2023) — Prenatal Medicaid and Low Birth Weight"
+title: "Chapter 2: East et al. (2023) — Prenatal Medicaid and Low Birth Weight"
 ---
 
 **Research Question:** How does prenatal Medicaid expansion affect the share of low-birth-weight (LBW) infants?
@@ -288,7 +288,7 @@ Average number of time periods over which a treatment's effect is accumulated = 
 Test of joint nullity of the placebos : p-value = .72098785
 ```
 
-![Figure 10.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm.png)
+![Figure 2.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm.png)
 
 ### R
 
@@ -346,7 +346,7 @@ Placebo_5    -0.06084 0.04808 -0.15508  0.03340 106 18
 Test of joint nullity of the placebos : p-value = 0.7210
 ```
 
-![Figure 10.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm_R.png)
+![Figure 2.1: Non-Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig3_medicaid_nonnorm_R.png)
 
 ### Python
 
@@ -456,7 +456,7 @@ Test of equality of the effects       : p-value = .58100394
        Total |    1.0000     1.0000     1.0000     1.0000     1.0000
 ```
 
-![Figure 10.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm.png)
+![Figure 2.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm.png)
 
 ### R
 
@@ -527,7 +527,7 @@ k=4   NA    NA    NA    NA    0.200
 Total 1.000 1.000 1.000 1.000 1.000
 ```
 
-![Figure 10.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm_R.png)
+![Figure 2.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm_R.png)
 
 ### Python
 
@@ -562,21 +562,40 @@ res_t6.plot
 ```
 
 ```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate  SE       LB CI     UB CI    N   Switchers
-Effect_1     -1.298867 0.591728 -2.458633 -0.139101 234 28
-Effect_2     -0.928825 0.328107 -1.571902 -0.285747 209 28
-Effect_3     -0.987624 0.268831 -1.514524 -0.460725 187 28
-Effect_4     -0.819227 0.275829 -1.359841 -0.278612 176 28
-Effect_5     -1.122649 0.390152 -1.887333 -0.357966 138 21
-
-Test of joint nullity of the effects  : p-value = 0.013565
-Test of equality of the effects       : p-value = 0.581004
-
-  Av_tot_eff | -2.674365  0.771115  -4.185722  -1.163007  405  133
+================================================================================
+          Weights of Normalized Effects on Current and Lagged Treatments
+================================================================================
+               l=1       l=2       l=3       l=4       l=5
+--------------------------------------------------------------------------------
+     k=0    1.0000    1.0000    1.0000    1.0000    1.0000
+     k=1    0.0000    1.0000    1.0000    1.0000    1.0000
+     k=2    0.0000    0.0000    1.0000    1.0000    1.0000
+     k=3    0.0000    0.0000    0.0000    1.0000    1.0000
+     k=4    0.0000    0.0000    0.0000    0.0000    1.0000
+--------------------------------------------------------------------------------
+   Total    1.0000    2.0000    3.0000    4.0000    5.0000
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI     UB CI     N  Switchers        N.w  Switchers.w
+            Effect_1 -1.298867 0.591728 -2.458633 -0.139101 234.0       28.0 17895714.0    1774650.0
+            Effect_2 -0.928825 0.328107 -1.571902 -0.285747 209.0       28.0 16559188.0    1756460.0
+            Effect_3 -0.987624 0.268831 -1.514524 -0.460725 187.0       28.0 15360486.0    1755764.0
+            Effect_4 -0.819227 0.275829 -1.359841 -0.278612 176.0       28.0 14705169.0    1768408.0
+            Effect_5 -1.122649 0.390152 -1.887332 -0.357966 138.0       21.0 11517655.0    1119166.0
+Average_Total_Effect -2.674365 0.771115 -4.185723 -1.163007 405.0      133.0 30260564.0    8174448.0
+           Placebo_1 -0.457210 0.442013 -1.323539  0.409119 234.0       28.0 17895714.0    1774650.0
+           Placebo_2 -0.111173 0.231466 -0.564837  0.342492 209.0       28.0 16559188.0    1756460.0
+           Placebo_3  0.057138 0.215924 -0.366066  0.480342 187.0       28.0 15360486.0    1755764.0
+           Placebo_4 -0.022046 0.162265 -0.340079  0.295987 176.0       28.0 14705169.0    1768408.0
+           Placebo_5 -0.222708 0.176020 -0.567700  0.122285 106.0       18.0  8718569.0     824485.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.013565
+Test of joint nullity of the placebos: p-value = 0.720988
+Test of equality of the effects: p-value = 0.581004
 ```
+
+![Figure 2.2: Normalized Effects of Prenatal Medicaid on LBW Rate](../figures/ch09_fig4_medicaid_norm_py.png)
 
 :::
 
