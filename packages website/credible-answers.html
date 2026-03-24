@@ -185,7 +185,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
         <span class="lang-pill r">R</span>
         <span class="lang-pill py">Python</span>
       </div>
-      <p class="pkg-desc">Flagship package. Estimates event-study DiD effects with non-binary, absorbing or non-absorbing treatments. Supports placebos, normalized effects, heterogeneity analysis, clustering, and bootstrapping.</p>
+      <p class="pkg-desc">Flagship package. Computes heterogeneity-robust event-study DID estimators, in general designs where the treatment may be non-binary and/or non absorbing, allowing for effects of lagged treatments on the outcome. The package can also be used if the treatment is binary and absorbing. Based on <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3980758" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin and D'Haultfoeuille (2020)</a> and <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3731856" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin and D'Haultfoeuille (2025)</a>.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">Stata</span>
@@ -218,9 +218,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
       </div>
       <div class="lang-row">
         <span class="lang-pill stata">Stata</span>
-        <span class="lang-pill r">R</span>
       </div>
-      <p class="pkg-desc">DiD estimators for treatments and instruments that are continuously distributed at every period, with stayers. For non-binary, non-discrete treatment settings where did_multiplegt_dyn doesn't apply.</p>
+      <p class="pkg-desc">Computes heterogeneity-robust DID estimators, in general designs where the treatment may be non-binary and/or non absorbing, assuming that past treatments do not affect the current outcome. Instead, did_multiplegt_dyn allows for effects of lagged treatments, but allowing for this generality also has some downsides: it may yield harder to interpret estimators, which rely on a parallel-trends assumption over a longer horizon. Based on <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3980758" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin and D'Haultfoeuille (2020)</a> and <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4011782" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin et al (2025)</a>.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">Stata</span>
@@ -249,7 +248,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
         <span class="lang-pill stata">Stata</span>
         <span class="lang-pill r">R</span>
       </div>
-      <p class="pkg-desc">Heterogeneity-robust DiD for designs without pure stayers but with quasi-stayers. Covers settings where all (or almost all) units eventually receive treatment.</p>
+      <p class="pkg-desc">Computes heterogeneity-robust DID estimators, in heterogeneous adoption designs where all units start receiving heterogeneous treatment doses at the same date and no unit remains fully untreated. Thus, this package can be used in some designs without "stayers" (units whose treatment does not change over time), while did_multiplegt_dyn and did_multiplegt_stat require stayers. Based on <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4284811" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin et al (2025)</a>.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">Stata</span>
@@ -307,7 +306,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
         <span class="lang-pill stata">Stata</span>
         <span class="lang-pill r">R</span>
       </div>
-      <p class="pkg-desc">Two complementary linearity tests for panel data. <strong>yatchew_test</strong> (R) implements Yatchew 1997 and dC&amp;DH 2024. <strong>stute_test</strong> (Stata) implements Stute 1997. Use them to test for non-linear treatment response before assuming linearity.</p>
+      <p class="pkg-desc">Non-parametric tests of the linearity of a conditional expectation, based on <a href="https://www.jstor.org/stable/2171950" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Yatchew (1997)</a> and <a href="https://www.jstor.org/stable/2242560" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Stute (1997)</a>. Can be useful to test the homogeneous and linear effect assumption underlying two-way fixed effects regressions in heterogeneous adoption designs.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">R</span>
@@ -407,7 +406,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
       <div class="team-body">
         <div class="team-name">Clément de Chaisemartin</div>
         <div class="team-role">Principal Investigator</div>
-        <div class="team-affil">Sciences Po · NBER<br/>ERC Really Credible Grant Holder</div>
+        <div class="team-affil">Sciences Po · CEPR<br/>ERC Really Credible Grant Holder</div>
         <div class="team-links">
           <a class="team-link" href="https://sites.google.com/site/clementdechaisemartin/" target="_blank">Website</a>
           <a class="team-link" href="https://github.com/Credible-Answers" target="_blank">GitHub</a>

@@ -2,7 +2,7 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Applied Examples with did_multiplegt_dyn",
+    "title": "Using did_multiplegt_dyn in four examples based on real datasets",
     "section": "",
     "text": "Preface\nThis book replicates the four applied examples from:\nEach example is replicated in Stata, R, and Python with hardcoded outputs, following the same format as the companion DiD Textbook Translations.",
     "crumbs": [
@@ -12,7 +12,7 @@
   {
     "objectID": "index.html#datasets",
     "href": "index.html#datasets",
-    "title": "Applied Examples with did_multiplegt_dyn",
+    "title": "Using did_multiplegt_dyn in four examples based on real datasets",
     "section": "Datasets",
     "text": "Datasets\nAll datasets are available for direct download in three formats:\n\n\n\nExample\nPaper\n.dta\n.RData\n.parquet\n\n\n\n\n1\nDeryugina (2017)\nderyugina_2017.dta\n.RData\n.parquet\n\n\n2\nEast et al. (2023)\neast_et_al_2023.dta\n.RData\n.parquet\n\n\n3\nGentzkow et al. (2011)\ngentzkowetal_didtextbook.dta\n.RData\n.parquet\n\n\n4\nHollingsworth et al. (2022)\nhollingsworth_et_al_2022.dta\n.RData\n.parquet\n\n\n\nAlternatively, datasets are bundled with the did_multiplegt_dyn Stata package:\nssc install did_multiplegt_dyn, replace\nnet get did_multiplegt_dyn",
     "crumbs": [
@@ -22,7 +22,7 @@
   {
     "objectID": "index.html#requirements",
     "href": "index.html#requirements",
-    "title": "Applied Examples with did_multiplegt_dyn",
+    "title": "Using did_multiplegt_dyn in four examples based on real datasets",
     "section": "Requirements",
     "text": "Requirements\n\nStataRPython\n\n\nssc install did_multiplegt_dyn, replace\n\n\ninstall.packages(\"DIDmultiplegtDYN\")\ninstall.packages(\"polars\")   # required backend\ninstall.packages(\"haven\")    # to read .dta files\n\n\npip install did-multiplegt-dyn\npip install pandas pyarrow    # to read .parquet files",
     "crumbs": [
