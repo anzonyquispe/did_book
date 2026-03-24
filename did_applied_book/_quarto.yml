@@ -3,7 +3,7 @@ project:
   output-dir: _book
 
 book:
-  title: "Applied Examples with did_multiplegt_dyn"
+  title: "Using did_multiplegt_dyn in four examples based on real datasets"
   author: "de Chaisemartin, Ciccia, Knau, Malézieux, Sow, Arboleda, Angotti, D'Haultfœuille, Li, Fabre & Quispe (2025)"
   chapters:
     - index.qmd
