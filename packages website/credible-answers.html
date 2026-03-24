@@ -111,8 +111,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
 
 /* ANIMATIONS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
-.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in{opacity:1;transform:none}
 @media(max-width:720px){
   nav{padding:0 1.2rem}
   .mission{grid-template-columns:1fr;padding:2rem;margin:0 1rem 3rem}
@@ -128,6 +127,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
   <ul class="nav-links">
     <li><a href="#packages">Packages</a></li>
     <li><a href="#team">Team</a></li>
+    <li><a href="#" style="opacity:.5;cursor:default;pointer-events:none">DiD Book</a></li>
+    <li><a href="https://credible-answers.github.io/did_multiplegt_dyn_book/" target="_blank">Tutorial</a></li>
     <li><a class="btn-nav" href="https://github.com/Credible-Answers" target="_blank">GitHub ↗</a></li>
   </ul>
 </nav>
@@ -139,6 +140,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
   <p>An ecosystem of causal inference tools for panel data — available in Stata, R, and Python — built on the research of de&nbsp;Chaisemartin &amp; D'Haultfoeuille.</p>
   <div class="hero-actions">
     <a class="btn-primary" href="#packages">Explore Packages</a>
+    <a class="btn-secondary" href="#" style="opacity:.55;cursor:default;pointer-events:none">DiD Book — coming soon</a>
+    <a class="btn-secondary" href="https://credible-answers.github.io/did_multiplegt_dyn_book/" target="_blank">did_multiplegt_dyn Tutorial ↗</a>
     <a class="btn-secondary" href="https://github.com/Credible-Answers" target="_blank">GitHub ↗</a>
   </div>
 </div>
@@ -408,7 +411,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
         <div class="team-links">
           <a class="team-link" href="https://sites.google.com/site/clementdechaisemartin/" target="_blank">Website</a>
           <a class="team-link" href="https://github.com/Credible-Answers" target="_blank">GitHub</a>
-          <a class="team-link" href="mailto:chaisemartin.packages@gmail.com">Email</a>
+          <a class="team-link" href="/cdn-cgi/l/email-protection#ddbeb5bcb4aeb8b0bcafa9b4b3f3adbcbeb6bcbab8ae9dbab0bcb4b1f3beb2b0">Email</a>
         </div>
       </div>
     </div>
@@ -529,25 +532,14 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
     <li><a href="https://github.com/Credible-Answers" target="_blank" style="text-decoration:none;font-size:.8rem;color:var(--muted)">GitHub</a></li>
     <li><a href="https://github.com/Credible-Answers/did_multiplegt_dyn" target="_blank" style="text-decoration:none;font-size:.8rem;color:var(--muted)">Docs</a></li>
     <li><a href="https://github.com/Credible-Answers/ReplicationPackages" target="_blank" style="text-decoration:none;font-size:.8rem;color:var(--muted)">Replications</a></li>
-    <li><a href="mailto:chaisemartin.packages@gmail.com" style="text-decoration:none;font-size:.8rem;color:var(--muted)">Contact</a></li>
+    <li><a href="/cdn-cgi/l/email-protection#b4d7dcd5ddc7d1d9d5c6c0ddda9ac4d5d7dfd5d3d1c7f4d3d9d5ddd89ad7dbd9" style="text-decoration:none;font-size:.8rem;color:var(--muted)">Contact</a></li>
   </ul>
   <span style="font-size:.72rem;color:var(--muted)">© 2026 Credible Answers · ERC Really Credible</span>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const obs = new IntersectionObserver(
   es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') }),
   {threshold:.07}
 );
-document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
-
-function copy(btn, text){
-  navigator.clipboard.writeText(text);
-  const o = btn.textContent;
-  btn.textContent = '✓';
-  setTimeout(() => btn.textContent = o, 1500);
-}
-
-</script>
-</body>
-</html>
+document.querySelectorAll('.fade-in').forEach(el => 
