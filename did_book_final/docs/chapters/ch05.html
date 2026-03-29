@@ -226,9 +226,9 @@ window.Quarto = {
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">3.1</span> Overview</a></li>
   <li><a href="#panel-view" id="toc-panel-view" class="nav-link" data-scroll-target="#panel-view"><span class="header-section-number">3.2</span> Panel View</a></li>
-  <li><a href="#basic-twfe-regression" id="toc-basic-twfe-regression" class="nav-link" data-scroll-target="#basic-twfe-regression"><span class="header-section-number">3.3</span> 5.6.1 Basic TWFE Regression</a></li>
-  <li><a href="#twfe-regression-with-state-year-fes" id="toc-twfe-regression-with-state-year-fes" class="nav-link" data-scroll-target="#twfe-regression-with-state-year-fes"><span class="header-section-number">3.4</span> 5.6.2 TWFE Regression with State-Year FEs</a></li>
-  <li><a href="#fd-regression-with-state-year-fes" id="toc-fd-regression-with-state-year-fes" class="nav-link" data-scroll-target="#fd-regression-with-state-year-fes"><span class="header-section-number">3.5</span> 5.6.3 FD Regression with State-Year FEs</a></li>
+  <li><a href="#cq1819-basic-twfe-regression-weight-decomposition" id="toc-cq1819-basic-twfe-regression-weight-decomposition" class="nav-link" data-scroll-target="#cq1819-basic-twfe-regression-weight-decomposition"><span class="header-section-number">3.3</span> CQ#18–19: Basic TWFE Regression &amp; Weight Decomposition</a></li>
+  <li><a href="#cq2021-twfe-regression-with-state-year-fes-weight-decomposition" id="toc-cq2021-twfe-regression-with-state-year-fes-weight-decomposition" class="nav-link" data-scroll-target="#cq2021-twfe-regression-with-state-year-fes-weight-decomposition"><span class="header-section-number">3.4</span> CQ#20–21: TWFE Regression with State-Year FEs &amp; Weight Decomposition</a></li>
+  <li><a href="#cq2224-fd-regression-weight-decomposition-random-weights-test" id="toc-cq2224-fd-regression-weight-decomposition-random-weights-test" class="nav-link" data-scroll-target="#cq2224-fd-regression-weight-decomposition-random-weights-test"><span class="header-section-number">3.5</span> CQ#22–24: FD Regression, Weight Decomposition &amp; Random Weights Test</a></li>
   </ul>
 </nav>
     </div>
@@ -317,8 +317,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="basic-twfe-regression" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="basic-twfe-regression"><span class="header-section-number">3.3</span> 5.6.1 Basic TWFE Regression</h2>
+<section id="cq1819-basic-twfe-regression-weight-decomposition" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="cq1819-basic-twfe-regression-weight-decomposition"><span class="header-section-number">3.3</span> CQ#18–19: Basic TWFE Regression &amp; Weight Decomposition</h2>
 <p>Regress turnout on number of newspapers and county and year FEs, clustering standard errors at the county level. Then decompose <span class="math inline">\(\hat{\beta}^{fe}\)</span> using <code>twowayfeweights</code>.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Python</a></li></ul>
@@ -471,8 +471,8 @@ Total                   10378       1.0000
 </div>
 <hr>
 </section>
-<section id="twfe-regression-with-state-year-fes" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="twfe-regression-with-state-year-fes"><span class="header-section-number">3.4</span> 5.6.2 TWFE Regression with State-Year FEs</h2>
+<section id="cq2021-twfe-regression-with-state-year-fes-weight-decomposition" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="cq2021-twfe-regression-with-state-year-fes-weight-decomposition"><span class="header-section-number">3.4</span> CQ#20–21: TWFE Regression with State-Year FEs &amp; Weight Decomposition</h2>
 <p>Regress turnout on number of newspapers and county, year, and state-year FEs. Then decompose using <code>twowayfeweights</code> with the controls option.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Python</a></li></ul>
@@ -557,8 +557,8 @@ Total                   10342       1.0000
 </div>
 <hr>
 </section>
-<section id="fd-regression-with-state-year-fes" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="fd-regression-with-state-year-fes"><span class="header-section-number">3.5</span> 5.6.3 FD Regression with State-Year FEs</h2>
+<section id="cq2224-fd-regression-weight-decomposition-random-weights-test" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="cq2224-fd-regression-weight-decomposition-random-weights-test"><span class="header-section-number">3.5</span> CQ#22–24: FD Regression, Weight Decomposition &amp; Random Weights Test</h2>
 <p>Regress the change in turnout on the change in number of newspapers and state-year FEs. Decompose using <code>twowayfeweights</code> with <code>type(fdTR)</code>, and test if weights are correlated with the year variable.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false" href="">Python</a></li></ul>
