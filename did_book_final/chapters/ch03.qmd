@@ -74,7 +74,7 @@ plt.show()
 
 ---
 
-## Green Question 1: Static TWFE Regression
+## CQ#1: Static TWFE Regression
 
 > Using the `moser_voena_didtextbook` dataset, run the TWFE regression of the number of patents in subclass $g$ and year $t$ on subclass and year FEs and the `twea` treatment, clustering standard errors at the subclass level.
 
@@ -167,7 +167,7 @@ Ejemplo 2:
 
 ---
 
-## Green Question 2: Equivalence between Static TWFE and DID
+## CQ#2: Equivalence between Static TWFE and DID
 
 > Verify that $\hat{\beta}_{fe}$ equals the coefficient on `twea` in a regression on the treatment group indicator, the post indicator, and `twea`.
 
@@ -242,7 +242,7 @@ print(m2.summary())
 
 ---
 
-## Green Question 3: Testing Randomized Treatment
+## CQ#3: Testing Randomized Treatment
 
 > Regress patents on the treatment group indicator, restricting the sample to years before 1919.
 
@@ -312,7 +312,7 @@ print(m3.summary())
 
 ---
 
-## Green Question 4: Event-Study TWFE Regression
+## CQ#4–7: Event-Study TWFE Regression
 
 > Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that $\hat{\beta}_1^{fe}$ equals the DID from equation (3.7).
 
@@ -531,7 +531,7 @@ plt.savefig("figures/ch03_fig32_es_twfe_Python.png", dpi=150, bbox_inches="tight
 
 ---
 
-## Green Question 5: Event-Study without Pre-Trends
+## CQ#9: Event-Study without Pre-Trends
 
 > Re-estimate the event-study using only post-treatment dummies. This is numerically equivalent to Borusyak, Jaravel, and Spiess (2024).
 
@@ -671,7 +671,7 @@ RMSE: 1.337 R2: 0.026 R2 Within: 0.001
 
 ---
 
-## Green Question 6: Linear Pre-Trends We Could Fail to Detect
+## CQ#8: Linear Pre-Trends We Could Fail to Detect
 
 > Use the `pretrends` package (Roth, 2022) to compute the slope detectable with 50% power using 6 pre-periods.
 
@@ -763,7 +763,7 @@ Slope for 50% power (numpre=6): 0.0098252
 
 ---
 
-## Green Question 7: Variance of Treatment Effects
+## CQ#10: Variance of Treatment Effects
 
 > Compare the variance of `diffpatentswrt1918` in treatment and control groups in 1932.
 
@@ -862,7 +862,7 @@ CI: [0.173812, 1.110620]
 
 ---
 
-## Green Question 8: Placebo Test
+## CQ#10 (cont.): Placebo Test
 
 > Perform a placebo test by comparing the variances of `diffpatentswrt1918` across all years.
 

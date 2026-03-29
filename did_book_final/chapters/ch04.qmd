@@ -74,7 +74,7 @@ plt.show()
 
 ---
 
-## 4.1 TWFE with Controls (controlling for patents in 1900)
+## CQ#11: TWFE with Controls (controlling for patents in 1900)
 
 > Estimate the event-study TWFE regression controlling for `year#patents1900` interactions. Are the estimated event-study effects with controls very different from those without controls?
 
@@ -365,7 +365,7 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 
 ---
 
-## 4.1.2 DID with Nonparametric Trends (`did_multiplegt_dyn`)
+## CQ#12: DID with Nonparametric Trends (`did_multiplegt_dyn`)
 
 > Use the `did_multiplegt_dyn` command to perform the same estimation with `trends_nonparam(patents1900)`. Are results very different from those you obtained with the TWFE ES regression with controls?
 
@@ -601,7 +601,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ---
 
-## 4.2 Interactive Fixed Effects (IFE)
+## CQ#13–14: Interactive Fixed Effects (IFE)
 
 > Use `fect` to determine by cross-validation the optimal number of factors. Then estimate the TWFE-IFE model with bootstrap standard errors.
 
@@ -679,7 +679,7 @@ IFE ATT = 0.296834
 
 ---
 
-## 4.2.2 Synthetic Control (SC)
+## CQ#15: Synthetic Control (SC)
 
 > Install the `sdid_event` package and compute event-study SC estimators with 200 bootstrap replications.
 
@@ -806,7 +806,7 @@ Demeaned SC ATT = 0.474263
 
 ---
 
-## 4.2.3 Synthetic Difference-in-Differences (SDID)
+## CQ#16: Synthetic Difference-in-Differences (SDID)
 
 > Compute event-study SD estimators with 200 bootstrap replications.
 
@@ -855,7 +855,7 @@ Synthetic Difference-in-differences
 
 ---
 
-## 4.3 Sensitivity Analysis (Rambachan & Roth / HonestDiD)
+## CQ#17: Sensitivity Analysis (Rambachan & Roth / HonestDiD)
 
 > Run the ES-TWFER with pre-trend variables ordered from last to first, including a reference period variable `reltimeminus0`, then run `honestdid` with 18 pre-periods and 21 post-periods. Is the 95% CI for ATT1 produced by the command much wider than that produced by the ES-TWFER?
 

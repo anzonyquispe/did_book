@@ -72,7 +72,7 @@ norm = mcolors.Normalize(vmin=0, vmax=df['ntrgap'].max() * 1.1)
 
 ---
 
-## GQ1 (§7.3.1): TWFE Regressions
+## CQ#36: TWFE Regressions
 
 > Regress $\Delta_{2000}^t Y_g$ on $D_g$ (NTR gap) for $t \in \{2001, 2002, 2004, 2005\}$, with HC2 standard errors.
 
@@ -177,7 +177,7 @@ for year in [2001, 2002, 2004, 2005]:
 
 ---
 
-## GQ2 (§7.3.1): Decompose TWFE Weights
+## CQ#37: Decompose TWFE Weights
 
 > Use `twowayfeweights` with `type(fdTR)` to assess whether $\hat{\beta}_{fe}$ estimates a convex combination of effects.
 
@@ -268,7 +268,7 @@ Total                   103         1.0000
 
 ---
 
-## GQ3 (§7.3.3): Test Random Assignment of Treatment Dose
+## CQ#38: Test Random Assignment of Treatment Dose
 
 > Regress the NTR gap on pre-treatment employment levels (1997–2000) and test their joint significance.
 
@@ -346,7 +346,7 @@ F(4, 98) = 2.3901     Prob > F = 0.0560
 
 ---
 
-## GQ4 (§7.3.4.3): Stute Tests of Linearity
+## Stute Tests of Linearity (extra)
 
 > Test whether $E[\Delta Y | D]$ is linear in $D$ using the Stute (1997) Cramér–von Mises test, for each post-treatment year and jointly.
 
@@ -473,7 +473,7 @@ Panel Joint Test:
 
 ---
 
-## GQ5 (§7.3.4.5): Pre-Trend Tests (Without Linear Trends)
+## Pre-Trend Tests — Without Linear Trends (extra)
 
 > Test for pre-trends by regressing $\Delta_{2000}^t Y_g$ on $D_g$ for $t \in \{1999, 1998, 1997\}$.
 
@@ -559,7 +559,7 @@ for year in [1999, 1998, 1997]:
 
 ---
 
-## GQ6 (§7.3.4.5): Pre-Trend Tests WITH Linear Trends
+## Pre-Trend Tests — With Linear Trends (extra)
 
 > Repeat GQ5 using the detrended outcome $\tilde{\Delta}_{2000}^t Y_g$ (netting out industry-specific linear trends).
 
@@ -632,7 +632,7 @@ for year in [1998, 1997]:
 
 ---
 
-## GQ7 (§7.3.4.5): Stute Tests of Mean Independence (With Linear Trends)
+## Stute Tests of Mean Independence (extra)
 
 > Test whether $E[\tilde{\Delta} Y | D] = \text{const}$ (mean independence, order 0) for the detrended pre-period outcomes.
 
@@ -738,7 +738,7 @@ Joint        |  0.0011769      0.530
 
 ---
 
-## GQ8 (§7.3.4.5): TWFE With Industry-Specific Linear Trends
+## TWFE With Industry-Specific Linear Trends (extra)
 
 > Regress the detrended outcome $\tilde{\Delta}_{2000}^t Y_g$ on $D_g$ for post-treatment years.
 
@@ -843,7 +843,7 @@ for year in [2001, 2002, 2004, 2005]:
 
 ---
 
-## GQ9 (§7.3.4.5): Stute Tests of Linearity (With Linear Trends)
+## Stute Tests of Linearity — With Linear Trends (extra)
 
 > Test linearity of $E[\tilde{\Delta} Y | D]$ for the detrended post-treatment outcomes.
 
@@ -1024,7 +1024,7 @@ QS = D(1)/(D(2)-D(1)) = 6.1498877
 
 ---
 
-## Computing Commands (§7.3.2.2): `contdid` and `did_multiplegt_stat` Syntax
+## Computing Commands: `contdid` and `did_multiplegt_stat` Syntax (extra)
 
 > This section documents the syntax of the commands for estimating $CAS(d_2)$, $ATT$, and $WATT$ in heterogeneous adoption designs **with stayers**. These commands are not applied to the Pierce & Schott data (which has no stayers), but their syntax is provided here for reference as shown in the textbook.
 
@@ -1095,7 +1095,7 @@ summary_did_multiplegt_stat(result)
 
 ---
 
-## GQ10 (§7.3.5): `did_had` Event-Study Estimates
+## CQ#39: `did_had` Event-Study Estimates
 
 > Using the `pierce_schott_didtextbook` dataset, transform the data into a panel at the industry $\times$ year level, with industries' log-employment and NTR gap treatment from 1997 to 2005. Then, use `did_had` to compute four event-study estimates and three pre-trend estimates.
 

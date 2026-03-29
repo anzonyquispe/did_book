@@ -1,8 +1,8 @@
 # Preface {.unnumbered}
 
-This book provides complete, executable solutions to all **green questions** (coding exercises) from:
+This book provides complete, executable solutions to all **computer questions** (CQs) from:
 
-> **Credible Answers to Hard Questions: Differences-in-Differences for Natural Experiments**
+> **Difference-in-Differences for Natural Experiments**
 > by Clément de Chaisemartin & Xavier D'Haultfœuille (Princeton University Press, forthcoming)
 
 Every exercise is solved in **three programming languages** — Stata, R, and Python — and the code **executes directly** inside this book, producing outputs, tables, and graphs so the reader can verify that results are exactly the same across all three languages.

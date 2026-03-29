@@ -226,12 +226,12 @@ window.Quarto = {
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">2.1</span> Overview</a></li>
   <li><a href="#panel-view" id="toc-panel-view" class="nav-link" data-scroll-target="#panel-view"><span class="header-section-number">2.2</span> Panel View</a></li>
-  <li><a href="#twfe-with-controls-controlling-for-patents-in-1900" id="toc-twfe-with-controls-controlling-for-patents-in-1900" class="nav-link" data-scroll-target="#twfe-with-controls-controlling-for-patents-in-1900"><span class="header-section-number">2.3</span> 4.1 TWFE with Controls (controlling for patents in 1900)</a></li>
-  <li><a href="#did-with-nonparametric-trends-did_multiplegt_dyn" id="toc-did-with-nonparametric-trends-did_multiplegt_dyn" class="nav-link" data-scroll-target="#did-with-nonparametric-trends-did_multiplegt_dyn"><span class="header-section-number">2.4</span> 4.1.2 DID with Nonparametric Trends (<code>did_multiplegt_dyn</code>)</a></li>
-  <li><a href="#interactive-fixed-effects-ife" id="toc-interactive-fixed-effects-ife" class="nav-link" data-scroll-target="#interactive-fixed-effects-ife"><span class="header-section-number">2.5</span> 4.2 Interactive Fixed Effects (IFE)</a></li>
-  <li><a href="#synthetic-control-sc" id="toc-synthetic-control-sc" class="nav-link" data-scroll-target="#synthetic-control-sc"><span class="header-section-number">2.6</span> 4.2.2 Synthetic Control (SC)</a></li>
-  <li><a href="#synthetic-difference-in-differences-sdid" id="toc-synthetic-difference-in-differences-sdid" class="nav-link" data-scroll-target="#synthetic-difference-in-differences-sdid"><span class="header-section-number">2.7</span> 4.2.3 Synthetic Difference-in-Differences (SDID)</a></li>
-  <li><a href="#sensitivity-analysis-rambachan-roth-honestdid" id="toc-sensitivity-analysis-rambachan-roth-honestdid" class="nav-link" data-scroll-target="#sensitivity-analysis-rambachan-roth-honestdid"><span class="header-section-number">2.8</span> 4.3 Sensitivity Analysis (Rambachan &amp; Roth / HonestDiD)</a></li>
+  <li><a href="#cq11-twfe-with-controls-controlling-for-patents-in-1900" id="toc-cq11-twfe-with-controls-controlling-for-patents-in-1900" class="nav-link" data-scroll-target="#cq11-twfe-with-controls-controlling-for-patents-in-1900"><span class="header-section-number">2.3</span> CQ#11: TWFE with Controls (controlling for patents in 1900)</a></li>
+  <li><a href="#cq12-did-with-nonparametric-trends-did_multiplegt_dyn" id="toc-cq12-did-with-nonparametric-trends-did_multiplegt_dyn" class="nav-link" data-scroll-target="#cq12-did-with-nonparametric-trends-did_multiplegt_dyn"><span class="header-section-number">2.4</span> CQ#12: DID with Nonparametric Trends (<code>did_multiplegt_dyn</code>)</a></li>
+  <li><a href="#cq1314-interactive-fixed-effects-ife" id="toc-cq1314-interactive-fixed-effects-ife" class="nav-link" data-scroll-target="#cq1314-interactive-fixed-effects-ife"><span class="header-section-number">2.5</span> CQ#13–14: Interactive Fixed Effects (IFE)</a></li>
+  <li><a href="#cq15-synthetic-control-sc" id="toc-cq15-synthetic-control-sc" class="nav-link" data-scroll-target="#cq15-synthetic-control-sc"><span class="header-section-number">2.6</span> CQ#15: Synthetic Control (SC)</a></li>
+  <li><a href="#cq16-synthetic-difference-in-differences-sdid" id="toc-cq16-synthetic-difference-in-differences-sdid" class="nav-link" data-scroll-target="#cq16-synthetic-difference-in-differences-sdid"><span class="header-section-number">2.7</span> CQ#16: Synthetic Difference-in-Differences (SDID)</a></li>
+  <li><a href="#cq17-sensitivity-analysis-rambachan-roth-honestdid" id="toc-cq17-sensitivity-analysis-rambachan-roth-honestdid" class="nav-link" data-scroll-target="#cq17-sensitivity-analysis-rambachan-roth-honestdid"><span class="header-section-number">2.8</span> CQ#17: Sensitivity Analysis (Rambachan &amp; Roth / HonestDiD)</a></li>
   <li><a href="#summary-of-results" id="toc-summary-of-results" class="nav-link" data-scroll-target="#summary-of-results"><span class="header-section-number">2.9</span> Summary of Results</a></li>
   </ul>
 </nav>
@@ -317,8 +317,8 @@ window.Quarto = {
 </div>
 <hr>
 </section>
-<section id="twfe-with-controls-controlling-for-patents-in-1900" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="twfe-with-controls-controlling-for-patents-in-1900"><span class="header-section-number">2.3</span> 4.1 TWFE with Controls (controlling for patents in 1900)</h2>
+<section id="cq11-twfe-with-controls-controlling-for-patents-in-1900" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="cq11-twfe-with-controls-controlling-for-patents-in-1900"><span class="header-section-number">2.3</span> CQ#11: TWFE with Controls (controlling for patents in 1900)</h2>
 <blockquote class="blockquote">
 <p>Estimate the event-study TWFE regression controlling for <code>year#patents1900</code> interactions. Are the estimated event-study effects with controls very different from those without controls?</p>
 </blockquote>
@@ -579,8 +579,8 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 <p><strong>Result:</strong> The pre-trends are individually mostly insignificant but jointly significant (F = 5.07, p &lt; 0.001). The covariate <code>patents1900</code> is correlated with treatment (coef = −0.156312, p &lt; 0.001), making controls necessary.</p>
 <hr>
 </section>
-<section id="did-with-nonparametric-trends-did_multiplegt_dyn" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="did-with-nonparametric-trends-did_multiplegt_dyn"><span class="header-section-number">2.4</span> 4.1.2 DID with Nonparametric Trends (<code>did_multiplegt_dyn</code>)</h2>
+<section id="cq12-did-with-nonparametric-trends-did_multiplegt_dyn" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="cq12-did-with-nonparametric-trends-did_multiplegt_dyn"><span class="header-section-number">2.4</span> CQ#12: DID with Nonparametric Trends (<code>did_multiplegt_dyn</code>)</h2>
 <blockquote class="blockquote">
 <p>Use the <code>did_multiplegt_dyn</code> command to perform the same estimation with <code>trends_nonparam(patents1900)</code>. Are results very different from those you obtained with the TWFE ES regression with controls?</p>
 </blockquote>
@@ -798,8 +798,8 @@ Test of joint nullity of the placebos : p-value = 1.685e-12</code></pre>
 <p><strong>Result:</strong> The <code>did_multiplegt_dyn</code> estimates with <code>trends_nonparam(patents1900)</code> are very close to the TWFE ES estimates with controls. The average total effect is <strong>0.2893714</strong> (SE = 0.0489889). All estimates match across Stata, R, and Python to 7 decimal places.</p>
 <hr>
 </section>
-<section id="interactive-fixed-effects-ife" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="interactive-fixed-effects-ife"><span class="header-section-number">2.5</span> 4.2 Interactive Fixed Effects (IFE)</h2>
+<section id="cq1314-interactive-fixed-effects-ife" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="cq1314-interactive-fixed-effects-ife"><span class="header-section-number">2.5</span> CQ#13–14: Interactive Fixed Effects (IFE)</h2>
 <blockquote class="blockquote">
 <p>Use <code>fect</code> to determine by cross-validation the optimal number of factors. Then estimate the TWFE-IFE model with bootstrap standard errors.</p>
 </blockquote>
@@ -859,8 +859,8 @@ IFE ATT = 0.296834</code></pre>
 <p><strong>Result:</strong> Cross-validation selects <strong>r* = 2</strong> factors in both Stata and R. The ATT is <strong>0.296655</strong> (Stata) and <strong>0.296834</strong> (R) — virtually identical (bootstrap variability). The <code>fect</code> package is not available in Python.</p>
 <hr>
 </section>
-<section id="synthetic-control-sc" class="level2" data-number="2.6">
-<h2 data-number="2.6" class="anchored" data-anchor-id="synthetic-control-sc"><span class="header-section-number">2.6</span> 4.2.2 Synthetic Control (SC)</h2>
+<section id="cq15-synthetic-control-sc" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="cq15-synthetic-control-sc"><span class="header-section-number">2.6</span> CQ#15: Synthetic Control (SC)</h2>
 <blockquote class="blockquote">
 <p>Install the <code>sdid_event</code> package and compute event-study SC estimators with 200 bootstrap replications.</p>
 </blockquote>
@@ -969,8 +969,8 @@ Demeaned SC ATT = 0.474263
 <p><strong>Result:</strong> The demeaned SC ATT is <strong>0.474263</strong> in both Stata and R. The standard SC differs slightly (Stata: 0.414370, R: 0.491647) due to different implementations (<code>sdid_event</code> vs <code>synthdid</code>). SC estimators are noisier than TWFE, with some implausibly large or negative period-specific effects. The <code>synthdid</code> and <code>sdid_event</code> packages are not available in Python.</p>
 <hr>
 </section>
-<section id="synthetic-difference-in-differences-sdid" class="level2" data-number="2.7">
-<h2 data-number="2.7" class="anchored" data-anchor-id="synthetic-difference-in-differences-sdid"><span class="header-section-number">2.7</span> 4.2.3 Synthetic Difference-in-Differences (SDID)</h2>
+<section id="cq16-synthetic-difference-in-differences-sdid" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="cq16-synthetic-difference-in-differences-sdid"><span class="header-section-number">2.7</span> CQ#16: Synthetic Difference-in-Differences (SDID)</h2>
 <blockquote class="blockquote">
 <p>Compute event-study SD estimators with 200 bootstrap replications.</p>
 </blockquote>
@@ -1013,8 +1013,8 @@ Demeaned SC ATT = 0.474263
 <p><strong>Result:</strong> The SDID ATT is <strong>0.3019373</strong> (Stata). The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The <code>sdid_event</code> package is only available in Stata.</p>
 <hr>
 </section>
-<section id="sensitivity-analysis-rambachan-roth-honestdid" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="sensitivity-analysis-rambachan-roth-honestdid"><span class="header-section-number">2.8</span> 4.3 Sensitivity Analysis (Rambachan &amp; Roth / HonestDiD)</h2>
+<section id="cq17-sensitivity-analysis-rambachan-roth-honestdid" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="cq17-sensitivity-analysis-rambachan-roth-honestdid"><span class="header-section-number">2.8</span> CQ#17: Sensitivity Analysis (Rambachan &amp; Roth / HonestDiD)</h2>
 <blockquote class="blockquote">
 <p>Run the ES-TWFER with pre-trend variables ordered from last to first, including a reference period variable <code>reltimeminus0</code>, then run <code>honestdid</code> with 18 pre-periods and 21 post-periods. Is the 95% CI for ATT1 produced by the command much wider than that produced by the ES-TWFER?</p>
 </blockquote>
