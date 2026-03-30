@@ -1354,13 +1354,15 @@ N = 1565  |  R-sq = 0.9404
 import pandas as pd
 import re
 import numpy as np
+import pyfixest as pf
 from scipy import stats
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
 # Sun & Abraham (2021) IW estimator via saturated regression
 # Step 1: Exclude always-treated (1956), drop NAs, create rel_time
 df6 = df[(df['controlgroup'] == 1) | ((df['cohort'] > 0) & (df['cohort'] != 1956))].copy()
 df6 = df6.dropna(subset=['div_rate'])
-treated_cohorts = sorted([c for c in df6['cohort'].unique() if c > 0])
+df6['cohort'] = df6['cohort'].astype(int)
+treated_cohorts = sorted([int(c) for c in df6['cohort'].unique() if c > 0])
 df6['cohort_yr'] = df6['cohort'].replace(0, np.inf)
 df6['rel_time'] = df6['year'] - (df6['cohort_yr'] - 1)
 df6.loc[df6['cohort'] == 0, 'rel_time'] = np.inf
@@ -1376,18 +1378,12 @@ vcov_mat = m6_sat._vcov
 coefnames = coefs.index.tolist()
 
 # Step 3: IW aggregation by relative time
-event_times = sorted(set(
-    float(re.search(r'\[(-?\d+\.?\d*)\]', n).group(1))
-    for n in coefnames if re.search(r'\[(-?\d+\.?\d*)\]', n)
-))
-report_range = [e for e in event_times if -13 <= e <= 13 and e != 0]
-
+report_range = list(range(-13, 0)) + list(range(1, 14))
 for e in report_range:
     cohort_idx = {}
     for c in treated_cohorts:
-        target = f'[{e}]:coh_{c}'
         for i, name in enumerate(coefnames):
-            if target in name:
+            if f'[{float(e)}]:coh_{c}' in name:
                 cohort_idx[c] = i; break
     if not cohort_idx: continue
     shares = {}
@@ -1395,6 +1391,7 @@ for e in report_range:
         mask = (df6['cohort'] == c) & (df6['year'] == int(c - 1 + e))
         shares[c] = df6.loc[mask, 'stpop'].sum()
     total = sum(shares.values())
+    if total == 0: continue
     R = np.zeros(len(coefs))
     for c, idx in cohort_idx.items():
         R[idx] = shares[c] / total

@@ -80,7 +80,7 @@ plt.show()
 
 ---
 
-## CQ#18–19: Basic TWFE Regression & Weight Decomposition
+## 5.6.1 Basic TWFE Regression
 
 Regress turnout on number of newspapers and county and year FEs, clustering standard errors at the county level. Then decompose $\hat{\beta}^{fe}$ using `twowayfeweights`.
 
@@ -246,10 +246,11 @@ year::1928             -0.1102546    0.0108236     -10.19      0.000 [-0.1314688
 
 ```python
 import pandas as pd
-from twowayfeweights import twowayfeweights
+from twowayfeweights import twowayfeweights, print_twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
                           type="feTR")
+print_twowayfeweights(result, D_name="numdailies", type="feTR")
 ```
 
 ```
@@ -270,7 +271,7 @@ Total                   10378       1.0000
 
 ---
 
-## CQ#20–21: TWFE Regression with State-Year FEs & Weight Decomposition
+## 5.6.2 TWFE Regression with State-Year FEs
 
 Regress turnout on number of newspapers and county, year, and state-year FEs. Then decompose using `twowayfeweights` with the controls option.
 
@@ -315,7 +316,7 @@ Total                   10342       1.0000
 ### R
 
 ```r
-library(haven)
+library(haven); library(fixest)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 model2 <- feols(prestout ~ numdailies + i(year) + i(styr) | cnty90,
                 data = df, cluster = ~cnty90,
@@ -327,8 +328,12 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```r
-library(haven)
+library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
+colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
+df <- cbind(df, styr_dummies)
+styr_cols <- paste0("styr", 1:ncol(styr_dummies))
 decomp2 <- twowayfeweights(df, "prestout", "cnty90", "year",
                             "numdailies", type = "feTR",
                             controls = styr_cols)
@@ -350,6 +355,7 @@ Total                     10342            1
 
 ```python
 import pandas as pd
+import pyfixest as pf
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 m2 = pf.feols(
     "prestout ~ numdailies + C(year) + C(styr) | cnty90",
@@ -366,11 +372,13 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 
 ```python
 import pandas as pd
+from twowayfeweights import twowayfeweights, print_twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 # Decomposition with state-year controls
 styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
 result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
                           type="feTR", controls=styr_cols)
+print_twowayfeweights(result, D_name="numdailies", type="feTR")
 ```
 
 ```
@@ -392,7 +400,7 @@ Total                   10342       1.0000
 
 ---
 
-## CQ#22–24: FD Regression, Weight Decomposition & Random Weights Test
+## 5.6.3 FD Regression with State-Year FEs
 
 Regress the change in turnout on the change in number of newspapers and state-year FEs. Decompose using `twowayfeweights` with `type(fdTR)`, and test if weights are correlated with the year variable.
 
@@ -464,7 +472,7 @@ year    -.1674271    .05101171   -3.2821307    -.0631614
 ### R
 
 ```r
-library(haven)
+library(haven); library(fixest)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 model3 <- feols(changeprestout ~ changedailies | styr,
                 data = df, cluster = ~cnty90,
@@ -481,8 +489,12 @@ changedailies                0.0025907    0.0009345       2.77     0.0057    0.0
 ```
 
 ```r
-library(haven)
+library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
+colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
+df <- cbind(df, styr_dummies)
+styr_cols <- paste0("styr", 1:ncol(styr_dummies))
 decomp3 <- twowayfeweights(df, "changeprestout", "cnty90", "year",
                             "changedailies", D0 = "numdailies",
                             type = "fdTR", controls = styr_cols)
@@ -501,8 +513,12 @@ Total                        9876            1
 ```
 
 ```r
-library(haven)
+library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
+colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
+df <- cbind(df, styr_dummies)
+styr_cols <- paste0("styr", 1:ncol(styr_dummies))
 decomp3_test <- twowayfeweights(df, "changeprestout", "cnty90", "year",
                                  "changedailies", D0 = "numdailies",
                                  type = "fdTR", controls = styr_cols,
@@ -519,6 +535,7 @@ RW_year -0.1674271 0.05101171 -3.282131  -0.0631614
 
 ```python
 import pandas as pd
+import pyfixest as pf
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 m3 = pf.feols(
     "changeprestout ~ changedailies | styr",
@@ -543,11 +560,14 @@ changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580
 
 ```python
 import pandas as pd
+from twowayfeweights import twowayfeweights, print_twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 # FD weight decomposition (fdTR type)
+styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
 result3 = twowayfeweights(df, "changeprestout", "cnty90", "year",
                            "changedailies", type="fdTR", D0="numdailies",
                            controls=styr_cols)
+print_twowayfeweights(result3, D_name="changedailies", type="fdTR")
 ```
 
 ```
@@ -567,11 +587,14 @@ Total                   9876        1.0000
 
 ```python
 import pandas as pd
+from twowayfeweights import twowayfeweights, print_twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
 # Test random weights (year)
+styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
 result3b = twowayfeweights(df, "changeprestout", "cnty90", "year",
                             "changedailies", type="fdTR", D0="numdailies",
                             controls=styr_cols, test_random_weights="year")
+print_twowayfeweights(result3b, D_name="changedailies", type="fdTR")
 ```
 
 ```
