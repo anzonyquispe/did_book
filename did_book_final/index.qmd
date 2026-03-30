@@ -22,7 +22,6 @@ Download the dataset in your preferred format and place it in your working direc
 
 ## Requirements
 
-- **Quarto** ≥ 1.4: <https://quarto.org/docs/download/>
 - **Stata 17+** with `nbstata`: `pip install nbstata && python -m nbstata.install`
 - **R** with packages: `install.packages(c("haven", "fixest", "dplyr", "ggplot2", "broom", "car"))`
 - **Python** with packages: `pip install pandas numpy pyfixest scipy matplotlib pyreadstat`

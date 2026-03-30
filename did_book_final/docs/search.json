@@ -24,7 +24,7 @@
     "href": "index.html#requirements",
     "title": "DID Textbook: Translations",
     "section": "Requirements",
-    "text": "Requirements\n\nQuarto ≥ 1.4: https://quarto.org/docs/download/\nStata 17+ with nbstata: pip install nbstata && python -m nbstata.install\nR with packages: install.packages(c(\"haven\", \"fixest\", \"dplyr\", \"ggplot2\", \"broom\", \"car\"))\nPython with packages: pip install pandas numpy pyfixest scipy matplotlib pyreadstat",
+    "text": "Requirements\n\nStata 17+ with nbstata: pip install nbstata && python -m nbstata.install\nR with packages: install.packages(c(\"haven\", \"fixest\", \"dplyr\", \"ggplot2\", \"broom\", \"car\"))\nPython with packages: pip install pandas numpy pyfixest scipy matplotlib pyreadstat",
     "crumbs": [
       "Preface"
     ]
