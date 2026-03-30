@@ -80,7 +80,7 @@ plt.show()
 
 ---
 
-## 5.6.1 Basic TWFE Regression
+## CQ#18–19: Basic TWFE Regression & Weight Decomposition
 
 Regress turnout on number of newspapers and county and year FEs, clustering standard errors at the county level. Then decompose $\hat{\beta}^{fe}$ using `twowayfeweights`.
 
@@ -271,7 +271,7 @@ Total                   10378       1.0000
 
 ---
 
-## 5.6.2 TWFE Regression with State-Year FEs
+## CQ#20–21: TWFE Regression with State-Year FEs & Weight Decomposition
 
 Regress turnout on number of newspapers and county, year, and state-year FEs. Then decompose using `twowayfeweights` with the controls option.
 
@@ -400,7 +400,7 @@ Total                   10342       1.0000
 
 ---
 
-## 5.6.3 FD Regression with State-Year FEs
+## CQ#22–24: FD Regression, Weight Decomposition & Random Weights Test
 
 Regress the change in turnout on the change in number of newspapers and state-year FEs. Decompose using `twowayfeweights` with `type(fdTR)`, and test if weights are correlated with the year variable.
 
