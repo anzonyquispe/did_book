@@ -2007,40 +2007,41 @@ Placebo_13  0.0256646  0.1832985 -0.3335925  0.3849217  160.0      24.0</code></
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_imputation, <span class="kw">replace</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta"</span> <span class="st">"wolfers2006_didtextbook.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"wolfers2006_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>did_imputation div_rate state <span class="fu">year</span> cohort [<span class="kw">aweight</span>=stpop], horizons(0/12) autosample minn(0) pre(13)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="kw">replace</span> cohort=. <span class="kw">if</span> cohort==0</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>did_imputation div_rate state <span class="fu">year</span> cohort [<span class="kw">aweight</span>=stpop], horizons(0/12) autosample minn(0) pre(13)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Warning: part of the sample was dropped for the following coefficients because
 FE could not be imputed: tau0 tau1 tau2 ... tau12.
 
-                                                           Number of obs = 812
+                                                           Number of obs = 1,471
 ------------------------------------------------------------------------------
     div_rate | Coefficient  Std. err.      z    P&gt;|z|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        tau0 |   .3982088    .083689     4.76   0.000     .2341813    .5622362
-        tau1 |   .4858059   .0994445     4.89   0.000     .2908982    .6807135
-        tau2 |   .4033853   .1164078     3.47   0.001     .1752302    .6315404
-        tau3 |   .3432607   .1252577     2.74   0.006       .09776    .5887614
-        tau4 |    .293705   .1239472     2.37   0.018      .050773    .5366369
-        tau5 |   .2824907   .1446266     1.95   0.051    -.0009722    .5659535
-        tau6 |    .226243   .1360518     1.66   0.096    -.0404136    .4928996
-        tau7 |   .1637751   .1010199     1.62   0.105    -.0342203    .3617705
-        tau8 |   .0001362   .0883071     0.00   0.999    -.1729425    .1732148
-        tau9 |   -.130082   .1076979    -1.21   0.227     -.341166    .0810021
-       tau10 |  -.1588139   .1158352    -1.37   0.170    -.3858467    .0682189
-       tau11 |    -.29496   .1321315    -2.23   0.026     -.553933    -.035987
-       tau12 |  -.2524661   .0517455    -4.88   0.000    -.3538854   -.1510468
-        pre1 |   .5210023   .2614443     1.99   0.046     .0085809    1.033424
-        pre2 |   .4469163   .2395986     1.87   0.062    -.0226883    .9165209
-        pre3 |   .3810802   .2364828     1.61   0.107    -.0824175    .8445779
-        pre4 |    .385571   .2401448     1.61   0.108    -.0851042    .8562462
-        pre5 |   .3062643    .261149     1.17   0.241    -.2055784    .8181071
-        pre6 |   .1946564   .2177908     0.89   0.371    -.2322057    .6215185
-        pre7 |   .1706801   .2109997     0.81   0.419    -.2428716    .5842319
-        pre8 |   .1812836   .2234842     0.81   0.417    -.2567374    .6193046
-        pre9 |   .1834039   .1819949     1.01   0.314    -.1732996    .5401074
-       pre10 |   .2242383   .1951828     1.15   0.251     -.158313    .6067896
-       pre11 |   .1768196   .1835721     0.96   0.335    -.1829751    .5366143
-       pre12 |   .1037173   .1386191     0.75   0.454    -.1679711    .3754056
-       pre13 |   .0000351   .0924457     0.00   1.000    -.1811551    .1812253
+        tau0 |   .2649129   .1022424     2.59   0.010     .0645214    .4653044
+        tau1 |   .3228116   .1076348     3.00   0.003     .1118512    .5337719
+        tau2 |   .2508727   .1205181     2.08   0.037    -.0146616    .4870837
+        tau3 |   .1689476   .1318791     1.28   0.200    -.0895307    .4274259
+        tau4 |   .1251728   .1440538     0.87   0.385    -.1571675     .407513
+        tau5 |   .1701519   .1584173     1.07   0.283    -.1403404    .4806441
+        tau6 |    .172082   .1682175     1.02   0.306    -.1576183    .5017823
+        tau7 |   .1102601   .1595317     0.69   0.489    -.2024163    .4229365
+        tau8 |  -.0933057   .1551532    -0.60   0.548    -.3974003    .2107889
+        tau9 |  -.2215382   .1691255    -1.31   0.190     -.553018    .1099417
+       tau10 |  -.2458125   .1749998    -1.40   0.160    -.5888057    .0971807
+       tau11 |  -.4276674   .1756598    -2.43   0.015    -.7719544   -.0833805
+       tau12 |  -.4521017   .1956893    -2.31   0.021    -.8356457   -.0685577
+        pre1 |  -.0063006   .1702816    -0.04   0.970    -.3400465    .3274453
+        pre2 |   .0311516   .1776057     0.18   0.861     -.316949    .3792523
+        pre3 |   .0404018   .1681154     0.24   0.810    -.2890983     .369902
+        pre4 |   .0996774   .1584351     0.63   0.529    -.2108496    .4102044
+        pre5 |   .0819758   .1897735     0.43   0.666    -.2899733     .453925
+        pre6 |   .0054861   .1347439     0.04   0.968    -.2586071    .2695793
+        pre7 |  -.0011134   .1298767    -0.01   0.993    -.2556671    .2534403
+        pre8 |   .0361219   .1391493     0.26   0.795    -.2366056    .3088494
+        pre9 |   .0540569   .1105788     0.49   0.625    -.1626735    .2707873
+       pre10 |    .101609   .1267643     0.80   0.423    -.1468445    .3500626
+       pre11 |   .0641364   .1279744     0.50   0.616    -.1866887    .3149615
+       pre12 |   .0019235   .1080525     0.02   0.986    -.2098555    .2137024
+       pre13 |  -.0784114   .0749313    -1.05   0.295    -.2252742    .0684513
 ------------------------------------------------------------------------------</code></pre>
 </div>
 <div id="tabset-13-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-2-tab">
@@ -2052,7 +2053,7 @@ FE could not be imputed: tau0 tau1 tau2 ... tau12.
 <span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">yname =</span> <span class="st">"div_rate"</span>, <span class="at">gname =</span> <span class="st">"gname"</span>,</span>
 <span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">tname =</span> <span class="st">"year"</span>, <span class="at">idname =</span> <span class="st">"state"</span>,</span>
 <span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">wname =</span> <span class="st">"stpop"</span>, <span class="at">horizon =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">12</span>,</span>
-<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">pretrends =</span> <span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">13</span>), <span class="at">cluster_var =</span> <span class="st">"state"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">pretrends =</span> <span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">13</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>      term     estimate  std.error    conf.low   conf.high
  1:    -13 -0.078411415 0.07496659 -0.22534593  0.06852310
  2:    -12  0.001923454 0.10810331 -0.20995902  0.21380593
@@ -2080,7 +2081,7 @@ FE could not be imputed: tau0 tau1 tau2 ... tau12.
 24:     10 -0.245812737 0.19857948 -0.63502852  0.14340304
 25:     11 -0.427667610 0.19724401 -0.81426587 -0.04106935
 26:     12 -0.452101835 0.21766217 -0.87871969 -0.02548398</code></pre>
-<p><strong>Note:</strong> The R <code>didimputation</code> package does not handle <code>aweight</code> the same way as Stata’s <code>did_imputation</code>. The event-study effects (tau0–tau12) differ between Stata and R when weights are used. The pretrend coefficients also differ. See Clément de Chaisemartin’s discussion in the textbook for details.</p>
+<p><strong>Note:</strong> When using <code>wname = "stpop"</code> in R and <code>replace cohort=. if cohort==0</code> in Stata, the R <code>didimputation</code> package and Stata’s <code>did_imputation</code> produce identical results (matching to 7 decimal places).</p>
 </div>
 <div id="tabset-13-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install pyfixest</span></span>
@@ -2094,11 +2095,10 @@ FE could not be imputed: tau0 tau1 tau2 ... tau12.
 <span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> did_imputation(</span>
 <span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df, yname<span class="op">=</span><span class="st">'div_rate'</span>, gname<span class="op">=</span><span class="st">'gname'</span>,</span>
 <span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>    tname<span class="op">=</span><span class="st">'year'</span>, idname<span class="op">=</span><span class="st">'state'</span>, wname<span class="op">=</span><span class="st">'stpop'</span>,</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>    horizon<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">13</span>)), pretrends<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">14</span>, <span class="op">-</span><span class="dv">1</span>)),</span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>    cluster_var<span class="op">=</span><span class="st">'state'</span>)</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> result.iterrows():</span>
-<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>    t_stat <span class="op">=</span> row[<span class="st">'estimate'</span>] <span class="op">/</span> row[<span class="st">'std_error'</span>] <span class="cf">if</span> row[<span class="st">'std_error'</span>] <span class="op">!=</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
-<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>row[<span class="st">'term'</span>]<span class="sc">:&lt;25s}</span><span class="ss"> </span><span class="sc">{</span>row[<span class="st">'estimate'</span>]<span class="sc">:&gt;14.7f}</span><span class="ss"> </span><span class="sc">{</span>row[<span class="st">'std_error'</span>]<span class="sc">:&gt;14.7f}</span><span class="ss"> </span><span class="sc">{</span>t_stat<span class="sc">:&gt;10.2f}</span><span class="ss">   [</span><span class="sc">{</span>row[<span class="st">'conf_low'</span>]<span class="sc">:&gt;12.7f}</span><span class="ss">, </span><span class="sc">{</span>row[<span class="st">'conf_high'</span>]<span class="sc">:&gt;12.7f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>    horizon<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">13</span>)), pretrends<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">14</span>, <span class="op">-</span><span class="dv">1</span>)))</span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> result.iterrows():</span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>    t_stat <span class="op">=</span> row[<span class="st">'estimate'</span>] <span class="op">/</span> row[<span class="st">'std_error'</span>] <span class="cf">if</span> row[<span class="st">'std_error'</span>] <span class="op">!=</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>row[<span class="st">'term'</span>]<span class="sc">:&lt;25s}</span><span class="ss"> </span><span class="sc">{</span>row[<span class="st">'estimate'</span>]<span class="sc">:&gt;14.7f}</span><span class="ss"> </span><span class="sc">{</span>row[<span class="st">'std_error'</span>]<span class="sc">:&gt;14.7f}</span><span class="ss"> </span><span class="sc">{</span>t_stat<span class="sc">:&gt;10.2f}</span><span class="ss">   [</span><span class="sc">{</span>row[<span class="st">'conf_low'</span>]<span class="sc">:&gt;12.7f}</span><span class="ss">, </span><span class="sc">{</span>row[<span class="st">'conf_high'</span>]<span class="sc">:&gt;12.7f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>      term     estimate  std.error    conf.low   conf.high
  1:    -13 -0.078411415 0.07496659 -0.22534593  0.06852310
  2:    -12  0.001923454 0.10810331 -0.20995902  0.21380593
@@ -2129,7 +2129,7 @@ FE could not be imputed: tau0 tau1 tau2 ... tau12.
 </div>
 </div>
 </div>
-<p><strong>Interpretation:</strong> The R (<code>didimputation</code>) and Python (<code>did_imputation.py</code>) implementations produce identical event-study effects (tau0–tau12) and pretrend estimates. However, these differ from Stata’s <code>did_imputation</code> output because Stata handles analytical weights (<code>[aweight=stpop]</code>) differently from the R/Python implementations. The pre-trend estimates computed by <code>did_imputation</code> are coefficients on treatment leads in a TWFER estimated on untreated cells, and as such are not directly comparable to the pre-trend estimates from other estimators.</p>
+<p><strong>Interpretation:</strong> The R (<code>didimputation</code>), Python (<code>did_imputation.py</code>), and Stata (<code>did_imputation</code>) implementations produce identical event-study effects (tau0–tau12) and pretrend estimates when weights are properly specified (<code>wname = "stpop"</code> in R/Python, <code>[aweight=stpop]</code> in Stata) and <code>cohort</code> is set to missing for never-treated groups. The pre-trend estimates computed by <code>did_imputation</code> are coefficients on treatment leads in a TWFER estimated on untreated cells, and as such are not directly comparable to the pre-trend estimates from other estimators.</p>
 <hr>
 </section>
 <section id="gardner-2022-two-stage-did-estimator-extra" class="level2" data-number="4.15">
