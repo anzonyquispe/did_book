@@ -140,6 +140,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
   <p>An ecosystem of causal inference tools for panel data — available in Stata, R, and Python — built on the research of de&nbsp;Chaisemartin &amp; D'Haultfoeuille.</p>
   <div class="hero-actions">
     <a class="btn-primary" href="#packages">Explore Packages</a>
+    <a class="btn-primary" href="#team">Team</a>
     <a class="btn-secondary" href="#" style="opacity:.55;cursor:default;pointer-events:none">DiD Book — coming soon</a>
     <a class="btn-secondary" href="https://credible-answers.github.io/did_multiplegt_dyn_book/" target="_blank">did_multiplegt_dyn Tutorial ↗</a>
     <a class="btn-secondary" href="https://github.com/Credible-Answers" target="_blank">GitHub ↗</a>
@@ -219,7 +220,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
       <div class="lang-row">
         <span class="lang-pill stata">Stata</span>
       </div>
-      <p class="pkg-desc">Computes heterogeneity-robust DID estimators, in general designs where the treatment may be non-binary and/or non absorbing, assuming that past treatments do not affect the current outcome. Instead, did_multiplegt_dyn allows for effects of lagged treatments, but allowing for this generality also has some downsides: it may yield harder to interpret estimators, which rely on a parallel-trends assumption over a longer horizon. Based on <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3751060" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin and D'Haultfoeuille (2020b)</a> and <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4011782" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin et al (2022)</a>.</p>
+      <p class="pkg-desc">Computes heterogeneity-robust DID estimators, in general designs where the treatment may be non-binary and/or non absorbing. Unlike _dyn, _stat assumes that lagged treatments do not affect the current outcome beyond a pre-determined lag. On the one hand, allowing for effects of lagged treatments up to any lag is appealing, to avoid misspecification. On the other hand, allowing for this generality also has some downsides: it may yield harder to interpret estimators, which rely on a parallel-trends assumption over a longer horizon. Thus, in settings where past treatments are unlikely to affect the outcome for very long, _stat is an interesting alternative to _dyn. Based on <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3751060" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin and D'Haultfoeuille (2020b)</a> and <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4011782" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">de Chaisemartin et al (2022)</a>.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">Stata</span>
@@ -306,7 +307,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:0}
         <span class="lang-pill stata">Stata</span>
         <span class="lang-pill r">R</span>
       </div>
-      <p class="pkg-desc">Non-parametric tests of the linearity of a conditional expectation, based on <a href="https://www.jstor.org/stable/2171950" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Yatchew (1997)</a> and <a href="https://www.jstor.org/stable/2242560" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Stute (1997)</a>. Can be useful to test the homogeneous and linear effect assumption underlying two-way fixed effects regressions in heterogeneous adoption designs.</p>
+      <p class="pkg-desc">Non-parametric tests of the linearity of a conditional expectation, based on <a href="https://www.jstor.org/stable/2171950" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Yatchew (1997)</a> and <a href="https://www.jstor.org/stable/2242560" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px">Stute (1997)</a>. Can be useful to test the homogeneous and linear effect assumption underlying two-way fixed effects regressions.</p>
       <div class="install-snippets">
         <div class="snippet">
           <span class="snippet-lang">R</span>
