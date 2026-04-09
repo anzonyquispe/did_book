@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "DID Textbook: Translations"
+  title: "Causal Inference with Differences-in-Differences: Credible Answers to Hard Questions"
   author: "Anzony Quispe Rojas"
   chapters:
     - index.qmd
@@ -13,6 +13,8 @@ book:
     - chapters/ch06.qmd
     - chapters/ch07.qmd
     - chapters/ch08.qmd
+  repo-url: https://github.com/Credible-Answers/did_book
+  repo-actions: [edit, issue]
 format:
   html:
     theme: cosmo
