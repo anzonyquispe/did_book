@@ -87,10 +87,10 @@ plt.show()
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
-* Ejemplo 1: xtreg
+* Example 1: xtreg
 xtreg patents twea i.year, fe i(subclass) robust cluster(subclass)
 
-* Ejemplo 2: reghdfe
+* Example 2: reghdfe
 reghdfe patents twea, absorb(subclass year) cluster(subclass)
 ```
 
@@ -112,19 +112,19 @@ library(fixest); library(haven)
 options(digits=7)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
-# Ejemplo 1
+# Example 1
 summary(feols(patents ~ twea + i(year) | subclass, data = df, cluster = ~subclass))
 
-# Ejemplo 2
+# Example 2
 summary(feols(patents ~ twea | subclass + year, data = df, cluster = ~subclass))
 ```
 
 ```
-Ejemplo 1 (feols with i(year)):
+Example 1 (feols with i(year)):
      Estimate Std. Error  t value   Pr(>|t|)
 twea 0.288262   0.038887  7.412783 1.3770e-13 ***
 
-Ejemplo 2 (feols with subclass + year):
+Example 2 (feols with subclass + year):
      Estimate Std. Error t value  Pr(>|t|)
 twea 0.288262   0.038887 7.41278 1.377e-13 ***
 ```
@@ -137,27 +137,27 @@ import pyfixest as pf
 
 df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 
-# Ejemplo 1
+# Example 1
 m1 = pf.feols('patents ~ twea + i(year) | subclass', data=df, vcov={'CRV1': 'subclass'})
 c1 = m1.coef(); s1 = m1.se(); t1 = m1.tstat(); p1 = m1.pvalue()
 for name in c1.index:
     print(f"{name:>20s} | {c1[name]:>12.7f}  {s1[name]:>10.7f}  {t1[name]:>8.2f}   {p1[name]:>8.4f}")
 
-# Ejemplo 2
+# Example 2
 m2 = pf.feols('patents ~ twea | subclass + year', data=df, vcov={'CRV1': 'subclass'})
 c2 = m2.coef(); s2 = m2.se(); t2 = m2.tstat(); p2 = m2.pvalue()
-print("\n--- Ejemplo 2 ---")
+print("\n--- Example 2 ---")
 for name in c2.index:
     print(f"{name:>20s} | {c2[name]:>12.7f}  {s2[name]:>10.7f}  {t2[name]:>8.2f}   {p2[name]:>8.4f}")
 ```
 
 ```
-Ejemplo 1:
+Example 1:
                 twea |    0.2882615   0.0388871      7.41     0.0000
      C(year)[T.1901] |    0.0059327   0.0077529      0.77     0.4442
      ...
 
-Ejemplo 2:
+Example 2:
                 twea |    0.2882615   0.0388871      7.41     0.0000
 ```
 
