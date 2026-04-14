@@ -18,7 +18,7 @@ This chapter explores alternatives to the parallel trends assumption. We conside
 
 ```stata
 * ssc install panelview, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 panelview patents twea, i(subclass) t(year) type(treat) title("Treatment Status: Moser & Voena (2012)") ylabel(none) ytitle("")
 graph export "figures/ch03_panelview_stata.png", replace width(1200)
@@ -30,7 +30,7 @@ graph export "figures/ch03_panelview_stata.png", replace width(1200)
 
 ```r
 library(panelView)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 png("figures/ch03_panelview_R.png", width = 1000, height = 600)
 panelview(patents ~ twea, data = df, index = c("subclass", "year"), type = "treat",
           main = "Moser & Voena (2012)", ylab = "")
@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 pv = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="first")
 pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
 cmap = mcolors.ListedColormap(["#D4E6F1", "#00AAAA"])
@@ -84,7 +84,7 @@ plt.show()
 
 ```stata
 * ssc install reghdfe, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 reghdfe patents reltimeminus* reltimeplus*, absorb(year#patents1900 treatmentgroup) cluster(subclass)
 ```
@@ -148,7 +148,7 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
 ```
 
 ```stata
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * F-test on pre-trends
 test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 reltimeminus5 reltimeminus6 reltimeminus7 reltimeminus8 reltimeminus9 reltimeminus10 reltimeminus11 reltimeminus12 reltimeminus13 reltimeminus14 reltimeminus15 reltimeminus16 reltimeminus17 reltimeminus18
@@ -160,7 +160,7 @@ test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 reltimeminus5 relti
 ```
 
 ```stata
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Testing correlation between treatment and covariate
 reg patents1900 treatmentgroup if year==1900
@@ -186,7 +186,7 @@ treatmentgroup |   -.156312   .0432625    -3.61   0.000     -.241119    -.071505
 
 ```r
 library(fixest); library(haven); library(car); library(dplyr)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
 formula_str <- paste("patents ~",
     paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
@@ -268,7 +268,7 @@ import pyfixest as pf
 import numpy as np
 from scipy import stats
 
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
@@ -363,6 +363,87 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 
 **Result:** The pre-trends are individually mostly insignificant but jointly significant (F = 5.07, p < 0.001). The covariate `patents1900` is correlated with treatment (coef = −0.156312, p < 0.001), making controls necessary.
 
+### Figure 4.2: ES-TWFER with controls
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+reghdfe patents reltimeminus* reltimeplus*, absorb(year#patents1900 treatmentgroup) cluster(subclass)
+estimates store m_ctrl
+
+coefplot m_ctrl, keep(reltimeminus* reltimeplus*) order(reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeplus1 reltimeplus2 reltimeplus3 reltimeplus4 reltimeplus5 reltimeplus6 reltimeplus7 reltimeplus8 reltimeplus9 reltimeplus10 reltimeplus11 reltimeplus12 reltimeplus13 reltimeplus14 reltimeplus15 reltimeplus16 reltimeplus17 reltimeplus18 reltimeplus19 reltimeplus20 reltimeplus21) vertical yline(0, lcolor(gs12)) xline(18.5, lcolor(gs10) lpattern(dash)) title("TWFE Event-study estimates") xtitle("Relative time to year before TWEA") ytitle("Effect") scheme(s2mono) mcolor(gs4) ciopts(lcolor(gs8)) connect(l) lcolor(gs4) msymbol(O) msize(small) xlabel(1 "-18" 4 "-15" 7 "-12" 10 "-9" 13 "-6" 16 "-3" 19 "0" 22 "3" 25 "6" 28 "9" 31 "12" 34 "15" 37 "18" 39 "21", labsize(small))
+graph export "figures/ch04_fig42_twfe_controls.png", replace width(1200)
+```
+
+![Stata Figure 4.2](../figures/ch04_fig42_twfe_controls.png)
+
+### R
+
+```r
+library(fixest); library(ggplot2)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+
+m_ctrl <- feols(patents ~ reltimeminus1 + reltimeminus2 + reltimeminus3 + reltimeminus4 + reltimeminus5 + reltimeminus6 + reltimeminus7 + reltimeminus8 + reltimeminus9 + reltimeminus10 + reltimeminus11 + reltimeminus12 + reltimeminus13 + reltimeminus14 + reltimeminus15 + reltimeminus16 + reltimeminus17 + reltimeminus18 + reltimeplus1 + reltimeplus2 + reltimeplus3 + reltimeplus4 + reltimeplus5 + reltimeplus6 + reltimeplus7 + reltimeplus8 + reltimeplus9 + reltimeplus10 + reltimeplus11 + reltimeplus12 + reltimeplus13 + reltimeplus14 + reltimeplus15 + reltimeplus16 + reltimeplus17 + reltimeplus18 + reltimeplus19 + reltimeplus20 + reltimeplus21 | year^patents1900 + treatmentgroup, data = df, cluster = ~subclass)
+
+minus_vars <- paste0("reltimeminus", 18:1)
+plus_vars <- paste0("reltimeplus", 1:21)
+all_vars <- c(minus_vars, plus_vars)
+ci <- data.frame(x = -18:20, est = coef(m_ctrl)[all_vars], se = se(m_ctrl)[all_vars])
+ci$lo <- ci$est - 1.96 * ci$se
+ci$hi <- ci$est + 1.96 * ci$se
+
+ggplot(ci, aes(x = x, y = est)) +
+  geom_line(color = "grey30") + geom_point(color = "grey30", size = 1.5) +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.3, color = "grey50") +
+  geom_hline(yintercept = 0, color = "grey70") +
+  geom_vline(xintercept = -0.5, linetype = "dashed", color = "grey70") +
+  scale_x_continuous(breaks = seq(-18, 21, 3)) +
+  labs(x = "Relative time to year before TWEA", y = "Effect", title = "TWFE Event-study estimates") +
+  theme_minimal()
+ggsave("figures/ch04_fig42_twfe_controls_R.png", width = 8, height = 5, dpi = 150)
+```
+
+![R Figure 4.2](../figures/ch04_fig42_twfe_controls_R.png)
+
+### Python
+
+```python
+import pandas as pd, numpy as np, pyfixest as pf, matplotlib.pyplot as plt
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
+plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
+fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | year^patents1900 + treatmentgroup"
+m = pf.feols(fml, data=df, vcov={"CRV1": "subclass"})
+
+all_vars = [f"reltimeminus{i}" for i in range(18, 0, -1)] + plus_vars
+x = np.arange(-18, 21)
+c = np.array([m.coef()[v] for v in all_vars])
+s = np.array([m.se()[v] for v in all_vars])
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.errorbar(x, c, yerr=1.96*s, fmt='-o', color='grey', markersize=3, capsize=2, linewidth=1, elinewidth=0.8)
+ax.axhline(y=0, color='grey', linewidth=0.5)
+ax.axvline(x=-0.5, color='grey', linestyle='--', linewidth=0.8)
+ax.set_xticks(range(-18, 22, 3))
+ax.set_xlabel("Relative time to year before TWEA")
+ax.set_ylabel("Effect")
+ax.set_title("TWFE Event-study estimates")
+plt.tight_layout()
+plt.savefig("figures/ch04_fig42_twfe_controls_Python.png", dpi=150)
+plt.show()
+```
+
+![Python Figure 4.2](../figures/ch04_fig42_twfe_controls_Python.png)
+
+:::
+
+*Figure 4.2: Effects of compulsory licensing on US innovation, according to an ES-TWFER with controls. Standard errors are clustered at the patent subclass level. 95% confidence intervals shown.*
+
 ---
 
 ## CQ#12: DID with Nonparametric Trends (`did_multiplegt_dyn`)
@@ -375,7 +456,7 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 
 ```stata
 * ssc install did_multiplegt_dyn, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 did_multiplegt_dyn patents subclass year twea, effects(21) placebo(18) trends_nonparam(patents1900)
 ```
@@ -452,7 +533,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ```r
 library(haven); library(DIDmultiplegtDYN); library(polars)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 result_dyn <- did_multiplegt_dyn(
     df = as.data.frame(df),
     outcome = "patents",
@@ -535,7 +616,7 @@ import polars as pl
 import pandas as pd
 from did_multiplegt_dyn import DidMultiplegtDyn
 
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 model = DidMultiplegtDyn(
     df=pl.from_pandas(df),
     outcome='patents',
@@ -611,7 +692,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ```stata
 * ssc install fect, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Cross-validation
 fect patents, treat(twea) unit(subclass) time(year) method("ife") r(4) tol(1e-4) cv
@@ -629,7 +710,7 @@ optimal r=2 in fe/ife model
 
 ```stata
 * ssc install fect, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Estimation with r=2 and bootstrap SEs
 set seed 1
@@ -647,7 +728,7 @@ r1     .2966552         7056    .04932318    .17481898    .37326233       0
 
 ```r
 library(haven); library(fect)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 # Cross-validation
 out_cv <- fect(patents ~ twea, data = as.data.frame(df),
     index = c("subclass","year"),
@@ -677,6 +758,88 @@ IFE ATT = 0.296834
 
 **Result:** Cross-validation selects **r\* = 2** factors in both Stata and R. The ATT is **0.296655** (Stata) and **0.296834** (R) — virtually identical (bootstrap variability). The `fect` package is not available in Python.
 
+### Figure 4.3: TWFE vs IFE estimates
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+
+reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
+matrix b_twfe = e(b)
+matrix V_twfe = vecdiag(e(V))
+
+fect patents, treat(twea) unit(subclass) time(year) method("ife") r(2) tol(1e-4) se
+matrix ife_atts = e(ATTs)
+
+clear
+set obs 21
+gen x = _n
+gen coef_twfe = .
+gen se_twfe = .
+gen coef_ife = .
+gen ci_ife_lo = .
+gen ci_ife_hi = .
+
+forvalues i = 1/21 {
+    replace coef_twfe = b_twfe[1, 59 + `i'] in `i'
+    replace se_twfe = sqrt(V_twfe[1, 59 + `i']) in `i'
+    replace coef_ife = ife_atts[19 + `i', 3] in `i'
+    replace ci_ife_lo = ife_atts[19 + `i', 6] in `i'
+    replace ci_ife_hi = ife_atts[19 + `i', 7] in `i'
+}
+
+gen ci_twfe_lo = coef_twfe - 1.96*se_twfe
+gen ci_twfe_hi = coef_twfe + 1.96*se_twfe
+
+twoway (rcap ci_twfe_hi ci_twfe_lo x, lcolor(gs10)) (connected coef_twfe x, lcolor(gs10) mcolor(gs10) msymbol(O) msize(vsmall)) (rcap ci_ife_hi ci_ife_lo x, lcolor(gs4)) (connected coef_ife x, lcolor(gs4) mcolor(gs4) msymbol(O) msize(vsmall)), yline(0, lcolor(gs12)) title("Event-study estimates") xtitle("Years after TWEA") ytitle("Effect") xlabel(1 "1" 6 "6" 11 "11" 16 "16" 21 "21") legend(order(2 "TWFE" 4 "IFE") rows(1) position(6)) scheme(s2mono) ylabel(-.5(.25)1.5)
+graph export "figures/ch04_fig43_ife_twfe.png", replace width(1200)
+```
+
+![Stata Figure 4.3](../figures/ch04_fig43_ife_twfe.png)
+
+### R
+
+```r
+library(fixest); library(fect); library(ggplot2)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+
+plus_vars <- paste0("reltimeplus", 1:21)
+minus_vars <- paste0("reltimeminus", 1:18)
+fml <- as.formula(paste("patents ~ i(year) + treatmentgroup +", paste(c(minus_vars, plus_vars), collapse = " + ")))
+m_twfe <- feols(fml, data = df, cluster = ~subclass)
+
+set.seed(1)
+out_ife <- fect(patents ~ twea, data = as.data.frame(df), index = c("subclass","year"), method = "ife", force = "two-way", r = 2, se = TRUE)
+
+ife_effects <- out_ife$est.att[as.character(1:21), ]
+twfe_df <- data.frame(x = 1:21, est = coef(m_twfe)[plus_vars], se = se(m_twfe)[plus_vars], model = "TWFE")
+ife_df <- data.frame(x = 1:21, est = ife_effects[,"ATT"], se = ife_effects[,"S.E."], model = "IFE")
+plotdf <- rbind(twfe_df, ife_df)
+plotdf$lo <- plotdf$est - 1.96 * plotdf$se
+plotdf$hi <- plotdf$est + 1.96 * plotdf$se
+
+ggplot(plotdf, aes(x = x, y = est, color = model)) +
+  geom_line(position = position_dodge(0.3)) +
+  geom_point(position = position_dodge(0.3), size = 1.5) +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.3, position = position_dodge(0.3)) +
+  geom_hline(yintercept = 0, color = "grey70") +
+  scale_color_manual(values = c("TWFE" = "grey70", "IFE" = "grey30")) +
+  scale_x_continuous(breaks = c(1, 6, 11, 16, 21)) +
+  labs(x = "Years after TWEA", y = "Effect", title = "Event-study estimates", color = "") +
+  theme_minimal() + theme(legend.position = "bottom")
+ggsave("figures/ch04_fig43_ife_twfe_R.png", width = 8, height = 5, dpi = 150)
+```
+
+![R Figure 4.3](../figures/ch04_fig43_ife_twfe_R.png)
+
+:::
+
+*Figure 4.3: TWFE estimates and TWFE-IFE estimates of Xu (2017), on the data of Moser and Voena (2012a). The `fect` package is not available in Python.*
+
 ---
 
 ## CQ#15: Synthetic Control (SC)
@@ -688,7 +851,7 @@ IFE ATT = 0.296834
 ### Stata
 
 ```stata
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Standard SC
 set seed 1
@@ -724,7 +887,7 @@ Synthetic Control
 ```
 
 ```stata
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Demeaned SC
 bys subclass: egen pre_mean_temp=mean(patents) if year<=1918
@@ -767,7 +930,7 @@ Synthetic Control (Demeaned)
 
 ```r
 library(haven); library(synthdid)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 panel <- panel.matrices(as.data.frame(df),
     unit = "subclass", time = "year",
     outcome = "patents", treatment = "twea")
@@ -804,6 +967,54 @@ Demeaned SC ATT = 0.474263
 
 **Result:** The demeaned SC ATT is **0.474263** in both Stata and R. The standard SC differs slightly (Stata: 0.414370, R: 0.491647) due to different implementations (`sdid_event` vs `synthdid`). SC estimators are noisier than TWFE, with some implausibly large or negative period-specific effects. The `synthdid` and `sdid_event` packages are not available in Python.
 
+### Figure 4.4: SC vs TWFE estimates
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+
+reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
+matrix b_twfe = e(b)
+matrix V_twfe = vecdiag(e(V))
+
+set seed 1
+sdid_event patents subclass year twea, method("sc") brep(200)
+matrix sc_atts = e(H)
+
+clear
+set obs 21
+gen x = _n
+gen coef_twfe = .
+gen se_twfe = .
+gen coef_sc = .
+gen se_sc = .
+
+forvalues i = 1/21 {
+    replace coef_twfe = b_twfe[1, 59 + `i'] in `i'
+    replace se_twfe = sqrt(V_twfe[1, 59 + `i']) in `i'
+    replace coef_sc = sc_atts[1 + `i', 1] in `i'
+    replace se_sc = sc_atts[1 + `i', 2] in `i'
+}
+
+gen ci_twfe_lo = coef_twfe - 1.96*se_twfe
+gen ci_twfe_hi = coef_twfe + 1.96*se_twfe
+gen ci_sc_lo = coef_sc - 1.96*se_sc
+gen ci_sc_hi = coef_sc + 1.96*se_sc
+
+twoway (rcap ci_twfe_hi ci_twfe_lo x, lcolor(gs10)) (connected coef_twfe x, lcolor(gs10) mcolor(gs10) msymbol(O) msize(vsmall)) (rcap ci_sc_hi ci_sc_lo x, lcolor(gs4)) (connected coef_sc x, lcolor(gs4) mcolor(gs4) msymbol(O) msize(vsmall)), yline(0, lcolor(gs12)) title("Event-study estimates") xtitle("Years after TWEA") ytitle("Effect") xlabel(1 "1" 6 "6" 11 "11" 16 "16" 21 "21") legend(order(2 "TWFE" 4 "SC") rows(1) position(6)) scheme(s2mono)
+graph export "figures/ch04_fig44_sc_twfe.png", replace width(1200)
+```
+
+![Stata Figure 4.4](../figures/ch04_fig44_sc_twfe.png)
+
+:::
+
+*Figure 4.4: TWFE estimates and Synthetic Control estimates of Arkhangelsky et al. (2021), on the data of Moser and Voena (2012a). The `synthdid`/`sdid_event` packages are not available in R or Python for event-study plots with bootstrap CIs.*
+
 ---
 
 ## CQ#16: Synthetic Difference-in-Differences (SDID)
@@ -815,7 +1026,7 @@ Demeaned SC ATT = 0.474263
 ### Stata
 
 ```stata
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 set seed 1
 sdid_event patents subclass year twea, brep(200)
@@ -853,6 +1064,54 @@ Synthetic Difference-in-differences
 
 **Result:** The SDID ATT is **0.3019373** (Stata). The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` package is only available in Stata.
 
+### Figure 4.5: SDID vs TWFE estimates
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+
+reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
+matrix b_twfe = e(b)
+matrix V_twfe = vecdiag(e(V))
+
+set seed 1
+sdid_event patents subclass year twea, brep(200)
+matrix sdid_atts = e(H)
+
+clear
+set obs 21
+gen x = _n
+gen coef_twfe = .
+gen se_twfe = .
+gen coef_sdid = .
+gen se_sdid = .
+
+forvalues i = 1/21 {
+    replace coef_twfe = b_twfe[1, 59 + `i'] in `i'
+    replace se_twfe = sqrt(V_twfe[1, 59 + `i']) in `i'
+    replace coef_sdid = sdid_atts[1 + `i', 1] in `i'
+    replace se_sdid = sdid_atts[1 + `i', 2] in `i'
+}
+
+gen ci_twfe_lo = coef_twfe - 1.96*se_twfe
+gen ci_twfe_hi = coef_twfe + 1.96*se_twfe
+gen ci_sdid_lo = coef_sdid - 1.96*se_sdid
+gen ci_sdid_hi = coef_sdid + 1.96*se_sdid
+
+twoway (rcap ci_twfe_hi ci_twfe_lo x, lcolor(gs10)) (connected coef_twfe x, lcolor(gs10) mcolor(gs10) msymbol(O) msize(vsmall)) (rcap ci_sdid_hi ci_sdid_lo x, lcolor(gs4)) (connected coef_sdid x, lcolor(gs4) mcolor(gs4) msymbol(O) msize(vsmall)), yline(0, lcolor(gs12)) title("Event-study estimates") xtitle("Years after TWEA") ytitle("Effect") xlabel(1 "1" 6 "6" 11 "11" 16 "16" 21 "21") legend(order(2 "TWFE" 4 "SD") rows(1) position(6)) scheme(s2mono) ylabel(-.25(.25)1)
+graph export "figures/ch04_fig45_sdid_twfe.png", replace width(1200)
+```
+
+![Stata Figure 4.5](../figures/ch04_fig45_sdid_twfe.png)
+
+:::
+
+*Figure 4.5: TWFE estimates and Synthetic DID estimates, on the data of Moser and Voena (2012a). The `synthdid`/`sdid_event` packages are not available in R or Python for event-study plots with bootstrap CIs.*
+
 ---
 
 ## CQ#17: Sensitivity Analysis (Rambachan & Roth / HonestDiD)
@@ -865,7 +1124,7 @@ Synthetic Difference-in-differences
 
 ```stata
 * ssc install honestdid, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 gen reltimeminus0 = 0
 reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
@@ -933,7 +1192,7 @@ reltimeminus10 |   .0481978   .0482599     1.00   0.318    -.0464057    .1428012
 ```r
 library(haven); library(fixest); library(HonestDiD)
 options(digits=7)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 reltimeminus_vars <- paste0("reltimeminus", 18:1)
 reltimeplus_vars <- paste0("I(reltimeplus", 1:21, ")")
 sens_model <- feols(as.formula(paste("patents ~",
@@ -1013,7 +1272,7 @@ import torch
 import pyfixest as pf
 import honestdid as hd
 
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 minus_vars = [f"reltimeminus{i}" for i in range(18, 0, -1)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
 fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | year + treatmentgroup"
@@ -1075,6 +1334,122 @@ print(delta_rm)
 
 **Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **[−0.196, 0.221]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER. The original ES-TWFER CI for ATT1 is [−0.064, 0.111], already insignificant. With `honestdid`, the CI widens further to include both positive and negative values, illustrating how even small allowed violations of parallel trends can substantially widen confidence intervals when there are many pre-treatment periods.
 
+### Figure 4.6: Confidence intervals computed by honestdid
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+
+gen reltimeminus0 = 0
+reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
+
+matrix b_orig = e(b)
+matrix V_orig = e(V)
+
+clear
+set obs 39
+gen x = _n - 19
+gen coef = .
+gen ci_lo = .
+gen ci_hi = .
+gen hd_lo = .
+gen hd_hi = .
+
+forvalues i = 1/19 {
+    local row = 20 - `i'
+    replace coef = b_orig[1, `i'] in `row'
+    local se = sqrt(V_orig[`i', `i'])
+    replace ci_lo = b_orig[1, `i'] - 1.96*`se' in `row'
+    replace ci_hi = b_orig[1, `i'] + 1.96*`se' in `row'
+}
+forvalues i = 1/21 {
+    local row = 19 + `i'
+    local col = 19 + `i'
+    replace coef = b_orig[1, `col'] in `row'
+    local se = sqrt(V_orig[`col', `col'])
+    replace ci_lo = b_orig[1, `col'] - 1.96*`se' in `row'
+    replace ci_hi = b_orig[1, `col'] + 1.96*`se' in `row'
+}
+save _plot_temp, replace
+
+use "moser_voena_didtextbook.dta", clear
+gen reltimeminus0 = 0
+reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
+
+forvalues i = 1/21 {
+    mata: st_matrix("l_vec", _honestBasis(`i', 21))
+    quietly honestdid, pre(1/19) post(20/40) delta(rm) mvec(1) l_vec(l_vec)
+    mata: st_local("lb", strofreal(HonestEventStudy.CI[2,2]))
+    mata: st_local("ub", strofreal(HonestEventStudy.CI[2,3]))
+    use _plot_temp, clear
+    replace hd_lo = `lb' in `=19 + `i''
+    replace hd_hi = `ub' in `=19 + `i''
+    save _plot_temp, replace
+    use "moser_voena_didtextbook.dta", clear
+    gen reltimeminus0 = 0
+    reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
+}
+
+use _plot_temp, clear
+twoway (rcap ci_hi ci_lo x, lcolor(black) lwidth(thin)) (scatter coef x, mcolor(black) msymbol(O) msize(vsmall) connect(l) lcolor(black)) (rcap hd_hi hd_lo x, lcolor(gs10) lwidth(thin) lpattern(dash)), yline(0, lcolor(black) lpattern(dash)) xline(-0.5, lcolor(black) lpattern(dash)) title("Confidence intervals computed by honestdid") xtitle("Relative time to year before TWEA") ytitle("Effect") xlabel(-18(3)21) legend(order(1 "Usual CI" 3 "honestdid CI") rows(1) position(6)) scheme(s2mono)
+graph export "figures/ch04_fig46_honestdid.png", replace width(1200)
+erase _plot_temp.dta
+```
+
+![Stata Figure 4.6](../figures/ch04_fig46_honestdid.png)
+
+### R
+
+```r
+library(fixest); library(HonestDiD); library(ggplot2)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+
+reltimeminus_vars <- paste0("reltimeminus", 18:1)
+reltimeplus_vars <- paste0("reltimeplus", 1:21)
+all_vars <- c(reltimeminus_vars, reltimeplus_vars)
+fml <- as.formula(paste("patents ~", paste(all_vars, collapse = " + "), "| year + treatmentgroup"))
+m <- feols(fml, data = df, cluster = ~subclass)
+
+betahat <- coef(m)
+sigma <- matrix(as.numeric(vcov(m)), nrow = length(betahat), ncol = length(betahat))
+
+orig_ci <- data.frame(x = -18:20, est = betahat, se = sqrt(diag(sigma)), type = "Usual CI")
+orig_ci$lo <- orig_ci$est - 1.96 * orig_ci$se
+orig_ci$hi <- orig_ci$est + 1.96 * orig_ci$se
+
+honest_list <- list()
+for (i in 1:21) {
+  lvec <- basisVector(i, 21)
+  res <- createSensitivityResults_relativeMagnitudes(betahat = betahat, sigma = sigma, numPrePeriods = 18, numPostPeriods = 21, Mbarvec = 1, l_vec = lvec)
+  honest_list[[i]] <- data.frame(x = i - 1, lo = res$lb, hi = res$ub, est = betahat[18+i], type = "honestdid CI")
+}
+honest_df <- do.call(rbind, honest_list)
+plotdf <- rbind(orig_ci[, c("x","est","lo","hi","type")], honest_df[, c("x","est","lo","hi","type")])
+
+ggplot(plotdf, aes(x = x, y = est, color = type, linetype = type)) +
+  geom_point(position = position_dodge(0.4), size = 1.5) +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.3, position = position_dodge(0.4), na.rm = TRUE) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = -0.5, linetype = "dashed", color = "black") +
+  scale_color_manual(values = c("Usual CI" = "black", "honestdid CI" = "grey60")) +
+  scale_linetype_manual(values = c("Usual CI" = "solid", "honestdid CI" = "dashed")) +
+  scale_x_continuous(breaks = seq(-18, 21, 3)) +
+  coord_cartesian(ylim = c(-4, 4)) +
+  labs(x = "Relative time to year before TWEA", y = "Effect", title = "Confidence intervals computed by honestdid", color = "", linetype = "") +
+  theme_minimal() + theme(legend.position = "bottom")
+ggsave("figures/ch04_fig46_honestdid_R.png", width = 10, height = 5, dpi = 150)
+```
+
+![R Figure 4.6](../figures/ch04_fig46_honestdid_R.png)
+
+:::
+
+*Figure 4.6: Confidence intervals computed by honestdid, on the data of Moser and Voena (2012a). Black bars show usual 95% CIs from the ES-TWFER. Grey dashed bars show robust CIs computed by honestdid with M=1.*
+
 ---
 
 ## Summary of Results
@@ -1087,8 +1462,7 @@ print(delta_rm)
 | SC ATT (standard) | **0.414370** | **0.491647** | — |
 | SC ATT (demeaned) | **0.474263** | **0.474263** | — |
 | SDID ATT | **0.301937** | **0.301844** | — |
-| HonestDiD (M=2) | [0.361, 0.993] | [0.360, 0.995] | [0.360, 0.995] |
-| HonestDiD (M=6) | [−0.004, 1.403] | [−0.002, 1.406] | [−0.002, 1.406] |
+| HonestDiD (M=1) | [−0.196, 0.221] | [−0.200, 0.225] | [−0.200, 0.225] |
 
 **Notes:**
 
