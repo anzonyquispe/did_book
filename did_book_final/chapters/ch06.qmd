@@ -731,8 +731,8 @@ The next term is a weighted sum of 30 ATTs of treatment 3 included in the other_
 ------------------------------------------------
 Other treat.: rel_time4 # ATTs      Σ weights
 ------------------------------------------------
-Positive weights        21          0.0073
-Negative weights        9           -0.0073
+Positive weights        21          0.0083
+Negative weights        9           -0.0083
 ------------------------------------------------
 Total                   30          0.0000
 ------------------------------------------------
@@ -742,8 +742,8 @@ The next term is a weighted sum of 29 ATTs of treatment 4 included in the other_
 ------------------------------------------------
 Other treat.: rel_time5 # ATTs      Σ weights
 ------------------------------------------------
-Positive weights        21          0.0092
-Negative weights        8           -0.0092
+Positive weights        21          0.0105
+Negative weights        8           -0.0105
 ------------------------------------------------
 Total                   29          -0.0000
 ------------------------------------------------
@@ -775,8 +775,8 @@ The next term is a weighted sum of 29 ATTs of treatment 7 included in the other_
 ------------------------------------------------
 Other treat.: rel_time8 # ATTs      Σ weights
 ------------------------------------------------
-Positive weights        19          0.0014
-Negative weights        10          -0.0014
+Positive weights        19          0.0017
+Negative weights        10          -0.0017
 ------------------------------------------------
 Total                   29          0.0000
 ------------------------------------------------
@@ -786,8 +786,8 @@ The next term is a weighted sum of 28 ATTs of treatment 8 included in the other_
 ------------------------------------------------
 Other treat.: rel_time9 # ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0009
-Negative weights        11          -0.0009
+Positive weights        17          0.0011
+Negative weights        11          -0.0011
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -797,8 +797,8 @@ The next term is a weighted sum of 28 ATTs of treatment 9 included in the other_
 ------------------------------------------------
 Other treat.: rel_time10# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        14          0.0008
-Negative weights        14          -0.0008
+Positive weights        14          0.0009
+Negative weights        14          -0.0009
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -808,8 +808,8 @@ The next term is a weighted sum of 29 ATTs of treatment 10 included in the other
 ------------------------------------------------
 Other treat.: rel_time11# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        13          0.0008
-Negative weights        16          -0.0008
+Positive weights        13          0.0009
+Negative weights        16          -0.0009
 ------------------------------------------------
 Total                   29          0.0000
 ------------------------------------------------
@@ -819,8 +819,8 @@ The next term is a weighted sum of 29 ATTs of treatment 11 included in the other
 ------------------------------------------------
 Other treat.: rel_time12# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0008
-Negative weights        12          -0.0008
+Positive weights        17          0.0010
+Negative weights        12          -0.0010
 ------------------------------------------------
 Total                   29          0.0000
 ------------------------------------------------
@@ -830,8 +830,8 @@ The next term is a weighted sum of 28 ATTs of treatment 12 included in the other
 ------------------------------------------------
 Other treat.: rel_time13# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0009
-Negative weights        11          -0.0009
+Positive weights        17          0.0010
+Negative weights        11          -0.0010
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -841,8 +841,8 @@ The next term is a weighted sum of 26 ATTs of treatment 13 included in the other
 ------------------------------------------------
 Other treat.: rel_time14# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        13          0.0006
-Negative weights        13          -0.0006
+Positive weights        13          0.0007
+Negative weights        13          -0.0007
 ------------------------------------------------
 Total                   26          0.0000
 ------------------------------------------------
@@ -852,8 +852,8 @@ The next term is a weighted sum of 24 ATTs of treatment 14 included in the other
 ------------------------------------------------
 Other treat.: rel_time15# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        11          0.0010
-Negative weights        13          -0.0010
+Positive weights        11          0.0012
+Negative weights        13          -0.0012
 ------------------------------------------------
 Total                   24          0.0000
 ------------------------------------------------
@@ -993,8 +993,8 @@ The next term is a weighted sum of 28 ATTs of treatment 8 included in the other_
 ------------------------------------------------
 Other treat.: rel_time9 # ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0010
-Negative weights        11          -0.0010
+Positive weights        17          0.0011
+Negative weights        11          -0.0011
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -1004,8 +1004,8 @@ The next term is a weighted sum of 28 ATTs of treatment 9 included in the other_
 ------------------------------------------------
 Other treat.: rel_time10# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        14          0.0008
-Negative weights        14          -0.0008
+Positive weights        14          0.0009
+Negative weights        14          -0.0009
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -1015,8 +1015,8 @@ The next term is a weighted sum of 29 ATTs of treatment 10 included in the other
 ------------------------------------------------
 Other treat.: rel_time11# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        13          0.0008
-Negative weights        16          -0.0008
+Positive weights        13          0.0009
+Negative weights        16          -0.0009
 ------------------------------------------------
 Total                   29          0.0000
 ------------------------------------------------
@@ -1026,8 +1026,8 @@ The next term is a weighted sum of 29 ATTs of treatment 11 included in the other
 ------------------------------------------------
 Other treat.: rel_time12# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0008
-Negative weights        12          -0.0008
+Positive weights        17          0.0010
+Negative weights        12          -0.0010
 ------------------------------------------------
 Total                   29          0.0000
 ------------------------------------------------
@@ -1037,8 +1037,8 @@ The next term is a weighted sum of 28 ATTs of treatment 12 included in the other
 ------------------------------------------------
 Other treat.: rel_time13# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        17          0.0009
-Negative weights        11          -0.0009
+Positive weights        17          0.0010
+Negative weights        11          -0.0010
 ------------------------------------------------
 Total                   28          0.0000
 ------------------------------------------------
@@ -1048,8 +1048,8 @@ The next term is a weighted sum of 26 ATTs of treatment 13 included in the other
 ------------------------------------------------
 Other treat.: rel_time14# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        13          0.0006
-Negative weights        13          -0.0006
+Positive weights        13          0.0007
+Negative weights        13          -0.0007
 ------------------------------------------------
 Total                   26          0.0000
 ------------------------------------------------
@@ -1059,8 +1059,8 @@ The next term is a weighted sum of 24 ATTs of treatment 14 included in the other
 ------------------------------------------------
 Other treat.: rel_time15# ATTs      Σ weights
 ------------------------------------------------
-Positive weights        11          0.0010
-Negative weights        13          -0.0010
+Positive weights        11          0.0012
+Negative weights        13          -0.0012
 ------------------------------------------------
 Total                   24          0.0000
 ------------------------------------------------
