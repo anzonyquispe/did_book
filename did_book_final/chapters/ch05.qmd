@@ -293,8 +293,9 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 
 ```stata
 * ssc install twowayfeweights, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
+qui tab styr, gen(styr)
 twowayfeweights prestout cnty90 year numdailies, type(feTR) controls(styr1-styr683)
 ```
 
@@ -329,7 +330,7 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 
 ```r
 library(haven); library(TwoWayFEWeights)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
 colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
 df <- cbind(df, styr_dummies)
@@ -371,11 +372,14 @@ numdailies:  coef =   -0.0012122  se =    0.0010962  t =   -1.10578
 ```
 
 ```python
+# pip install twowayfeweights  (install from the authors' repository)
 import pandas as pd
 from twowayfeweights import twowayfeweights, print_twowayfeweights
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-# Decomposition with state-year controls
-styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
+# Generate state-year dummies (not pre-computed in the parquet)
+styr_dummies = pd.get_dummies(df["styr"], prefix="styr", prefix_sep="", dtype=int)
+styr_cols = list(styr_dummies.columns)
+df = pd.concat([df, styr_dummies], axis=1)
 result = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies",
                           type="feTR", controls=styr_cols)
 print_twowayfeweights(result, D_name="numdailies", type="feTR")
@@ -435,8 +439,9 @@ changedailies |   .0025907   .0009351     2.77   0.006     .0007561    .0044252
 
 ```stata
 * ssc install twowayfeweights, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
+qui tab styr, gen(styr)
 twowayfeweights changeprestout cnty90 year changedailies numdailies, type(fdTR) controls(styr1-styr683)
 ```
 
@@ -457,8 +462,9 @@ Total                      9876        1.0000
 
 ```stata
 * ssc install twowayfeweights, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
+qui tab styr, gen(styr)
 twowayfeweights changeprestout cnty90 year changedailies numdailies, type(fdTR) controls(styr1-styr683) test_random_weights(year)
 ```
 
@@ -490,7 +496,7 @@ changedailies                0.0025907    0.0009345       2.77     0.0057    0.0
 
 ```r
 library(haven); library(TwoWayFEWeights)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
 colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
 df <- cbind(df, styr_dummies)
@@ -514,7 +520,7 @@ Total                        9876            1
 
 ```r
 library(haven); library(TwoWayFEWeights)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 styr_dummies <- model.matrix(~ factor(styr) - 1, data = df)
 colnames(styr_dummies) <- paste0("styr", 1:ncol(styr_dummies))
 df <- cbind(df, styr_dummies)
@@ -559,11 +565,14 @@ changedailies           0.0025907    0.0009351       2.77     0.0057 [ 0.0007580
 ```
 
 ```python
+# pip install twowayfeweights  (install from the authors' repository)
 import pandas as pd
 from twowayfeweights import twowayfeweights, print_twowayfeweights
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-# FD weight decomposition (fdTR type)
-styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
+# Generate state-year dummies (not pre-computed in the parquet)
+styr_dummies = pd.get_dummies(df["styr"], prefix="styr", prefix_sep="", dtype=int)
+styr_cols = list(styr_dummies.columns)
+df = pd.concat([df, styr_dummies], axis=1)
 result3 = twowayfeweights(df, "changeprestout", "cnty90", "year",
                            "changedailies", type="fdTR", D0="numdailies",
                            controls=styr_cols)
@@ -586,11 +595,14 @@ Total                   9876        1.0000
 ```
 
 ```python
+# pip install twowayfeweights  (install from the authors' repository)
 import pandas as pd
 from twowayfeweights import twowayfeweights, print_twowayfeweights
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-# Test random weights (year)
-styr_cols = sorted([c for c in df.columns if c.startswith("styr") and c != "styr"])
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
+# Generate state-year dummies (not pre-computed in the parquet)
+styr_dummies = pd.get_dummies(df["styr"], prefix="styr", prefix_sep="", dtype=int)
+styr_cols = list(styr_dummies.columns)
+df = pd.concat([df, styr_dummies], axis=1)
 result3b = twowayfeweights(df, "changeprestout", "cnty90", "year",
                             "changedailies", type="fdTR", D0="numdailies",
                             controls=styr_cols, test_random_weights="year")

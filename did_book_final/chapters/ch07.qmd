@@ -187,7 +187,7 @@ for year in [2001, 2002, 2004, 2005]:
 
 ```stata
 * ssc install twowayfeweights, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta" "pierce_schott_didtextbook.dta", replace
 use "pierce_schott_didtextbook.dta", clear
 twowayfeweights delta2001 indusid cons ntrgap ntrgap, type(fdTR)
 ```
@@ -210,7 +210,7 @@ Total                   103         1.0000
 
 ```r
 library(haven); library(TwoWayFEWeights)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData")); df <- as.data.frame(df)
 # Workaround: fdTR with constant time variable crashes in R.
 # Create a 2-period panel and use feTR (equivalent with T=2).
 df_panel <- rbind(
@@ -239,9 +239,10 @@ Summary Measures:
 ### Python
 
 ```python
+# pip install twowayfeweights  (install from the authors' repository)
 import pandas as pd
 from twowayfeweights import twowayfeweights
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet")
 df["cons"] = 1
 df["ntrgap_D0"] = df["ntrgap"]
 result = twowayfeweights(df, "delta2001", "indusid", "cons", "ntrgap",

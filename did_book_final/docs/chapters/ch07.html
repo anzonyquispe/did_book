@@ -469,7 +469,7 @@ ntrgap      -0.5317591  0.1666765 -3.1904   0.0019</code></pre>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install twowayfeweights, <span class="kw">replace</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta"</span> <span class="st">"pierce_schott_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.dta"</span> <span class="st">"pierce_schott_didtextbook.dta"</span>, <span class="kw">replace</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"pierce_schott_didtextbook.dta"</span>, <span class="kw">clear</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>twowayfeweights delta2001 indusid cons ntrgap ntrgap, <span class="dv">type</span>(fdTR)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
@@ -486,7 +486,7 @@ Total                   103         1.0000
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(TwoWayFEWeights)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData"</span>)); df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.RData"</span>)); df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Workaround: fdTR with constant time variable crashes in R.</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a 2-period panel and use feTR (equivalent with T=2).</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>df_panel <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
@@ -509,13 +509,14 @@ Summary Measures:
   min σ(Δ) compatible with opposite sign: 0.0642</code></pre>
 </div>
 <div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet"</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"cons"</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"ntrgap_D0"</span>] <span class="op">=</span> df[<span class="st">"ntrgap"</span>]</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"delta2001"</span>, <span class="st">"indusid"</span>, <span class="st">"cons"</span>, <span class="st">"ntrgap"</span>,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"ntrgap_D0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install twowayfeweights  (install from the authors' repository)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> twowayfeweights <span class="im">import</span> twowayfeweights</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Pierce%20and%20Schott%202016/pierce_schott_didtextbook.parquet"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"cons"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"ntrgap_D0"</span>] <span class="op">=</span> df[<span class="st">"ntrgap"</span>]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> twowayfeweights(df, <span class="st">"delta2001"</span>, <span class="st">"indusid"</span>, <span class="st">"cons"</span>, <span class="st">"ntrgap"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                          <span class="bu">type</span><span class="op">=</span><span class="st">"fdTR"</span>, D0<span class="op">=</span><span class="st">"ntrgap_D0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Under the common trends assumption,
 beta estimates a weighted sum of 103 ATTs.
 62 ATTs receive a positive weight, and 41 receive a negative weight.
