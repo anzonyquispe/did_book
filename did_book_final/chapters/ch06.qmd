@@ -691,188 +691,207 @@ decomp5 <- twowayfeweights(df, "div_rate", "state", "year", "rel_time1",
 
 ```
 Under the common trends assumption,
-the TWFE coefficient beta estimates the sum of several terms.
+the TWFE coefficient beta, equal to 0.2892, estimates the sum of several terms.
 
-The first term is a weighted sum of 27 ATTs of the treatment.
+The first term is a weighted sum of 27 ATTs.
 27 ATTs receive a positive weight, and 0 receive a negative weight.
-------------------------------------------------
-Treat. var: rel_time1   # ATTs      Σ weights
-------------------------------------------------
-Positive weights        27          1.0000
-Negative weights        0           0.0000
-------------------------------------------------
-Total                   27          1.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 1 included in the other_treatments option.
+────────────────────────────────────────── 
+Treat. var: rel_time1    ATTs    Σ weights 
+────────────────────────────────────────── 
+Positive weights           27            1 
+Negative weights            0            0 
+────────────────────────────────────────── 
+Total                      27            1 
+──────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 16 ATTs receive a positive weight, and 13 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time2 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        16          0.0119
-Negative weights        13          -0.0119
-------------------------------------------------
-Total                   29          -0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 28 ATTs of treatment 2 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time2    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             16       0.0119 
+Negative weights             13      -0.0119 
+──────────────────────────────────────────── 
+Total                        29            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 28 ATTs.
 10 ATTs receive a positive weight, and 18 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time3 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        10          0.0102
-Negative weights        18          -0.0102
-------------------------------------------------
-Total                   28          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 30 ATTs of treatment 3 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time3    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             10       0.0102 
+Negative weights             18      -0.0102 
+──────────────────────────────────────────── 
+Total                        28            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 30 ATTs.
 21 ATTs receive a positive weight, and 9 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time4 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        21          0.0083
-Negative weights        9           -0.0083
-------------------------------------------------
-Total                   30          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 4 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time4    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             21       0.0083 
+Negative weights              9      -0.0083 
+──────────────────────────────────────────── 
+Total                        30            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 21 ATTs receive a positive weight, and 8 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time5 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        21          0.0105
-Negative weights        8           -0.0105
-------------------------------------------------
-Total                   29          -0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 5 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time5    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             21       0.0105 
+Negative weights              8      -0.0105 
+──────────────────────────────────────────── 
+Total                        29            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 26 ATTs receive a positive weight, and 3 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time6 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        26          0.0065
-Negative weights        3           -0.0065
-------------------------------------------------
-Total                   29          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 6 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time6    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             26       0.0065 
+Negative weights              3      -0.0065 
+──────────────────────────────────────────── 
+Total                        29            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 19 ATTs receive a positive weight, and 10 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time7 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        19          0.0023
-Negative weights        10          -0.0023
-------------------------------------------------
-Total                   29          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 7 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time7    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             19       0.0023 
+Negative weights             10      -0.0023 
+──────────────────────────────────────────── 
+Total                        29            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 19 ATTs receive a positive weight, and 10 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time8 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        19          0.0017
-Negative weights        10          -0.0017
-------------------------------------------------
-Total                   29          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 28 ATTs of treatment 8 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time8    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             19       0.0017 
+Negative weights             10      -0.0017 
+──────────────────────────────────────────── 
+Total                        29            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 28 ATTs.
 17 ATTs receive a positive weight, and 11 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time9 # ATTs      Σ weights
-------------------------------------------------
-Positive weights        17          0.0011
-Negative weights        11          -0.0011
-------------------------------------------------
-Total                   28          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 28 ATTs of treatment 9 included in the other_treatments option.
+──────────────────────────────────────────── 
+Other treat.: rel_time9    ATTs    Σ weights 
+──────────────────────────────────────────── 
+Positive weights             17       0.0011 
+Negative weights             11      -0.0011 
+──────────────────────────────────────────── 
+Total                        28            0 
+────────────────────────────────────────────
+
+The next term is a weighted sum of 28 ATTs.
 14 ATTs receive a positive weight, and 14 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time10# ATTs      Σ weights
-------------------------------------------------
-Positive weights        14          0.0009
-Negative weights        14          -0.0009
-------------------------------------------------
-Total                   28          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 10 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time10    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              14        9e-04 
+Negative weights              14       -9e-04 
+───────────────────────────────────────────── 
+Total                         28            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 13 ATTs receive a positive weight, and 16 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time11# ATTs      Σ weights
-------------------------------------------------
-Positive weights        13          0.0009
-Negative weights        16          -0.0009
-------------------------------------------------
-Total                   29          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 29 ATTs of treatment 11 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time11    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              13        9e-04 
+Negative weights              16       -9e-04 
+───────────────────────────────────────────── 
+Total                         29            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 29 ATTs.
 17 ATTs receive a positive weight, and 12 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time12# ATTs      Σ weights
-------------------------------------------------
-Positive weights        17          0.0010
-Negative weights        12          -0.0010
-------------------------------------------------
-Total                   29          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 28 ATTs of treatment 12 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time12    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              17        0.001 
+Negative weights              12       -0.001 
+───────────────────────────────────────────── 
+Total                         29            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 28 ATTs.
 17 ATTs receive a positive weight, and 11 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time13# ATTs      Σ weights
-------------------------------------------------
-Positive weights        17          0.0010
-Negative weights        11          -0.0010
-------------------------------------------------
-Total                   28          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 26 ATTs of treatment 13 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time13    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              17        0.001 
+Negative weights              11       -0.001 
+───────────────────────────────────────────── 
+Total                         28            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 26 ATTs.
 13 ATTs receive a positive weight, and 13 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time14# ATTs      Σ weights
-------------------------------------------------
-Positive weights        13          0.0007
-Negative weights        13          -0.0007
-------------------------------------------------
-Total                   26          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 24 ATTs of treatment 14 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time14    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              13        7e-04 
+Negative weights              13       -7e-04 
+───────────────────────────────────────────── 
+Total                         26            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 24 ATTs.
 11 ATTs receive a positive weight, and 13 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time15# ATTs      Σ weights
-------------------------------------------------
-Positive weights        11          0.0012
-Negative weights        13          -0.0012
-------------------------------------------------
-Total                   24          0.0000
-------------------------------------------------
 
-The next term is a weighted sum of 100 ATTs of treatment 15 included in the other_treatments option.
+───────────────────────────────────────────── 
+Other treat.: rel_time15    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              11       0.0012 
+Negative weights              13      -0.0012 
+───────────────────────────────────────────── 
+Total                         24            0 
+─────────────────────────────────────────────
+
+The next term is a weighted sum of 100 ATTs.
 65 ATTs receive a positive weight, and 35 receive a negative weight.
-------------------------------------------------
-Other treat.: rel_time16# ATTs      Σ weights
-------------------------------------------------
-Positive weights        65          0.0068
-Negative weights        35          -0.0068
-------------------------------------------------
-Total                   100         0.0000
-------------------------------------------------
 
-Regression of variables on the weights attached to the treatment
+───────────────────────────────────────────── 
+Other treat.: rel_time16    ATTs    Σ weights 
+───────────────────────────────────────────── 
+Positive weights              65       0.0068 
+Negative weights              35      -0.0068 
+───────────────────────────────────────────── 
+Total                        100            0 
+─────────────────────────────────────────────
 
-             Coef           SE       t-stat  Correlation
-RW_year -15.333901    13.428752   -1.1418709   -0.232246
+Regression of variables possibly correlated with the treatment effect on the weights:
+             Coef       SE    t-stat Correlation
+RW_year -15.33387 13.42876 -1.141868  -0.2322456
+
+
+The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).
+
 
 ```
 
@@ -1100,7 +1119,57 @@ year   -15.333901    13.428752   -1.1418709   -0.2322459
 ```stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
-twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) (line coef rel_time, lcolor(navy)) (rcap ci_hi ci_lo rel_time, lcolor(maroon)), title("TWFE estimates") xtitle("Relative time to year before law") ytitle("Effect") ylabel(-1(.5)0.5) yscale(range(-1.1 0.8)) xlabel(-9(3)15) xline(0, lcolor(gs10) lpattern(dash)) yline(0, lcolor(gs10) lpattern(dash))
+* Run the regression
+reg div_rate rel_time* i.state i.year [w=stpop], vce(cluster state)
+
+* Pull coefficients and CIs into a postfile
+tempname pf
+tempfile coefs
+postfile `pf' rel_time coef ci_lo ci_hi using `coefs'
+
+* Post-period coefficients: rel_time1 ... rel_time16
+forvalues t = 1/16 {
+    local b  = _b[rel_time`t']
+    local se = _se[rel_time`t']
+    local lo = `b' - 1.96 * `se'
+    local hi = `b' + 1.96 * `se'
+    post `pf' (`t') (`b') (`lo') (`hi')
+}
+
+* Pre-period coefficients: rel_timeminus1 ... rel_timeminus9 (negative event time)
+forvalues t = 1/9 {
+    local b  = _b[rel_timeminus`t']
+    local se = _se[rel_timeminus`t']
+    local lo = `b' - 1.96 * `se'
+    local hi = `b' + 1.96 * `se'
+    post `pf' (-`t') (`b') (`lo') (`hi')
+}
+
+* Add the reference period (rel_time = 0) as a zero point
+post `pf' (0) (0) (0) (0)
+
+postclose `pf'
+
+* Load the coefficient dataset
+preserve
+use `coefs', clear
+sort rel_time
+
+* Plot
+twoway (scatter coef rel_time, msize(medlarge) msymbol(o) mcolor(navy) legend(off)) ///
+       (line coef rel_time, lcolor(navy)) ///
+       (rcap ci_hi ci_lo rel_time, lcolor(maroon)), ///
+       title("TWFE estimates") ///
+       xtitle("Relative time to year before law") ///
+       ytitle("Effect") ///
+       ylabel(-1(.5)0.5) yscale(range(-1.1 0.8)) ///
+       xlabel(-9(3)15) ///
+       xline(0, lcolor(gs10) lpattern(dash)) ///
+       yline(0, lcolor(gs10) lpattern(dash)) ///
+       legend(off)
+
+graph export "figures/ch06_fig62_twfe_es.png", replace width(1200)
+restore
 ```
 
 ### R
@@ -1254,94 +1323,6 @@ year::12  -0.526894   0.189981 -2.773404 0.00787668
 N = 1565  |  Clusters = 49
 ```
 
-### Python
-
-```python
-import pandas as pd
-import re
-import numpy as np
-import pyfixest as pf
-from scipy import stats
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
-# Sun & Abraham (2021) IW estimator via saturated regression
-# Step 1: Exclude always-treated (1956), drop NAs, create rel_time
-df6 = df[(df['controlgroup'] == 1) | ((df['cohort'] > 0) & (df['cohort'] != 1956))].copy()
-df6 = df6.dropna(subset=['div_rate'])
-df6['cohort'] = df6['cohort'].astype(int)
-treated_cohorts = sorted([int(c) for c in df6['cohort'].unique() if c > 0])
-df6['cohort_yr'] = df6['cohort'].replace(0, np.inf)
-df6['rel_time'] = df6['year'] - (df6['cohort_yr'] - 1)
-df6.loc[df6['cohort'] == 0, 'rel_time'] = np.inf
-
-# Step 2: Create cohort dummies and saturated regression
-for c in treated_cohorts:
-    df6[f'coh_{c}'] = (df6['cohort'] == c).astype(int)
-interactions = ' + '.join([f'i(rel_time, coh_{c}, ref=0.0)' for c in treated_cohorts])
-m6_sat = pf.feols(f'div_rate ~ {interactions} | state + year',
-                   data=df6, weights='stpop', vcov={'CRV1': 'state'})
-coefs = m6_sat.coef()
-vcov_mat = m6_sat._vcov
-coefnames = coefs.index.tolist()
-
-# Step 3: IW aggregation by relative time
-report_range = list(range(-13, 0)) + list(range(1, 14))
-for e in report_range:
-    cohort_idx = {}
-    for c in treated_cohorts:
-        for i, name in enumerate(coefnames):
-            if f'[{float(e)}]:coh_{c}' in name:
-                cohort_idx[c] = i; break
-    if not cohort_idx: continue
-    shares = {}
-    for c in cohort_idx:
-        mask = (df6['cohort'] == c) & (df6['year'] == int(c - 1 + e))
-        shares[c] = df6.loc[mask, 'stpop'].sum()
-    total = sum(shares.values())
-    if total == 0: continue
-    R = np.zeros(len(coefs))
-    for c, idx in cohort_idx.items():
-        R[idx] = shares[c] / total
-    iw_est = float(R @ coefs.values)
-    iw_se  = np.sqrt(float(R @ vcov_mat @ R))
-```
-
-```
-IW estimates (Sun & Abraham 2021)                       Number of obs =  1,565
-                                    (Std. err. adjusted for 49 clusters in state)
--------------------------------------------------------------------------------------
-              Coefficient    Std. Err.        t   [95% Conf. Interval]
--------------------------------------------------------------------------------------
-rel_timeminus13   -0.1889074    0.1620046   -1.17   [ -0.5146399,   0.1368252]
-rel_timeminus12   -0.1345839    0.1232145   -1.09   [ -0.3822326,   0.1131549]
-rel_timeminus11   -0.0556618    0.1271449   -0.44   [ -0.3113043,   0.1999800]
-rel_timeminus10    0.0163998    0.1476705    0.11   [ -0.2805122,   0.3133106]
- rel_timeminus9    0.0641501    0.1420123    0.45   [ -0.2213851,   0.3496853]
- rel_timeminus8    0.0288205    0.1238131    0.23   [ -0.2201218,   0.2777628]
- rel_timeminus7    0.0171528    0.1146393    0.15   [ -0.2134449,   0.2477514]
- rel_timeminus6   -0.0211382    0.1154457   -0.18   [ -0.2532569,   0.2109812]
- rel_timeminus5   -0.0006499    0.1194916   -0.01   [ -0.2409038,   0.2396041]
- rel_timeminus4    0.0934107    0.0962606    0.97   [ -0.1001343,   0.2869560]
- rel_timeminus3    0.0976019    0.0867612    1.12   [ -0.0768428,   0.2720467]
- rel_timeminus2    0.0569232    0.0707045    0.81   [ -0.0852380,   0.1990844]
- rel_timeminus1    0.0581053    0.0506949    1.15   [ -0.0438242,   0.1600349]
-      rel_time1    0.2923031    0.0788309    3.71   [  0.1338034,   0.4508028]
-      rel_time2    0.2980093    0.0726580    4.10   [  0.1519972,   0.4440215]
-      rel_time3    0.2609812    0.0816158    3.20   [  0.0969816,   0.4249809]
-      rel_time4    0.1475856    0.0988189    1.49   [ -0.0509956,   0.3461668]
-      rel_time5    0.1155049    0.1054061    1.10   [ -0.0960755,   0.3270853]
-      rel_time6    0.1687372    0.1216117    1.39   [ -0.0753783,   0.4128527]
-      rel_time7    0.1737134    0.1399491    1.24   [ -0.1069728,   0.4543996]
-      rel_time8    0.1142176    0.1267936    0.90   [ -0.1407183,   0.3691535]
-      rel_time9   -0.0715731    0.1299182   -0.55   [ -0.3327910,   0.1896448]
-     rel_time10   -0.1977727    0.1443755   -1.37   [ -0.4880588,   0.0925133]
-     rel_time11   -0.2370089    0.1496063   -1.58   [ -0.5378128,   0.0637950]
-     rel_time12   -0.4187277    0.1572459   -2.66   [ -0.7348921,  -0.1025634]
-     rel_time13   -0.4409427    0.1827418   -2.41   [ -0.8083700,  -0.0735154]
-
-N = 1565  |  Clusters = 49
-Note: R fixest::sunab() with bin.rel and Python IW estimates match closely.
-Minor differences with Stata eventstudyinteract due to endpoint binning conventions.
-```
 
 :::
 

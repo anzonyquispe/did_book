@@ -1451,22 +1451,3 @@ ggsave("figures/ch04_fig46_honestdid_R.png", width = 10, height = 5, dpi = 150)
 *Figure 4.6: Confidence intervals computed by honestdid, on the data of Moser and Voena (2012a). Black bars show usual 95% CIs from the ES-TWFER. Grey dashed bars show robust CIs computed by honestdid with M=1.*
 
 ---
-
-## Summary of Results
-
-| Estimator | Stata | R | Python |
-|-----------|-------|---|--------|
-| TWFE with controls (F-test) | F=5.07, p<0.001 | Chi2=91.313, p<0.001 | F=5.072919, p<0.001 |
-| `did_multiplegt_dyn` (Av. Total Effect) | **0.2893714** | **0.2893714** | **0.2893714** |
-| IFE ATT (r=2) | **0.296655** | **0.296834** | — |
-| SC ATT (standard) | **0.414370** | **0.491647** | — |
-| SC ATT (demeaned) | **0.474263** | **0.474263** | — |
-| SDID ATT | **0.301937** | **0.301844** | — |
-| HonestDiD (M=1) | [−0.196, 0.221] | [−0.200, 0.225] | [−0.200, 0.225] |
-
-**Notes:**
-
-- Python tabs are shown only where official packages exist (`pyfixest`, `py-did-multiplegt-dyn`, `honestdid`).
-- IFE, SC, and SDID do not have official Python packages (`fect`, `sdid_event`/`synthdid`).
-- The standard SC ATT differs between Stata (0.414370) and R (0.491647) due to different package implementations (`sdid_event` vs `synthdid`); the demeaned SC and SDID match exactly.
-- The IFE ATT differs slightly (0.296655 vs 0.296834) due to bootstrap variability across runs.

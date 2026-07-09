@@ -87,10 +87,10 @@ plt.show()
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
-* Ejemplo 1: xtreg
+* Example 1: xtreg
 xtreg patents twea i.year, fe i(subclass) robust cluster(subclass)
 
-* Ejemplo 2: reghdfe
+* Example 2: reghdfe
 reghdfe patents twea, absorb(subclass year) cluster(subclass)
 ```
 
@@ -112,19 +112,19 @@ library(fixest); library(haven)
 options(digits=7)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
-# Ejemplo 1
+# Example 1
 summary(feols(patents ~ twea + i(year) | subclass, data = df, cluster = ~subclass))
 
-# Ejemplo 2
+# Example 2
 summary(feols(patents ~ twea | subclass + year, data = df, cluster = ~subclass))
 ```
 
 ```
-Ejemplo 1 (feols with i(year)):
+Example 1 (feols with i(year)):
      Estimate Std. Error  t value   Pr(>|t|)
 twea 0.288262   0.038887  7.412783 1.3770e-13 ***
 
-Ejemplo 2 (feols with subclass + year):
+Example 2 (feols with subclass + year):
      Estimate Std. Error t value  Pr(>|t|)
 twea 0.288262   0.038887 7.41278 1.377e-13 ***
 ```
@@ -137,28 +137,79 @@ import pyfixest as pf
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
 
-# Ejemplo 1
+# Example 1
 m1 = pf.feols('patents ~ twea + i(year) | subclass', data=df, vcov={'CRV1': 'subclass'})
-c1 = m1.coef(); s1 = m1.se(); t1 = m1.tstat(); p1 = m1.pvalue()
-for name in c1.index:
-    print(f"{name:>20s} | {c1[name]:>12.7f}  {s1[name]:>10.7f}  {t1[name]:>8.2f}   {p1[name]:>8.4f}")
+m1.summary()
 
-# Ejemplo 2
+# Example 2
 m2 = pf.feols('patents ~ twea | subclass + year', data=df, vcov={'CRV1': 'subclass'})
-c2 = m2.coef(); s2 = m2.se(); t2 = m2.tstat(); p2 = m2.pvalue()
-print("\n--- Ejemplo 2 ---")
-for name in c2.index:
-    print(f"{name:>20s} | {c2[name]:>12.7f}  {s2[name]:>10.7f}  {t2[name]:>8.2f}   {p2[name]:>8.4f}")
+m2.summary()
 ```
 
 ```
-Ejemplo 1:
-                twea |    0.2882615   0.0388871      7.41     0.0000
-     C(year)[T.1901] |    0.0059327   0.0077529      0.77     0.4442
-     ...
+Example 1:
 
-Ejemplo 2:
-                twea |    0.2882615   0.0388871      7.41     0.0000
+Estimation:  OLS
+Dep. var.: patents, Fixed effects: subclass
+Inference:  CRV1
+Observations:  289920
+
+| Coefficient     |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
+|:----------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
+| twea            |      0.288 |        0.039 |     7.413 |      0.000 |  0.212 |   0.364 |
+| C(year)[T.1901] |      0.006 |        0.008 |     0.765 |      0.444 | -0.009 |   0.021 |
+| C(year)[T.1902] |      0.006 |        0.008 |     0.708 |      0.479 | -0.010 |   0.022 |
+| C(year)[T.1903] |      0.035 |        0.009 |     3.966 |      0.000 |  0.018 |   0.052 |
+| C(year)[T.1904] |      0.018 |        0.009 |     2.138 |      0.033 |  0.002 |   0.035 |
+| C(year)[T.1905] |      0.021 |        0.009 |     2.329 |      0.020 |  0.003 |   0.039 |
+| C(year)[T.1906] |      0.043 |        0.009 |     4.654 |      0.000 |  0.025 |   0.061 |
+| C(year)[T.1907] |      0.102 |        0.010 |     9.758 |      0.000 |  0.081 |   0.122 |
+| C(year)[T.1908] |      0.058 |        0.010 |     5.855 |      0.000 |  0.039 |   0.078 |
+| C(year)[T.1909] |      0.087 |        0.011 |     7.984 |      0.000 |  0.065 |   0.108 |
+| C(year)[T.1910] |      0.058 |        0.010 |     5.961 |      0.000 |  0.039 |   0.078 |
+| C(year)[T.1911] |      0.087 |        0.011 |     7.889 |      0.000 |  0.065 |   0.108 |
+| C(year)[T.1912] |      0.109 |        0.011 |    10.027 |      0.000 |  0.088 |   0.131 |
+| C(year)[T.1913] |      0.069 |        0.011 |     6.080 |      0.000 |  0.046 |   0.091 |
+| C(year)[T.1914] |      0.153 |        0.013 |    11.953 |      0.000 |  0.128 |   0.178 |
+| C(year)[T.1915] |      0.204 |        0.016 |    12.901 |      0.000 |  0.173 |   0.235 |
+| C(year)[T.1916] |      0.247 |        0.018 |    13.936 |      0.000 |  0.212 |   0.282 |
+| C(year)[T.1917] |      0.234 |        0.016 |    14.694 |      0.000 |  0.203 |   0.266 |
+| C(year)[T.1918] |      0.203 |        0.016 |    12.818 |      0.000 |  0.172 |   0.234 |
+| C(year)[T.1919] |      0.170 |        0.013 |    12.578 |      0.000 |  0.143 |   0.196 |
+| C(year)[T.1920] |      0.163 |        0.014 |    11.455 |      0.000 |  0.135 |   0.191 |
+| C(year)[T.1921] |      0.210 |        0.015 |    14.170 |      0.000 |  0.181 |   0.239 |
+| C(year)[T.1922] |      0.224 |        0.015 |    15.227 |      0.000 |  0.195 |   0.252 |
+| C(year)[T.1923] |      0.184 |        0.015 |    12.575 |      0.000 |  0.155 |   0.212 |
+| C(year)[T.1924] |      0.231 |        0.016 |    14.600 |      0.000 |  0.200 |   0.262 |
+| C(year)[T.1925] |      0.245 |        0.016 |    15.479 |      0.000 |  0.214 |   0.276 |
+| C(year)[T.1926] |      0.280 |        0.016 |    18.065 |      0.000 |  0.250 |   0.310 |
+| C(year)[T.1927] |      0.212 |        0.014 |    15.354 |      0.000 |  0.185 |   0.239 |
+| C(year)[T.1928] |      0.231 |        0.014 |    16.364 |      0.000 |  0.204 |   0.259 |
+| C(year)[T.1929] |      0.298 |        0.016 |    18.926 |      0.000 |  0.267 |   0.329 |
+| C(year)[T.1930] |      0.313 |        0.016 |    19.844 |      0.000 |  0.282 |   0.344 |
+| C(year)[T.1931] |      0.511 |        0.020 |    25.109 |      0.000 |  0.472 |   0.551 |
+| C(year)[T.1932] |      0.577 |        0.021 |    27.115 |      0.000 |  0.535 |   0.618 |
+| C(year)[T.1933] |      0.574 |        0.020 |    29.292 |      0.000 |  0.536 |   0.613 |
+| C(year)[T.1934] |      0.586 |        0.020 |    29.800 |      0.000 |  0.547 |   0.624 |
+| C(year)[T.1935] |      0.556 |        0.019 |    29.074 |      0.000 |  0.518 |   0.593 |
+| C(year)[T.1936] |      0.636 |        0.020 |    31.406 |      0.000 |  0.596 |   0.676 |
+| C(year)[T.1937] |      0.595 |        0.019 |    32.081 |      0.000 |  0.558 |   0.631 |
+| C(year)[T.1938] |      0.644 |        0.019 |    33.170 |      0.000 |  0.606 |   0.682 |
+| C(year)[T.1939] |      0.777 |        0.023 |    34.512 |      0.000 |  0.733 |   0.821 |
+---
+RMSE: 0.978 R2: 0.479 R2 Within: 0.048 
+
+Example 2:
+Estimation:  OLS
+Dep. var.: patents, Fixed effects: subclass+year
+Inference:  CRV1
+Observations:  289920
+
+| Coefficient   |   Estimate |   Std. Error |   t value |   Pr(>|t|) |   2.5% |   97.5% |
+|:--------------|-----------:|-------------:|----------:|-----------:|-------:|--------:|
+| twea          |      0.288 |        0.039 |     7.413 |      0.000 |  0.212 |   0.364 |
+---
+RMSE: 0.978 R2: 0.479 R2 Within: 0.001
 ```
 
 :::
@@ -329,12 +380,6 @@ Now estimate the event-study TWFE regression:
 ```stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
-forvalues l = 1/18 {
-    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
-}
-forvalues l = 1/21 {
-    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
-}
 reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
 
 * F-test on pre-trends
@@ -454,10 +499,34 @@ reltimeplus1 coef:        0.02352017
 ### Stata
 
 ```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-reg patents i.year treatmentgroup reltimeminus* reltimeplus*, cluster(subclass)
-coefplot, keep(reltimeminus* reltimeplus*) vertical yline(0) xline(18.5, lpattern(dash)) xtitle("Relative time to year before TWEA") ytitle("Effect") title("TWFE Event-study estimates") ciopts(recast(rcap) color(cranberry))
+gen reltimeminus0 = year == 1918
+local order_evtime ""
+forvalues i = 18(-1)0 {
+    local order_evtime "`order_evtime' reltimeminus`i'"
+}
+forvalues i = 1/21 {
+    local order_evtime "`order_evtime' reltimeplus`i'"
+}
+
+dis("`order_evtime'")
+reg patents i.year treatmentgroup `order_evtime', cluster(subclass)
+
+
+coefplot, keep(`order_evtime') order(`order_evtime') omitted vertical ///
+    rename(reltimeminus(\d+) = "-\1" reltimeplus(\d+) = "\1", regex) ///
+    recast(connected) ///
+    lcolor(black) mcolor(black) mfcolor(white) ///
+    yline(0) xline(19) ///
+    yscale(range(-0.25 1)) ylabel(-0.25(0.25)1) ///
+    xtitle("Relative time to year before TWEA") ///
+    ytitle("Effect") ///
+    xlabel(1 "-18" 3 "-16" 5 "-14" 7 "-12" 9 "-10" 11 "-8" ///
+           13 "-6" 15 "-4" 17 "-2" 19 "0" ///
+           21 "2" 23 "4" 25 "6" 27 "8" 29 "10" ///
+           31 "12" 33 "14" 35 "16" 37 "18" 39 "20", nogrid) ///
+    xline(3 7 11 15 23 27 31 35 39, lcolor(gs12) lpattern(dot) lwidth(thin)) ///
+    title("TWFE Event-study estimates") ///
+    ciopts(recast(rcap) color(black) lpattern(solid))
 graph export "figures/ch03_fig32_es_twfe.png", replace width(1200)
 ```
 
@@ -466,28 +535,25 @@ graph export "figures/ch03_fig32_es_twfe.png", replace width(1200)
 ### R
 
 ```r
-library(fixest); library(haven)
+library(fixest); library(haven);library(ggfixest);
 options(digits=7)
+setwd("/Users/anzony.quisperojas/Documents/GitHub/did_book/did_book_final")
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-reltimeminus_vars <- paste0("reltimeminus", 1:18)
-reltimeplus_vars <- paste0("reltimeplus", 1:21)
-formula_str <- paste("patents ~", paste(reltimeminus_vars, collapse = " + "), "+",
-    paste(reltimeplus_vars, collapse = " + "), "+ treatmentgroup | year")
-model4 <- feols(as.formula(formula_str), data = df, cluster = ~subclass)
-rt <- c(-(18:1), 0, 1:21)
-coefs <- c(rev(coef(model4)[paste0("reltimeminus", 18:1)]), 0,
-           coef(model4)[paste0("reltimeplus", 1:21)])
-ses <- c(rev(se(model4)[paste0("reltimeminus", 18:1)]), 0,
-         se(model4)[paste0("reltimeplus", 1:21)])
-png("figures/ch03_fig32_es_twfe_R.png", width = 1000, height = 600)
-plot(rt, coefs, type = "b", pch = 19, col = "navy", cex = 0.6,
-     xlab = "Relative time to year before TWEA", ylab = "Effect",
-     main = "TWFE Event-study estimates", ylim = range(coefs - 1.96*ses, coefs + 1.96*ses))
-arrows(rt, coefs - 1.96*ses, rt, coefs + 1.96*ses,
-       length = 0.03, angle = 90, code = 3, col = "firebrick")
-abline(h = 0, col = "black", lwd = 0.8)
-abline(v = 0, col = "black", lty = 2)
-dev.off()
+df$evtime = df$year -1918
+names(df)
+model4 <- feols(patents~ i(evtime, treatmentgroup, ref = 0) + treatmentgroup | year, data = df, cluster = ~subclass)
+p <- ggiplot(model4, geom_style = "errorbar") +
+  geom_line(aes(group = 1), color = "black") +
+  theme_minimal()
+
+# Save as PDF
+ggsave(
+  filename = "figures/ch03_fig32_es_twfe_R.png",
+  plot = p,
+  width = 8,
+  height = 5,
+  units = "in"
+)
 ```
 
 ![R Event Study](../figures/ch03_fig32_es_twfe_R.png)
@@ -528,6 +594,98 @@ plt.savefig("figures/ch03_fig32_es_twfe_Python.png", dpi=150, bbox_inches="tight
 :::
 
 *Figure 3.2: Effects of compulsory licensing on US innovation, according to an ES-TWFER. Standard errors clustered at the patent subclass level. 95% confidence intervals shown in red.*
+
+---
+
+## CQ#8: Linear Pre-Trends We Could Fail to Detect
+
+> Use the `pretrends` package (Roth, 2022) to compute the slope detectable with 50% power using 6 pre-periods.
+
+::: {.panel-tabset}
+
+### Stata
+
+```stata
+* ssc install pretrends, replace
+copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
+use "moser_voena_didtextbook.dta", clear
+forvalues l = 1/18 {
+    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
+}
+forvalues l = 1/21 {
+    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
+}
+reghdfe patents reltimeminus* reltimeplus*, absorb(treatmentgroup year) cluster(subclass)
+pretrends power 0.5, numpre(6)
+```
+
+```
+Slope for 50% power =  .0098235
+```
+
+### R
+
+```r
+library(haven); library(fixest); library(pretrends)
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+for (l in 1:18) df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
+for (l in 1:21) df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
+
+model6 <- feols(as.formula(paste(
+  "patents ~", paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
+  paste(paste0("reltimeplus", 1:21), collapse = " + "), "| treatmentgroup + year")),
+  data = df, cluster = ~subclass)
+
+# Extract coefficients and vcov for first 6 pre-periods
+pretrend_coefs_6 <- paste0("reltimeminus", 1:6)
+beta <- coef(model6)[pretrend_coefs_6]
+sigma <- vcov(model6)[pretrend_coefs_6, pretrend_coefs_6]
+slope50 <- slope_for_power(sigma = sigma, targetPower = 0.5,
+                           tVec = -6:-1, referencePeriod = 0)
+cat("Slope for 50% power:", slope50)
+```
+
+```
+Slope for 50% power (numpre=6): 0.009796021
+```
+
+### Python
+
+```python
+import pandas as pd
+import pyfixest as pf
+from pretrends import slope_for_power
+
+df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+for l in range(1, 19):
+    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
+for l in range(1, 22):
+    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
+
+minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
+plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
+
+# Full model (matches Stata: reghdfe patents reltimeminus* reltimeplus*)
+fml6 = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | treatmentgroup + year"
+m6 = pf.feols(fml6, data=df, vcov={"CRV1": "subclass"})
+
+# Extract vcov for 6 closest pre-periods
+pre6 = [f"reltimeminus{i}" for i in range(1, 7)]
+vcov6 = pd.DataFrame(m6._vcov, index=m6.coef().index,
+                      columns=m6.coef().index).loc[pre6, pre6].values
+
+slope50 = slope_for_power(vcov6, target_power=0.5,
+                           t_vec=[-6, -5, -4, -3, -2, -1])
+print(f"Slope for 50% power (numpre=6): {slope50:.7f}")
+```
+
+```
+Slope for 50% power (numpre=6): 0.0098252
+```
+
+:::
+
+**Note:** All three platforms give essentially identical results: Stata ≈ 0.0098235, R ≈ 0.009796, Python ≈ 0.0098252. The Python `pretrends` package (based on Roth 2022) uses the exact multivariate normal CDF, matching Stata and R.
 
 ---
 
@@ -775,97 +933,6 @@ plt.show()
 
 ---
 
-## CQ#8: Linear Pre-Trends We Could Fail to Detect
-
-> Use the `pretrends` package (Roth, 2022) to compute the slope detectable with 50% power using 6 pre-periods.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-* ssc install pretrends, replace
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-forvalues l = 1/18 {
-    gen reltimeminus`l' = treatmentgroup * (year == 1918 - `l')
-}
-forvalues l = 1/21 {
-    gen reltimeplus`l' = treatmentgroup * (year == 1918 + `l')
-}
-reghdfe patents reltimeminus* reltimeplus*, absorb(treatmentgroup year) cluster(subclass)
-pretrends power 0.5, numpre(6)
-```
-
-```
-Slope for 50% power =  .0098235
-```
-
-### R
-
-```r
-library(haven); library(fixest); library(pretrends)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-for (l in 1:18) df[[paste0("reltimeminus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 - l)
-for (l in 1:21) df[[paste0("reltimeplus", l)]] <- as.numeric(df$treatmentgroup == 1 & df$year == 1918 + l)
-
-model6 <- feols(as.formula(paste(
-  "patents ~", paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
-  paste(paste0("reltimeplus", 1:21), collapse = " + "), "| treatmentgroup + year")),
-  data = df, cluster = ~subclass)
-
-# Extract coefficients and vcov for first 6 pre-periods
-pretrend_coefs_6 <- paste0("reltimeminus", 1:6)
-beta <- coef(model6)[pretrend_coefs_6]
-sigma <- vcov(model6)[pretrend_coefs_6, pretrend_coefs_6]
-slope50 <- slope_for_power(sigma = sigma, targetPower = 0.5,
-                           tVec = -6:-1, referencePeriod = 0)
-cat("Slope for 50% power:", slope50)
-```
-
-```
-Slope for 50% power (numpre=6): 0.009796021
-```
-
-### Python
-
-```python
-import pandas as pd
-import pyfixest as pf
-from pretrends import slope_for_power
-
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
-for l in range(1, 19):
-    df[f"reltimeminus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 - l)).astype(float)
-for l in range(1, 22):
-    df[f"reltimeplus{l}"] = (df["treatmentgroup"] * (df["year"] == 1918 + l)).astype(float)
-
-minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
-plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
-
-# Full model (matches Stata: reghdfe patents reltimeminus* reltimeplus*)
-fml6 = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | treatmentgroup + year"
-m6 = pf.feols(fml6, data=df, vcov={"CRV1": "subclass"})
-
-# Extract vcov for 6 closest pre-periods
-pre6 = [f"reltimeminus{i}" for i in range(1, 7)]
-vcov6 = pd.DataFrame(m6._vcov, index=m6.coef().index,
-                      columns=m6.coef().index).loc[pre6, pre6].values
-
-slope50 = slope_for_power(vcov6, target_power=0.5,
-                           t_vec=[-6, -5, -4, -3, -2, -1])
-print(f"Slope for 50% power (numpre=6): {slope50:.7f}")
-```
-
-```
-Slope for 50% power (numpre=6): 0.0098252
-```
-
-:::
-
-**Note:** All three platforms give essentially identical results: Stata ≈ 0.0098235, R ≈ 0.009796, Python ≈ 0.0098252. The Python `pretrends` package (based on Roth 2022) uses the exact multivariate normal CDF, matching Stata and R.
-
----
 
 ## CQ#10: Variance of Treatment Effects
 
