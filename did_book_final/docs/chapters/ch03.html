@@ -516,8 +516,9 @@ treatmentgroup -0.178087   0.033815 -5.26649 1.4306e-07 ***</code></pre>
 <section id="cq47-event-study-twfe-regression" class="level2" data-number="1.6">
 <h2 data-number="1.6" class="anchored" data-anchor-id="cq47-event-study-twfe-regression"><span class="header-section-number">1.6</span> CQ#4–7: Event-Study TWFE Regression</h2>
 <blockquote class="blockquote">
-<p>Using the <code>moser_voena_didtextbook</code> dataset, estimate an ES-TWFER of patents on a treatment group FE, year FEs, indicators for having been exposed to treatment for 1, 2, …, 21 years, and indicators for being a treatment group subclass 1, 2, …, 18 years before 1918, clustering standard errors at the subclass level. According to this regression, does compulsory licensing have an effect on US innovation? Do Assumptions NA and PT seem to hold? Then, verify that (3.8) holds for <span class="math inline">\(\ell = 1\)</span>, by computing in Stata the DID in the right hand side of that equation.</p>
+<p>Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that <span class="math inline">\(\hat{\beta}_1^{fe}\)</span> equals the DID from equation (3.7).</p>
 </blockquote>
+<p>Now estimate the event-study TWFE regression:</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -710,9 +711,7 @@ reltimeplus1 coef:        0.02352017</code></pre>
 <section id="cq9-event-study-without-pre-trends" class="level2" data-number="1.7">
 <h2 data-number="1.7" class="anchored" data-anchor-id="cq9-event-study-without-pre-trends"><span class="header-section-number">1.7</span> CQ#9: Event-Study without Pre-Trends</h2>
 <blockquote class="blockquote">
-<blockquote class="blockquote">
-<p>Using the <code>moser_voena_didtextbook</code> dataset, estimate the ES-TWFER in (3.29) with patents as the outcome. Are the estimated effects of compulsory licensing in this regression similar to those we obtained estimating (3.7)? Are the effects more precisely estimated?.</p>
-</blockquote>
+<p>Re-estimate the event-study using only post-treatment dummies. This is numerically equivalent to Borusyak, Jaravel, and Spiess (2024).</p>
 </blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false" href="">Python</a></li></ul>

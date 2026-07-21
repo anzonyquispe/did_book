@@ -314,7 +314,9 @@ print(m3.summary())
 
 ## CQ#4–7: Event-Study TWFE Regression
 
-> Using the `moser_voena_didtextbook` dataset, estimate an ES-TWFER of patents on a treatment group FE, year FEs, indicators for having been exposed to treatment for 1, 2, ..., 21 years, and indicators for being a treatment group subclass 1, 2, ..., 18 years before 1918, clustering standard errors at the subclass level. According to this regression, does compulsory licensing have an effect on US innovation? Do Assumptions NA and PT seem to hold? Then, verify that (3.8) holds for $\ell = 1$, by computing in Stata the DID in the right hand side of that equation.
+> Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that $\hat{\beta}_1^{fe}$ equals the DID from equation (3.7).
+
+Now estimate the event-study TWFE regression:
 
 ::: {.panel-tabset}
 
@@ -527,7 +529,7 @@ plt.savefig("figures/ch03_fig32_es_twfe_Python.png", dpi=150, bbox_inches="tight
 
 ## CQ#9: Event-Study without Pre-Trends
 
-> > Using the `moser_voena_didtextbook` dataset, estimate the ES-TWFER in (3.29) with patents as the outcome. Are the estimated effects of compulsory licensing in this regression similar to those we obtained estimating (3.7)? Are the effects more precisely estimated?.
+> Re-estimate the event-study using only post-treatment dummies. This is numerically equivalent to Borusyak, Jaravel, and Spiess (2024).
 
 ::: {.panel-tabset}
 
