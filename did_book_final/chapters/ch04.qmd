@@ -4,73 +4,9 @@ title: "Chapter 4: Alternatives to Parallel Trends"
 
 ## Overview
 
-Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta`
+Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta, moser_voena_didtextbook.RData, moser_voena_didtextbook.parquet`
 
 This chapter explores alternatives to the parallel trends assumption. We consider: (1) TWFE with control variables, (2) Interactive Fixed Effects, (3) Synthetic Control, (4) Synthetic DID, and (5) sensitivity analysis using HonestDiD.
-
----
-
-## Panel View
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-* ssc install panelview, replace
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-panelview patents twea, i(subclass) t(year) type(treat) title("Treatment Status: Moser & Voena (2012)") ylabel(none) ytitle("")
-graph export "figures/ch03_panelview_stata.png", replace width(1200)
-```
-
-<img src="../figures/ch03_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
-
-### R
-
-```r
-library(panelView)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-png("figures/ch03_panelview_R.png", width = 1000, height = 600)
-panelview(patents ~ twea, data = df, index = c("subclass", "year"), type = "treat",
-          main = "Moser & Voena (2012)", ylab = "")
-dev.off()
-```
-
-<img src="../figures/ch03_panelview_R.png" alt="Treatment Status (R)" width="100%" />
-
-### Python
-
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from matplotlib.patches import Patch
-
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
-pv = df.pivot_table(index="subclass", columns="year", values="twea", aggfunc="first")
-pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
-cmap = mcolors.ListedColormap(["#D4E6F1", "#00AAAA"])
-fig, ax = plt.subplots(figsize=(12, 10))
-ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
-for i in range(0, len(pv_sorted), 10):
-    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
-ax.set_xticks(range(0, len(pv_sorted.columns), 1))
-ax.set_xticklabels([int(c) for c in pv_sorted.columns], rotation=45, ha="right", fontsize=8)
-ax.set_yticks([])
-ax.set_xlabel("year")
-ax.set_title("Treatment Status: Moser & Voena (2012)", fontsize=16)
-ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="Control"),
-                   Patch(facecolor="#00AAAA", edgecolor="gray", label="Treated")],
-          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
-plt.tight_layout()
-plt.savefig("figures/ch03_panelview_Python.png", dpi=150, bbox_inches="tight")
-plt.show()
-```
-
-<img src="../figures/ch03_panelview_Python.png" alt="Treatment Status (Python)" width="100%" />
-
-:::
 
 ---
 
@@ -144,41 +80,6 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
  reltimeplus20 |    .650356   .1026827     6.33   0.000      .449068    .8516441
  reltimeplus21 |    .779268   .1193597     6.53   0.000     .5452882    1.013248
          _cons |   .4615322   .0085679    53.87   0.000     .4447366    .4783278
---------------------------------------------------------------------------------
-```
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-* F-test on pre-trends
-test reltimeminus1 reltimeminus2 reltimeminus3 reltimeminus4 reltimeminus5 reltimeminus6 reltimeminus7 reltimeminus8 reltimeminus9 reltimeminus10 reltimeminus11 reltimeminus12 reltimeminus13 reltimeminus14 reltimeminus15 reltimeminus16 reltimeminus17 reltimeminus18
-```
-
-```
-       F( 18,  7244) =    5.07
-            Prob > F =    0.0000
-```
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-* Testing correlation between treatment and covariate
-reg patents1900 treatmentgroup if year==1900
-```
-
-```
-      Source |       SS           df       MS      Number of obs   =     7,248
--------------+----------------------------------   F(1, 7246)      =     13.05
-       Model |  7.82905752         1  7.82905752   Prob > F        =    0.0003
-    Residual |  4345.55822     7,246   .59971822   R-squared       =    0.0018
--------------+----------------------------------   Adj R-squared   =    0.0017
-       Total |  4353.38728     7,247  .600715783   Root MSE        =    .77441
-
---------------------------------------------------------------------------------
-   patents1900 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
-treatmentgroup |   -.156312   .0432625    -3.61   0.000     -.241119    -.071505
-         _cons |   .2217882   .0093148    23.81   0.000     .2035285    .2400478
 --------------------------------------------------------------------------------
 ```
 
@@ -361,7 +262,7 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
 
 :::
 
-**Result:** The pre-trends are individually mostly insignificant but jointly significant (F = 5.07, p < 0.001). The covariate `patents1900` is correlated with treatment (coef = −0.156312, p < 0.001), making controls necessary.
+**Result:** The pre-trend and event-study estimates are similar to those without controls.
 
 ### Figure 4.2: ES-TWFER with controls
 
@@ -678,7 +579,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 :::
 
-**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average total effect is **0.2893714** (SE = 0.0489889). All estimates match across Stata, R, and Python to 7 decimal places.
+**Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average treatment effect on the treated is 0.2893714 (SE = 0.0489889). All estimates match across Stata, R, and Python to 7 decimal places.
 
 ---
 
@@ -1123,12 +1024,17 @@ graph export "figures/ch04_fig45_sdid_twfe.png", replace width(1200)
 ### Stata
 
 ```stata
-* ssc install honestdid, replace
+ssc install honestdid, replace
+honestdid _plugin_check
+
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
+
 gen reltimeminus0 = 0
+
 reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
-honestdid, pre(1/19) post(20/40) delta(rm) mvec(1)
+
+honestdid, pre(1/18) post(19/39) delta(rm) mvec(0.5(0.5)2) coefplot
 ```
 
 ```
@@ -1332,7 +1238,7 @@ print(delta_rm)
 
 :::
 
-**Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **[−0.196, 0.221]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER. The original ES-TWFER CI for ATT1 is [−0.064, 0.111], already insignificant. With `honestdid`, the CI widens further to include both positive and negative values, illustrating how even small allowed violations of parallel trends can substantially widen confidence intervals when there are many pre-treatment periods.
+**Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **[−0.196, 0.221]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER.
 
 ### Figure 4.6: Confidence intervals computed by honestdid
 

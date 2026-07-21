@@ -4,79 +4,13 @@ title: "Chapter 5: TWFE Estimators Outside of the Classical Design"
 
 ## Overview
 
-Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta`
+Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta, gentzkowetal_didtextbook.RData, gentzkowetal_didtextbook.parquet`
 
 This chapter investigates what the TWFE estimator $\hat{\beta}^{fe}$ estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1872 to 1928.
 
 Key tool: the `twowayfeweights` package (Stata/R) decomposes $\hat{\beta}^{fe}$ into a weighted sum of treatment effects, where some weights may be negative — meaning $\hat{\beta}^{fe}$ may not estimate a convex combination of effects.
 
 No event-study plots in this chapter — only numerical outputs from regressions and decompositions.
-
----
-
-## Panel View
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-* ssc install panelview, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
-use "gentzkowetal_didtextbook.dta", clear
-
-panelview prestout has_newspaper, i(cnty90) t(year) type(treat) title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)") legend(label(1 "No newspaper") label(2 "Has newspaper")) ylabel(none) ytitle("")
-graph export "figures/ch05_panelview_stata.png", replace width(1200)
-```
-
-<img src="../figures/ch05_panelview_stata.png" alt="Treatment Status (Stata)" width="100%" />
-
-### R
-
-```r
-library(panelView)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-png("figures/ch05_panelview_R.png", width = 1000, height = 600)
-panelview(prestout ~ numdailies, data = df, index = c("cnty90", "year"), type = "treat",
-          main = "Gentzkow, Shapiro & Sinkinson (2011)", ylab = "")
-dev.off()
-```
-
-<img src="../figures/ch05_panelview_R.png" alt="Treatment Status (R)" width="100%" />
-
-### Python
-
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from matplotlib.patches import Patch
-
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-df["has_newspaper"] = (df["numdailies"] > 0).astype(int)
-pv = df.pivot_table(index="cnty90", columns="year", values="has_newspaper", aggfunc="first")
-pv_sorted = pv.loc[pv.mean(axis=1).sort_values(ascending=False).index]
-cmap = mcolors.ListedColormap(["#D4E6F1", "#2171B5"])
-fig, ax = plt.subplots(figsize=(12, 10))
-ax.imshow(pv_sorted.values, aspect="auto", cmap=cmap, interpolation="nearest", vmin=0, vmax=1)
-for i in range(0, len(pv_sorted), 10):
-    ax.axhline(y=i - 0.5, color="white", linewidth=0.15)
-ax.set_xticks(range(0, len(pv_sorted.columns), 2))
-ax.set_xticklabels([int(c) for c in pv_sorted.columns[::2]], rotation=45, ha="right", fontsize=8)
-ax.set_yticks([])
-ax.set_xlabel("year")
-ax.set_title("Treatment Status: Gentzkow, Shapiro & Sinkinson (2011)", fontsize=16)
-ax.legend(handles=[Patch(facecolor="#D4E6F1", edgecolor="gray", label="No newspaper"),
-                   Patch(facecolor="#2171B5", edgecolor="gray", label="Has newspaper")],
-          loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=2)
-plt.tight_layout()
-plt.savefig("figures/ch05_panelview_Python.png", dpi=150, bbox_inches="tight")
-plt.show()
-```
-
-<img src="../figures/ch05_panelview_Python.png" alt="Treatment Status (Python)" width="100%" />
-
-:::
 
 ---
 

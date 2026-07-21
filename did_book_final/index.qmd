@@ -1,8 +1,7 @@
 # Preface {.unnumbered}
 
-This book provides complete, executable solutions to all **green questions** (coding exercises) from:
-
-> **Credible Answers to Hard Questions: Differences-in-Differences for Natural Experiments**
+This book provides complete, executable solutions to all **Computer Questions** (coding exercises) from:
+> **Causal Inference with Differences-in-Differences: Credible Answers to Hard Questions**
 > by Clément de Chaisemartin & Xavier D'Haultfœuille (Princeton University Press, forthcoming)
 
 Every exercise is solved in **three programming languages** — Stata, R, and Python — and the code **executes directly** inside this book, producing outputs, tables, and graphs so the reader can verify that results are exactly the same across all three languages.
@@ -35,4 +34,4 @@ Download the dataset in your preferred format and place it in your working direc
 
 - [Anthony Quispe](https://github.com/anzonyquispe)
 - [Karla Vega](https://karlavegaleg.github.io)
-- [Joshbel Damian](https://damianrojasjhosbel-sudo.github.io/)
+- [Jhosbel Damian](https://damianrojasjhosbel-sudo.github.io/)

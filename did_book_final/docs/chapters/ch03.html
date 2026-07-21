@@ -242,7 +242,6 @@ window.Quarto = {
   </ul></li>
   <li><a href="#cq8-linear-pre-trends-we-could-fail-to-detect" id="toc-cq8-linear-pre-trends-we-could-fail-to-detect" class="nav-link" data-scroll-target="#cq8-linear-pre-trends-we-could-fail-to-detect"><span class="header-section-number">1.8</span> CQ#8: Linear Pre-Trends We Could Fail to Detect</a></li>
   <li><a href="#cq10-variance-of-treatment-effects" id="toc-cq10-variance-of-treatment-effects" class="nav-link" data-scroll-target="#cq10-variance-of-treatment-effects"><span class="header-section-number">1.9</span> CQ#10: Variance of Treatment Effects</a></li>
-  <li><a href="#cq10-cont.-placebo-test" id="toc-cq10-cont.-placebo-test" class="nav-link" data-scroll-target="#cq10-cont.-placebo-test"><span class="header-section-number">1.10</span> CQ#10 (cont.): Placebo Test</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Credible-Answers/did_book/edit/main/chapters/ch03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Credible-Answers/did_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -270,7 +269,7 @@ window.Quarto = {
 
 <section id="overview" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1.1</span> Overview</h2>
-<p>Dataset: <strong>Moser &amp; Voena (2012)</strong> — <code>moser_voena_didtextbook.dta</code></p>
+<p>Dataset: <strong>Moser &amp; Voena (2012)</strong> — <code>moser_voena_didtextbook.dta, moser_voena_didtextbook.RData, moser_voena_didtextbook.parquet</code></p>
 <p>The Trading with the Enemy Act (TWEA) allowed US firms to use German-owned patents. Treatment (<span class="math inline">\(D_{g,t}\)</span>) equals 1 for the 336 subclasses that received German patents, starting in 1919. The dataset contains 289,920 observations (7,248 subclasses × 40 years).</p>
 <hr>
 </section>
@@ -517,11 +516,8 @@ treatmentgroup -0.178087   0.033815 -5.26649 1.4306e-07 ***</code></pre>
 <section id="cq47-event-study-twfe-regression" class="level2" data-number="1.6">
 <h2 data-number="1.6" class="anchored" data-anchor-id="cq47-event-study-twfe-regression"><span class="header-section-number">1.6</span> CQ#4–7: Event-Study TWFE Regression</h2>
 <blockquote class="blockquote">
-<p>Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that <span class="math inline">\(\hat{\beta}_1^{fe}\)</span> equals the DID from equation (3.7).</p>
+<p>Using the <code>moser_voena_didtextbook</code> dataset, estimate an ES-TWFER of patents on a treatment group FE, year FEs, indicators for having been exposed to treatment for 1, 2, …, 21 years, and indicators for being a treatment group subclass 1, 2, …, 18 years before 1918, clustering standard errors at the subclass level. According to this regression, does compulsory licensing have an effect on US innovation? Do Assumptions NA and PT seem to hold? Then, verify that (3.8) holds for <span class="math inline">\(\ell = 1\)</span>, by computing in Stata the DID in the right hand side of that equation.</p>
 </blockquote>
-<p>The event-study dummies <code>reltimeminus1</code>–<code>reltimeminus18</code> and <code>reltimeplus1</code>–<code>reltimeplus21</code> are already included in the dataset. The reference period is 1918 (the last pre-treatment year).</p>
-<p>Now estimate the event-study TWFE regression:</p>
-<p>Now estimate the event-study TWFE regression:</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
@@ -714,7 +710,9 @@ reltimeplus1 coef:        0.02352017</code></pre>
 <section id="cq9-event-study-without-pre-trends" class="level2" data-number="1.7">
 <h2 data-number="1.7" class="anchored" data-anchor-id="cq9-event-study-without-pre-trends"><span class="header-section-number">1.7</span> CQ#9: Event-Study without Pre-Trends</h2>
 <blockquote class="blockquote">
-<p>Re-estimate the event-study using only post-treatment dummies. This is numerically equivalent to Borusyak, Jaravel, and Spiess (2024).</p>
+<blockquote class="blockquote">
+<p>Using the <code>moser_voena_didtextbook</code> dataset, estimate the ES-TWFER in (3.29) with patents as the outcome. Are the estimated effects of compulsory licensing in this regression similar to those we obtained estimating (3.7)? Are the effects more precisely estimated?.</p>
+</blockquote>
 </blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false" href="">Python</a></li></ul>
@@ -946,7 +944,7 @@ RMSE: 1.337 R2: 0.026 R2 Within: 0.001</code></pre>
 <section id="cq8-linear-pre-trends-we-could-fail-to-detect" class="level2" data-number="1.8">
 <h2 data-number="1.8" class="anchored" data-anchor-id="cq8-linear-pre-trends-we-could-fail-to-detect"><span class="header-section-number">1.8</span> CQ#8: Linear Pre-Trends We Could Fail to Detect</h2>
 <blockquote class="blockquote">
-<p>Use the <code>pretrends</code> package (Roth, 2022) to compute the slope detectable with 50% power using 6 pre-periods.</p>
+<p>Use the pretrends package (Roth, 2022) to compute the linear differential trends one has 50% chances of detecting based on the first 6 pre-trend estimators.</p>
 </blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-3" role="tab" aria-controls="tabset-9-3" aria-selected="false" href="">Python</a></li></ul>
@@ -1033,236 +1031,117 @@ RMSE: 1.337 R2: 0.026 R2 Within: 0.001</code></pre>
 <span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scalar</span> sd_effects = <span class="fu">r</span>(sd_2) - <span class="fu">r</span>(sd_1)</span>
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="kw">reg</span> diffpatentswrt1918 treatmentgroup <span class="kw">if</span> <span class="fu">year</span>==1932</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="kw">display</span> <span class="st">"CI: ["</span> _b[treatmentgroup] - 1.96*sd_effects <span class="st">", "</span> _b[treatmentgroup] + 1.96*sd_effects <span class="st">"]"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Variance ratio test
---------------------------------------------------------------
-   Group |     Obs      Std. dev.
----------+------------------------
-       0 |   6,912      1.772807
-       1 |     336      2.011905
---------------------------------------------------------------
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="kw">display</span> <span class="st">"Bottom and top decile of effects: ["</span> _b[treatmentgroup] - 1.28*sd_effects <span class="st">", "</span> _b[treatmentgroup] + 1.28*sd_effects <span class="st">"]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>
+Variance ratio test
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |   6,912    .3577836    .0213236    1.772807    .3159828    .3995843
+       1 |     336           1    .1097584    2.011905    .7840975    1.215903
+---------+--------------------------------------------------------------------
+Combined |   7,248    .3875552    .0210201    1.789547    .3463497    .4287606
+------------------------------------------------------------------------------
+
     ratio = sd(0) / sd(1)                        f =   0.7764
   Pr(F &lt; f) = 0.0004     2*Pr(F &lt; f) = 0.0008
 
 sd_2 - sd_1 = .23909779
 beta = .64221644
-CI: [.17358476, 1.1108481]</code></pre>
+Bottom and top decile of effects: [.33617126, .94826161]</code></pre>
 </div>
 <div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(dplyr)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"</span>))</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>df_1932 <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1932</span>)</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>var_test <span class="ot">&lt;-</span> <span class="fu">var.test</span>(diffpatentswrt1918 <span class="sc">~</span> treatmentgroup, <span class="at">data =</span> df_1932)</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(var_test)</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>sd_stats <span class="ot">&lt;-</span> df_1932 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(treatmentgroup) <span class="sc">%&gt;%</span></span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sd =</span> <span class="fu">sd</span>(diffpatentswrt1918, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>sd_effects <span class="ot">&lt;-</span> sd_stats<span class="sc">$</span>sd[<span class="dv">2</span>] <span class="sc">-</span> sd_stats<span class="sc">$</span>sd[<span class="dv">1</span>]</span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>effect_reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(diffpatentswrt1918 <span class="sc">~</span> treatmentgroup, <span class="at">data =</span> df_1932)</span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>beta_reg <span class="ot">&lt;-</span> <span class="fu">coef</span>(effect_reg)[<span class="st">"treatmentgroup"</span>]</span>
-<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"CI: ["</span>, beta_reg <span class="sc">-</span> <span class="fl">1.96</span><span class="sc">*</span>sd_effects, <span class="st">","</span>, beta_reg <span class="sc">+</span> <span class="fl">1.96</span><span class="sc">*</span>sd_effects, <span class="st">"]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"</span>))</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>df_1932 <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1932</span>)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>var_test <span class="ot">&lt;-</span> <span class="fu">var.test</span>(diffpatentswrt1918 <span class="sc">~</span> treatmentgroup, <span class="at">data =</span> df_1932)</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(var_test)</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>sd_stats <span class="ot">&lt;-</span> df_1932 <span class="sc">%&gt;%</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(treatmentgroup) <span class="sc">%&gt;%</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sd =</span> <span class="fu">sd</span>(diffpatentswrt1918, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>sd_effects <span class="ot">&lt;-</span> sd_stats<span class="sc">$</span>sd[<span class="dv">2</span>] <span class="sc">-</span> sd_stats<span class="sc">$</span>sd[<span class="dv">1</span>]</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>effect_reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(diffpatentswrt1918 <span class="sc">~</span> treatmentgroup, <span class="at">data =</span> df_1932)</span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>beta_reg <span class="ot">&lt;-</span> <span class="fu">coef</span>(effect_reg)[<span class="st">"treatmentgroup"</span>]</span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bottom and top decile of effects: ["</span>,</span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a>  beta_reg <span class="sc">-</span> <span class="fl">1.28</span> <span class="sc">*</span> sd_effects,</span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">","</span>,</span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a>  beta_reg <span class="sc">+</span> <span class="fl">1.28</span> <span class="sc">*</span> sd_effects,</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"]</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>F = 0.77644, p-value = 0.0008145
 SD control: 1.772807
 SD treated: 2.011905
 sd_2 - sd_1 = 0.2390978
 beta = 0.6422164
-CI: [ 0.1735848 , 1.110848 ]</code></pre>
+Bottom and top decile of effects: [ 0.3361713 , 0.9482616 ]</code></pre>
 </div>
 <div id="tabset-10-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyfixest <span class="im">as</span> pf</span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet"</span>)</span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>df_1932 <span class="op">=</span> df[df[<span class="st">"year"</span>] <span class="op">==</span> <span class="dv">1932</span>]</span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>g0 <span class="op">=</span> df_1932.loc[df_1932[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">0</span>, <span class="st">"diffpatentswrt1918"</span>].dropna()</span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>g1 <span class="op">=</span> df_1932.loc[df_1932[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">"diffpatentswrt1918"</span>].dropna()</span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>sd0, sd1 <span class="op">=</span> g0.std(ddof<span class="op">=</span><span class="dv">1</span>), g1.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>sd_effects <span class="op">=</span> sd1 <span class="op">-</span> sd0</span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>F_var <span class="op">=</span> sd0<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> sd1<span class="op">**</span><span class="dv">2</span></span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>p_two <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> <span class="bu">min</span>(stats.f.cdf(F_var, <span class="bu">len</span>(g0)<span class="op">-</span><span class="dv">1</span>, <span class="bu">len</span>(g1)<span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>                <span class="dv">1</span> <span class="op">-</span> stats.f.cdf(F_var, <span class="bu">len</span>(g0)<span class="op">-</span><span class="dv">1</span>, <span class="bu">len</span>(g1)<span class="op">-</span><span class="dv">1</span>))</span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>m7 <span class="op">=</span> pf.feols(<span class="st">"diffpatentswrt1918 ~ treatmentgroup"</span>, data<span class="op">=</span>df_1932)</span>
-<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> m7.coef()[<span class="st">"treatmentgroup"</span>]</span>
-<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"F = </span><span class="sc">{</span>F_var<span class="sc">:.4f}</span><span class="ss">, p = </span><span class="sc">{</span>p_two<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"sd_2 - sd_1 = </span><span class="sc">{</span>sd_effects<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
-<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"beta = </span><span class="sc">{</span>beta<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
-<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"CI: [</span><span class="sc">{</span>beta <span class="op">-</span> <span class="fl">1.96</span><span class="op">*</span>sd_effects<span class="sc">:.6f}</span><span class="ss">, </span><span class="sc">{</span>beta <span class="op">+</span> <span class="fl">1.96</span><span class="op">*</span>sd_effects<span class="sc">:.6f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>SD control: 1.772923
-SD treated: 2.011905
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet"</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>df_1932 <span class="op">=</span> df[df[<span class="st">"year"</span>] <span class="op">==</span> <span class="dv">1932</span>]</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>g0 <span class="op">=</span> df_1932.loc[</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    df_1932[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">0</span>,</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"diffpatentswrt1918"</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>].dropna()</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>g1 <span class="op">=</span> df_1932.loc[</span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>    df_1932[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">1</span>,</span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"diffpatentswrt1918"</span></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>].dropna()</span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>sd0 <span class="op">=</span> g0.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>sd1 <span class="op">=</span> g1.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>sd_effects <span class="op">=</span> sd1 <span class="op">-</span> sd0</span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a>F_var <span class="op">=</span> sd0<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> sd1<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a>p_two <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> <span class="bu">min</span>(</span>
+<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a>    stats.f.cdf(F_var, <span class="bu">len</span>(g0) <span class="op">-</span> <span class="dv">1</span>, <span class="bu">len</span>(g1) <span class="op">-</span> <span class="dv">1</span>),</span>
+<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="op">-</span> stats.f.cdf(F_var, <span class="bu">len</span>(g0) <span class="op">-</span> <span class="dv">1</span>, <span class="bu">len</span>(g1) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-30"><a href="#cb52-30" aria-hidden="true" tabindex="-1"></a>m7 <span class="op">=</span> pf.feols(</span>
+<span id="cb52-31"><a href="#cb52-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"diffpatentswrt1918 ~ treatmentgroup"</span>,</span>
+<span id="cb52-32"><a href="#cb52-32" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_1932</span>
+<span id="cb52-33"><a href="#cb52-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb52-34"><a href="#cb52-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-35"><a href="#cb52-35" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> m7.coef()[<span class="st">"treatmentgroup"</span>]</span>
+<span id="cb52-36"><a href="#cb52-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-37"><a href="#cb52-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"F = </span><span class="sc">{</span>F_var<span class="sc">:.4f}</span><span class="ss">, p = </span><span class="sc">{</span>p_two<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb52-38"><a href="#cb52-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"sd_2 - sd_1 = </span><span class="sc">{</span>sd_effects<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
+<span id="cb52-39"><a href="#cb52-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"beta = </span><span class="sc">{</span>beta<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
+<span id="cb52-40"><a href="#cb52-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-41"><a href="#cb52-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb52-42"><a href="#cb52-42" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Bottom and top decile of effects: "</span></span>
+<span id="cb52-43"><a href="#cb52-43" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"[</span><span class="sc">{</span>beta <span class="op">-</span> <span class="fl">1.28</span> <span class="op">*</span> sd_effects<span class="sc">:.6f}</span><span class="ss">, "</span></span>
+<span id="cb52-44"><a href="#cb52-44" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>beta <span class="op">+</span> <span class="fl">1.28</span> <span class="op">*</span> sd_effects<span class="sc">:.6f}</span><span class="ss">]"</span></span>
+<span id="cb52-45"><a href="#cb52-45" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>F = 0.7765, p = 0.0008
+
 sd_2 - sd_1 = 0.238982
-F = 0.7765, 2*Pr(F&lt;f) = 0.0008
+
 beta = 0.642216
-CI: [0.173812, 1.110620]</code></pre>
+
+Bottom and top decile of effects: [0.336320, 0.948113]</code></pre>
 </div>
 </div>
 </div>
-<p><strong>Result:</strong> The treated group has a larger variance (<span class="math inline">\(\hat{\sigma}_1 = 2.01 &gt; \hat{\sigma}_0 = 1.77\)</span>). The implied SD of treatment effects is <span class="math inline">\(\approx 0.239\)</span>, and the confidence interval for <span class="math inline">\(\beta_{14}\)</span> using this SD is <span class="math inline">\([0.174, 1.111]\)</span>.</p>
-<hr>
-</section>
-<section id="cq10-cont.-placebo-test" class="level2" data-number="1.10">
-<h2 data-number="1.10" class="anchored" data-anchor-id="cq10-cont.-placebo-test"><span class="header-section-number">1.10</span> CQ#10 (cont.): Placebo Test</h2>
-<blockquote class="blockquote">
-<p>Perform a placebo test by comparing the variances of <code>diffpatentswrt1918</code> across all years.</p>
-</blockquote>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-11-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-1" role="tab" aria-controls="tabset-11-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-2" role="tab" aria-controls="tabset-11-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-3" role="tab" aria-controls="tabset-11-3" aria-selected="false" href="">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-11-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-11-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta"</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">replace</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="kw">forvalues</span> i = 1900/1939 {</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">quietly</span> <span class="kw">sdtest</span> diffpatentswrt1918 <span class="kw">if</span> <span class="fu">year</span>==<span class="ot">`i'</span>, <span class="kw">by</span>(treatmentgroup)</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">display</span> <span class="st">"Year `i': F = "</span> %6.4f <span class="fu">r</span>(<span class="fu">F</span>) <span class="st">"  p = "</span> %6.4f <span class="fu">r</span>(<span class="kw">p</span>)</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Year 1900: F = 3.2735  p = 0.0000
-Year 1901: F = 2.5398  p = 0.0000
-Year 1902: F = 3.3703  p = 0.0000
-Year 1903: F = 3.1775  p = 0.0000
-Year 1904: F = 4.0726  p = 0.0000
-Year 1905: F = 3.9685  p = 0.0000
-Year 1906: F = 3.5803  p = 0.0000
-Year 1907: F = 1.7711  p = 0.0000
-Year 1908: F = 2.5510  p = 0.0000
-Year 1909: F = 3.7689  p = 0.0000
-Year 1910: F = 2.2839  p = 0.0000
-Year 1911: F = 1.8151  p = 0.0000
-Year 1912: F = 3.7112  p = 0.0000
-Year 1913: F = 2.2403  p = 0.0000
-Year 1914: F = 2.7455  p = 0.0000
-Year 1915: F = 3.6764  p = 0.0000
-Year 1916: F = 3.2690  p = 0.0000
-Year 1917: F = 1.6222  p = 0.0000
-Year 1918: F =      .  p =      .
-Year 1919: F = 1.7652  p = 0.0000
-Year 1920: F = 1.7161  p = 0.0000
-Year 1921: F = 2.6409  p = 0.0000
-Year 1922: F = 1.6035  p = 0.0000
-Year 1923: F = 1.2684  p = 0.0040
-Year 1924: F = 2.3221  p = 0.0000
-Year 1925: F = 1.6974  p = 0.0000
-Year 1926: F = 2.4032  p = 0.0000
-Year 1927: F = 1.5314  p = 0.0000
-Year 1928: F = 1.7269  p = 0.0000
-Year 1929: F = 1.2982  p = 0.0016
-Year 1930: F = 1.1443  p = 0.0999
-Year 1931: F = 1.5775  p = 0.0000
-Year 1932: F = 0.7764  p = 0.0008
-Year 1933: F = 0.8284  p = 0.0134
-Year 1934: F = 1.1337  p = 0.1256
-Year 1935: F = 0.8164  p = 0.0076
-Year 1936: F = 0.7675  p = 0.0005
-Year 1937: F = 0.8621  p = 0.0522
-Year 1938: F = 0.8692  p = 0.0668
-Year 1939: F = 0.7569  p = 0.0002</code></pre>
-</div>
-<div id="tabset-11-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(dplyr)</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"</span>))</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (yr <span class="cf">in</span> <span class="dv">1900</span><span class="sc">:</span><span class="dv">1939</span>) {</span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  df_yr <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year <span class="sc">==</span> yr)</span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> <span class="fu">var.test</span>(diffpatentswrt1918 <span class="sc">~</span> treatmentgroup, <span class="at">data =</span> df_yr)</span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Year %d: F = %.4f, p = %.4f</span><span class="sc">\n</span><span class="st">"</span>, yr, test<span class="sc">$</span>statistic, test<span class="sc">$</span>p.value))</span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Year 1900: F = 3.2735, p = 0.0000
-Year 1901: F = 2.5398, p = 0.0000
-Year 1902: F = 3.3703, p = 0.0000
-Year 1903: F = 3.1775, p = 0.0000
-Year 1904: F = 4.0726, p = 0.0000
-Year 1905: F = 3.9685, p = 0.0000
-Year 1906: F = 3.5803, p = 0.0000
-Year 1907: F = 1.7711, p = 0.0000
-Year 1908: F = 2.5510, p = 0.0000
-Year 1909: F = 3.7689, p = 0.0000
-Year 1910: F = 2.2839, p = 0.0000
-Year 1911: F = 1.8151, p = 0.0000
-Year 1912: F = 3.7112, p = 0.0000
-Year 1913: F = 2.2403, p = 0.0000
-Year 1914: F = 2.7455, p = 0.0000
-Year 1915: F = 3.6764, p = 0.0000
-Year 1916: F = 3.2690, p = 0.0000
-Year 1917: F = 1.6222, p = 0.0000
-Year 1918: F =      ., p =      .
-Year 1919: F = 1.7652, p = 0.0000
-Year 1920: F = 1.7161, p = 0.0000
-Year 1921: F = 2.6409, p = 0.0000
-Year 1922: F = 1.6035, p = 0.0000
-Year 1923: F = 1.2684, p = 0.0040
-Year 1924: F = 2.3221, p = 0.0000
-Year 1925: F = 1.6974, p = 0.0000
-Year 1926: F = 2.4032, p = 0.0000
-Year 1927: F = 1.5314, p = 0.0000
-Year 1928: F = 1.7269, p = 0.0000
-Year 1929: F = 1.2982, p = 0.0016
-Year 1930: F = 1.1443, p = 0.0999
-Year 1931: F = 1.5775, p = 0.0000
-Year 1932: F = 0.7764, p = 0.0008
-Year 1933: F = 0.8284, p = 0.0134
-Year 1934: F = 1.1337, p = 0.1256
-Year 1935: F = 0.8164, p = 0.0076
-Year 1936: F = 0.7675, p = 0.0005
-Year 1937: F = 0.8621, p = 0.0522
-Year 1938: F = 0.8692, p = 0.0668
-Year 1939: F = 0.7569, p = 0.0002</code></pre>
-</div>
-<div id="tabset-11-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet"</span>)</span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> yr <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1900</span>, <span class="dv">1940</span>):</span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    dfy <span class="op">=</span> df[df[<span class="st">"year"</span>] <span class="op">==</span> yr]</span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>    g0y <span class="op">=</span> dfy.loc[dfy[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">0</span>, <span class="st">"diffpatentswrt1918"</span>].dropna()</span>
-<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>    g1y <span class="op">=</span> dfy.loc[dfy[<span class="st">"treatmentgroup"</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">"diffpatentswrt1918"</span>].dropna()</span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(g0y) <span class="op">&gt;</span> <span class="dv">1</span> <span class="kw">and</span> <span class="bu">len</span>(g1y) <span class="op">&gt;</span> <span class="dv">1</span> <span class="kw">and</span> g1y.std(ddof<span class="op">=</span><span class="dv">1</span>) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>        F_v <span class="op">=</span> g0y.std(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> g1y.std(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">**</span><span class="dv">2</span></span>
-<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>        p_v <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> <span class="bu">min</span>(stats.f.cdf(F_v, <span class="bu">len</span>(g0y)<span class="op">-</span><span class="dv">1</span>, <span class="bu">len</span>(g1y)<span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>                      <span class="dv">1</span> <span class="op">-</span> stats.f.cdf(F_v, <span class="bu">len</span>(g0y)<span class="op">-</span><span class="dv">1</span>, <span class="bu">len</span>(g1y)<span class="op">-</span><span class="dv">1</span>))</span>
-<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Year </span><span class="sc">{</span>yr<span class="sc">}</span><span class="ss">: F = </span><span class="sc">{</span>F_v<span class="sc">:.4f}</span><span class="ss">  p = </span><span class="sc">{</span>p_v<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Year 1900: F = 3.2740  p = 0.0000
-Year 1901: F = 2.5396  p = 0.0000
-Year 1902: F = 3.3701  p = 0.0000
-Year 1903: F = 3.1773  p = 0.0000
-Year 1904: F = 4.0723  p = 0.0000
-Year 1905: F = 3.9683  p = 0.0000
-Year 1906: F = 3.5801  p = 0.0000
-Year 1907: F = 1.7712  p = 0.0000
-Year 1908: F = 2.5509  p = 0.0000
-Year 1909: F = 3.7687  p = 0.0000
-Year 1910: F = 2.2838  p = 0.0000
-Year 1911: F = 1.8153  p = 0.0000
-Year 1912: F = 3.7110  p = 0.0000
-Year 1913: F = 2.2402  p = 0.0000
-Year 1914: F = 2.7453  p = 0.0000
-Year 1915: F = 3.6762  p = 0.0000
-Year 1916: F = 3.2688  p = 0.0000
-Year 1917: F = 1.6223  p = 0.0000
-Year 1918: (undefined - reference year)
-Year 1919: F = 1.7651  p = 0.0000
-Year 1920: F = 1.7159  p = 0.0000
-Year 1921: F = 2.6407  p = 0.0000
-Year 1922: F = 1.6034  p = 0.0000
-Year 1923: F = 1.2684  p = 0.0040
-Year 1924: F = 2.3220  p = 0.0000
-Year 1925: F = 1.6973  p = 0.0000
-Year 1926: F = 2.4031  p = 0.0000
-Year 1927: F = 1.5313  p = 0.0000
-Year 1928: F = 1.7268  p = 0.0000
-Year 1929: F = 1.2981  p = 0.0016
-Year 1930: F = 1.1442  p = 0.1002
-Year 1931: F = 1.5777  p = 0.0000
-Year 1932: F = 0.7765  p = 0.0008
-Year 1933: F = 0.8284  p = 0.0134
-Year 1934: F = 1.1336  p = 0.1258
-Year 1935: F = 0.8164  p = 0.0076
-Year 1936: F = 0.7675  p = 0.0005
-Year 1937: F = 0.8621  p = 0.0522
-Year 1938: F = 0.8692  p = 0.0668
-Year 1939: F = 0.7569  p = 0.0002</code></pre>
-</div>
-</div>
-</div>
-<p><strong>Result:</strong> Pre-TWEA years show <span class="math inline">\(F &gt; 1\)</span> (control group has higher variance), while post-1930 years show <span class="math inline">\(F &lt; 1\)</span> (treated group variance increases). The pattern is consistent across all three languages.</p>
+<p><strong>Result:</strong> The treated group has a larger variance (<span class="math inline">\(\hat{\sigma}_1 = 2.01 &gt; \hat{\sigma}_0 = 1.77\)</span>). The implied SD of treatment effects is <span class="math inline">\(\approx 0.239\)</span>, and the bottom and top deciles of subclass-specific effects are respectively equal to 0.336 and 0.948.</p>
 
 
 </section>

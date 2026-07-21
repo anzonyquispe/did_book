@@ -4,7 +4,7 @@ title: "Chapter 3: The Classical DID Design"
 
 ## Overview
 
-Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta`
+Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta, moser_voena_didtextbook.RData, moser_voena_didtextbook.parquet`
 
 The Trading with the Enemy Act (TWEA) allowed US firms to use German-owned patents. Treatment ($D_{g,t}$) equals 1 for the 336 subclasses that received German patents, starting in 1919. The dataset contains 289,920 observations (7,248 subclasses × 40 years).
 
@@ -314,13 +314,7 @@ print(m3.summary())
 
 ## CQ#4–7: Event-Study TWFE Regression
 
-> Estimate the event-study TWFE regression. Test whether pre-trend coefficients are jointly significant. Verify that $\hat{\beta}_1^{fe}$ equals the DID from equation (3.7).
-
-The event-study dummies `reltimeminus1`–`reltimeminus18` and `reltimeplus1`–`reltimeplus21` are already included in the dataset. The reference period is 1918 (the last pre-treatment year).
-
-Now estimate the event-study TWFE regression:
-
-Now estimate the event-study TWFE regression:
+> Using the `moser_voena_didtextbook` dataset, estimate an ES-TWFER of patents on a treatment group FE, year FEs, indicators for having been exposed to treatment for 1, 2, ..., 21 years, and indicators for being a treatment group subclass 1, 2, ..., 18 years before 1918, clustering standard errors at the subclass level. According to this regression, does compulsory licensing have an effect on US innovation? Do Assumptions NA and PT seem to hold? Then, verify that (3.8) holds for $\ell = 1$, by computing in Stata the DID in the right hand side of that equation.
 
 ::: {.panel-tabset}
 
@@ -533,7 +527,7 @@ plt.savefig("figures/ch03_fig32_es_twfe_Python.png", dpi=150, bbox_inches="tight
 
 ## CQ#9: Event-Study without Pre-Trends
 
-> Re-estimate the event-study using only post-treatment dummies. This is numerically equivalent to Borusyak, Jaravel, and Spiess (2024).
+> > Using the `moser_voena_didtextbook` dataset, estimate the ES-TWFER in (3.29) with patents as the outcome. Are the estimated effects of compulsory licensing in this regression similar to those we obtained estimating (3.7)? Are the effects more precisely estimated?.
 
 ::: {.panel-tabset}
 
@@ -777,7 +771,7 @@ plt.show()
 
 ## CQ#8: Linear Pre-Trends We Could Fail to Detect
 
-> Use the `pretrends` package (Roth, 2022) to compute the slope detectable with 50% power using 6 pre-periods.
+> Use the pretrends package (Roth, 2022) to compute the linear differential trends one has 50% chances of detecting based on the first 6 pre-trend estimators.
 
 ::: {.panel-tabset}
 
@@ -882,40 +876,59 @@ sdtest diffpatentswrt1918 if year==1932, by(treatmentgroup)
 
 scalar sd_effects = r(sd_2) - r(sd_1)
 reg diffpatentswrt1918 treatmentgroup if year==1932
-display "CI: [" _b[treatmentgroup] - 1.96*sd_effects ", " _b[treatmentgroup] + 1.96*sd_effects "]"
+display "Bottom and top decile of effects: [" _b[treatmentgroup] - 1.28*sd_effects ", " _b[treatmentgroup] + 1.28*sd_effects "]
 ```
 
 ```
+
 Variance ratio test
---------------------------------------------------------------
-   Group |     Obs      Std. dev.
----------+------------------------
-       0 |   6,912      1.772807
-       1 |     336      2.011905
---------------------------------------------------------------
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |   6,912    .3577836    .0213236    1.772807    .3159828    .3995843
+       1 |     336           1    .1097584    2.011905    .7840975    1.215903
+---------+--------------------------------------------------------------------
+Combined |   7,248    .3875552    .0210201    1.789547    .3463497    .4287606
+------------------------------------------------------------------------------
+
     ratio = sd(0) / sd(1)                        f =   0.7764
   Pr(F < f) = 0.0004     2*Pr(F < f) = 0.0008
 
 sd_2 - sd_1 = .23909779
 beta = .64221644
-CI: [.17358476, 1.1108481]
+Bottom and top decile of effects: [.33617126, .94826161]
 ```
 
 ### R
 
 ```r
-library(haven); library(dplyr)
+library(haven)
+library(dplyr)
+
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
+
 df_1932 <- df %>% filter(year == 1932)
+
 var_test <- var.test(diffpatentswrt1918 ~ treatmentgroup, data = df_1932)
 print(var_test)
 
-sd_stats <- df_1932 %>% group_by(treatmentgroup) %>%
+sd_stats <- df_1932 %>%
+  group_by(treatmentgroup) %>%
   summarise(sd = sd(diffpatentswrt1918, na.rm = TRUE))
+
 sd_effects <- sd_stats$sd[2] - sd_stats$sd[1]
+
 effect_reg <- lm(diffpatentswrt1918 ~ treatmentgroup, data = df_1932)
+
 beta_reg <- coef(effect_reg)["treatmentgroup"]
-cat("CI: [", beta_reg - 1.96*sd_effects, ",", beta_reg + 1.96*sd_effects, "]")
+
+cat(
+  "Bottom and top decile of effects: [",
+  beta_reg - 1.28 * sd_effects,
+  ",",
+  beta_reg + 1.28 * sd_effects,
+  "]\n"
+)
 ```
 
 ```
@@ -924,7 +937,7 @@ SD control: 1.772807
 SD treated: 2.011905
 sd_2 - sd_1 = 0.2390978
 beta = 0.6422164
-CI: [ 0.1735848 , 1.110848 ]
+Bottom and top decile of effects: [ 0.3361713 , 0.9482616 ]
 ```
 
 ### Python
@@ -933,215 +946,61 @@ CI: [ 0.1735848 , 1.110848 ]
 import pandas as pd
 import pyfixest as pf
 from scipy import stats
-
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
+df = pd.read_parquet(
+    "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet"
+)
 df_1932 = df[df["year"] == 1932]
-g0 = df_1932.loc[df_1932["treatmentgroup"] == 0, "diffpatentswrt1918"].dropna()
-g1 = df_1932.loc[df_1932["treatmentgroup"] == 1, "diffpatentswrt1918"].dropna()
-sd0, sd1 = g0.std(ddof=1), g1.std(ddof=1)
+g0 = df_1932.loc[
+    df_1932["treatmentgroup"] == 0,
+    "diffpatentswrt1918"
+].dropna()
+
+g1 = df_1932.loc[
+    df_1932["treatmentgroup"] == 1,
+    "diffpatentswrt1918"
+].dropna()
+
+sd0 = g0.std(ddof=1)
+sd1 = g1.std(ddof=1)
+
 sd_effects = sd1 - sd0
+
 F_var = sd0**2 / sd1**2
-p_two = 2 * min(stats.f.cdf(F_var, len(g0)-1, len(g1)-1),
-                1 - stats.f.cdf(F_var, len(g0)-1, len(g1)-1))
-m7 = pf.feols("diffpatentswrt1918 ~ treatmentgroup", data=df_1932)
+
+p_two = 2 * min(
+    stats.f.cdf(F_var, len(g0) - 1, len(g1) - 1),
+    1 - stats.f.cdf(F_var, len(g0) - 1, len(g1) - 1)
+)
+
+m7 = pf.feols(
+    "diffpatentswrt1918 ~ treatmentgroup",
+    data=df_1932
+)
+
 beta = m7.coef()["treatmentgroup"]
+
 print(f"F = {F_var:.4f}, p = {p_two:.4f}")
 print(f"sd_2 - sd_1 = {sd_effects:.6f}")
 print(f"beta = {beta:.6f}")
-print(f"CI: [{beta - 1.96*sd_effects:.6f}, {beta + 1.96*sd_effects:.6f}]")
+
+print(
+    f"Bottom and top decile of effects: "
+    f"[{beta - 1.28 * sd_effects:.6f}, "
+    f"{beta + 1.28 * sd_effects:.6f}]"
+)
 ```
 
 ```
-SD control: 1.772923
-SD treated: 2.011905
+F = 0.7765, p = 0.0008
+
 sd_2 - sd_1 = 0.238982
-F = 0.7765, 2*Pr(F<f) = 0.0008
+
 beta = 0.642216
-CI: [0.173812, 1.110620]
+
+Bottom and top decile of effects: [0.336320, 0.948113]
 ```
 
 :::
 
-**Result:** The treated group has a larger variance ($\hat{\sigma}_1 = 2.01 > \hat{\sigma}_0 = 1.77$). The implied SD of treatment effects is $\approx 0.239$, and the confidence interval for $\beta_{14}$ using this SD is $[0.174, 1.111]$.
+**Result:** The treated group has a larger variance ($\hat{\sigma}_1 = 2.01 > \hat{\sigma}_0 = 1.77$). The implied SD of treatment effects is $\approx 0.239$, and the bottom and top deciles of subclass-specific effects are respectively equal to 0.336 and 0.948.
 
----
-
-## CQ#10 (cont.): Placebo Test
-
-> Perform a placebo test by comparing the variances of `diffpatentswrt1918` across all years.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
-use "moser_voena_didtextbook.dta", clear
-forvalues i = 1900/1939 {
-    quietly sdtest diffpatentswrt1918 if year==`i', by(treatmentgroup)
-    display "Year `i': F = " %6.4f r(F) "  p = " %6.4f r(p)
-}
-```
-
-```
-Year 1900: F = 3.2735  p = 0.0000
-Year 1901: F = 2.5398  p = 0.0000
-Year 1902: F = 3.3703  p = 0.0000
-Year 1903: F = 3.1775  p = 0.0000
-Year 1904: F = 4.0726  p = 0.0000
-Year 1905: F = 3.9685  p = 0.0000
-Year 1906: F = 3.5803  p = 0.0000
-Year 1907: F = 1.7711  p = 0.0000
-Year 1908: F = 2.5510  p = 0.0000
-Year 1909: F = 3.7689  p = 0.0000
-Year 1910: F = 2.2839  p = 0.0000
-Year 1911: F = 1.8151  p = 0.0000
-Year 1912: F = 3.7112  p = 0.0000
-Year 1913: F = 2.2403  p = 0.0000
-Year 1914: F = 2.7455  p = 0.0000
-Year 1915: F = 3.6764  p = 0.0000
-Year 1916: F = 3.2690  p = 0.0000
-Year 1917: F = 1.6222  p = 0.0000
-Year 1918: F =      .  p =      .
-Year 1919: F = 1.7652  p = 0.0000
-Year 1920: F = 1.7161  p = 0.0000
-Year 1921: F = 2.6409  p = 0.0000
-Year 1922: F = 1.6035  p = 0.0000
-Year 1923: F = 1.2684  p = 0.0040
-Year 1924: F = 2.3221  p = 0.0000
-Year 1925: F = 1.6974  p = 0.0000
-Year 1926: F = 2.4032  p = 0.0000
-Year 1927: F = 1.5314  p = 0.0000
-Year 1928: F = 1.7269  p = 0.0000
-Year 1929: F = 1.2982  p = 0.0016
-Year 1930: F = 1.1443  p = 0.0999
-Year 1931: F = 1.5775  p = 0.0000
-Year 1932: F = 0.7764  p = 0.0008
-Year 1933: F = 0.8284  p = 0.0134
-Year 1934: F = 1.1337  p = 0.1256
-Year 1935: F = 0.8164  p = 0.0076
-Year 1936: F = 0.7675  p = 0.0005
-Year 1937: F = 0.8621  p = 0.0522
-Year 1938: F = 0.8692  p = 0.0668
-Year 1939: F = 0.7569  p = 0.0002
-```
-
-### R
-
-```r
-library(haven); library(dplyr)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
-for (yr in 1900:1939) {
-  df_yr <- df %>% filter(year == yr)
-  test <- var.test(diffpatentswrt1918 ~ treatmentgroup, data = df_yr)
-  cat(sprintf("Year %d: F = %.4f, p = %.4f\n", yr, test$statistic, test$p.value))
-}
-```
-
-```
-Year 1900: F = 3.2735, p = 0.0000
-Year 1901: F = 2.5398, p = 0.0000
-Year 1902: F = 3.3703, p = 0.0000
-Year 1903: F = 3.1775, p = 0.0000
-Year 1904: F = 4.0726, p = 0.0000
-Year 1905: F = 3.9685, p = 0.0000
-Year 1906: F = 3.5803, p = 0.0000
-Year 1907: F = 1.7711, p = 0.0000
-Year 1908: F = 2.5510, p = 0.0000
-Year 1909: F = 3.7689, p = 0.0000
-Year 1910: F = 2.2839, p = 0.0000
-Year 1911: F = 1.8151, p = 0.0000
-Year 1912: F = 3.7112, p = 0.0000
-Year 1913: F = 2.2403, p = 0.0000
-Year 1914: F = 2.7455, p = 0.0000
-Year 1915: F = 3.6764, p = 0.0000
-Year 1916: F = 3.2690, p = 0.0000
-Year 1917: F = 1.6222, p = 0.0000
-Year 1918: F =      ., p =      .
-Year 1919: F = 1.7652, p = 0.0000
-Year 1920: F = 1.7161, p = 0.0000
-Year 1921: F = 2.6409, p = 0.0000
-Year 1922: F = 1.6035, p = 0.0000
-Year 1923: F = 1.2684, p = 0.0040
-Year 1924: F = 2.3221, p = 0.0000
-Year 1925: F = 1.6974, p = 0.0000
-Year 1926: F = 2.4032, p = 0.0000
-Year 1927: F = 1.5314, p = 0.0000
-Year 1928: F = 1.7269, p = 0.0000
-Year 1929: F = 1.2982, p = 0.0016
-Year 1930: F = 1.1443, p = 0.0999
-Year 1931: F = 1.5775, p = 0.0000
-Year 1932: F = 0.7764, p = 0.0008
-Year 1933: F = 0.8284, p = 0.0134
-Year 1934: F = 1.1337, p = 0.1256
-Year 1935: F = 0.8164, p = 0.0076
-Year 1936: F = 0.7675, p = 0.0005
-Year 1937: F = 0.8621, p = 0.0522
-Year 1938: F = 0.8692, p = 0.0668
-Year 1939: F = 0.7569, p = 0.0002
-```
-
-### Python
-
-```python
-import pandas as pd
-from scipy import stats
-
-df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
-for yr in range(1900, 1940):
-    dfy = df[df["year"] == yr]
-    g0y = dfy.loc[dfy["treatmentgroup"] == 0, "diffpatentswrt1918"].dropna()
-    g1y = dfy.loc[dfy["treatmentgroup"] == 1, "diffpatentswrt1918"].dropna()
-    if len(g0y) > 1 and len(g1y) > 1 and g1y.std(ddof=1) > 0:
-        F_v = g0y.std(ddof=1)**2 / g1y.std(ddof=1)**2
-        p_v = 2 * min(stats.f.cdf(F_v, len(g0y)-1, len(g1y)-1),
-                      1 - stats.f.cdf(F_v, len(g0y)-1, len(g1y)-1))
-        print(f"Year {yr}: F = {F_v:.4f}  p = {p_v:.4f}")
-```
-
-```
-Year 1900: F = 3.2740  p = 0.0000
-Year 1901: F = 2.5396  p = 0.0000
-Year 1902: F = 3.3701  p = 0.0000
-Year 1903: F = 3.1773  p = 0.0000
-Year 1904: F = 4.0723  p = 0.0000
-Year 1905: F = 3.9683  p = 0.0000
-Year 1906: F = 3.5801  p = 0.0000
-Year 1907: F = 1.7712  p = 0.0000
-Year 1908: F = 2.5509  p = 0.0000
-Year 1909: F = 3.7687  p = 0.0000
-Year 1910: F = 2.2838  p = 0.0000
-Year 1911: F = 1.8153  p = 0.0000
-Year 1912: F = 3.7110  p = 0.0000
-Year 1913: F = 2.2402  p = 0.0000
-Year 1914: F = 2.7453  p = 0.0000
-Year 1915: F = 3.6762  p = 0.0000
-Year 1916: F = 3.2688  p = 0.0000
-Year 1917: F = 1.6223  p = 0.0000
-Year 1918: (undefined - reference year)
-Year 1919: F = 1.7651  p = 0.0000
-Year 1920: F = 1.7159  p = 0.0000
-Year 1921: F = 2.6407  p = 0.0000
-Year 1922: F = 1.6034  p = 0.0000
-Year 1923: F = 1.2684  p = 0.0040
-Year 1924: F = 2.3220  p = 0.0000
-Year 1925: F = 1.6973  p = 0.0000
-Year 1926: F = 2.4031  p = 0.0000
-Year 1927: F = 1.5313  p = 0.0000
-Year 1928: F = 1.7268  p = 0.0000
-Year 1929: F = 1.2981  p = 0.0016
-Year 1930: F = 1.1442  p = 0.1002
-Year 1931: F = 1.5777  p = 0.0000
-Year 1932: F = 0.7765  p = 0.0008
-Year 1933: F = 0.8284  p = 0.0134
-Year 1934: F = 1.1336  p = 0.1258
-Year 1935: F = 0.8164  p = 0.0076
-Year 1936: F = 0.7675  p = 0.0005
-Year 1937: F = 0.8621  p = 0.0522
-Year 1938: F = 0.8692  p = 0.0668
-Year 1939: F = 0.7569  p = 0.0002
-```
-
-:::
-
-**Result:** Pre-TWEA years show $F > 1$ (control group has higher variance), while post-1930 years show $F < 1$ (treated group variance increases). The pattern is consistent across all three languages.
