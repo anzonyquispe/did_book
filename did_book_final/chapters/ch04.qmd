@@ -4,28 +4,27 @@ title: "Chapter 4: Alternatives to Parallel Trends"
 
 ## Overview
 
-Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta, moser_voena_didtextbook.RData, moser_voena_didtextbook.parquet`
+Dataset: **Moser & Voena (2012)** — `moser_voena_didtextbook.dta` (Stata), `moser_voena_didtextbook.RData` (R), `moser_voena_didtextbook.parquet` (Python)
 
 This chapter explores alternatives to the parallel trends assumption. We consider: (1) TWFE with control variables, (2) Interactive Fixed Effects, (3) Synthetic Control, (4) Synthetic DID, and (5) sensitivity analysis using HonestDiD.
 
----
+------------------------------------------------------------------------
 
 ## CQ#11: TWFE with Controls (controlling for patents in 1900)
 
 > Estimate the event-study TWFE regression controlling for `year#patents1900` interactions. Are the estimated event-study effects with controls very different from those without controls?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install reghdfe, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 reghdfe patents reltimeminus* reltimeplus*, absorb(year#patents1900 treatmentgroup) cluster(subclass)
 ```
 
-```
+```         
 (dropped 120 singleton observations)
 HDFE Linear regression                            Number of obs   =    289,800
 Absorbing 2 HDFE groups                           F(  39,   7244) =       5.67
@@ -85,28 +84,21 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
 
 ### R
 
-```r
+``` r
 library(fixest); library(haven); library(car); library(dplyr)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
+load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 formula_str <- paste("patents ~",
     paste(paste0("reltimeminus", 1:18), collapse = " + "), "+",
     paste(paste0("reltimeplus", 1:21), collapse = " + "),
     "| year^patents1900 + treatmentgroup")
-model_controls <- feols(as.formula(formula_str),
-    data = df, cluster = ~subclass)
-summary(model_controls)
-
-# F-test on pre-trends
-linearHypothesis(model_controls, paste0("reltimeminus", 1:18))
-
-# Correlation test
-corr_test <- feols(patents1900 ~ treatmentgroup,
-    data = df %>% filter(year == 1900))
-summary(corr_test)
+model_controls <- feols(as.formula(formula_str), data = df, cluster = ~subclass)
+print(coeftable(model_controls), digits = 6)
+ftest <- linearHypothesis(model_controls, paste0("reltimeminus", 1:18))
+cat("\nChisq =", round(ftest$Chisq[2], 6), " p-value =", format(ftest$`Pr(>Chisq)`[2], scientific = TRUE), "\n")
 ```
 
-```
+```         
 NOTE: 120/0 fixed-effect singletons were removed (120 observations).
 OLS estimation, Dep. Var.: patents
 Observations: 289,800
@@ -163,43 +155,32 @@ Correlation: treatmentgroup = -0.156312 (t = -3.61, p = 0.0003)
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import pyfixest as pf
 import numpy as np
 from scipy import stats
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
-
 minus_vars = [f"reltimeminus{i}" for i in range(1, 19)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
-
-df["year_x_pat1900"] = df["year"].astype(str) + "_" + \
-                        df["patents1900"].astype(str)
-fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + \
-      " | year_x_pat1900 + treatmentgroup"
+df["year_x_pat1900"] = df["year"].astype(str) + "_" + df["patents1900"].astype(str)
+fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | year_x_pat1900 + treatmentgroup"
 m = pf.feols(fml, data=df, vcov={"CRV1": "subclass"})
-print(m.summary())
-
-# F-test on pre-trends
-c = m.coef()
+c = m.coef(); s = m.se(); t = m.tstat(); p = m.pvalue()
+print(f"{'Variable':<16} {'Coef':>12} {'Std.Err':>12} {'t':>10} {'P>|t|':>10}")
+for name in c.index:
+    print(f"{name:<16} {c[name]:>12.7f} {s[name]:>12.7f} {t[name]:>10.4f} {p[name]:>10.6f}")
 v_mat = pd.DataFrame(m._vcov, index=c.index, columns=c.index)
 pre_names = [x for x in minus_vars if x in c.index]
 beta_pre = c[pre_names].values
 V_pre = v_mat.loc[pre_names, pre_names].values
 F_stat = beta_pre @ np.linalg.inv(V_pre) @ beta_pre / len(pre_names)
-p_val = 1 - stats.f.cdf(F_stat, len(pre_names),
-                          df["subclass"].nunique() - 1)
-print(f"F-test: F({len(pre_names)}, {df['subclass'].nunique()-1})"
-      f" = {F_stat:.6f}, p = {p_val:.6e}")
-
-# Correlation test
-corr = pf.feols("patents1900 ~ treatmentgroup",
-    data=df[df["year"] == 1900])
-print(corr.summary())
+p_val = 1 - stats.f.cdf(F_stat, len(pre_names), df["subclass"].nunique() - 1)
+print(f"\nF-test: F({len(pre_names)}, {df['subclass'].nunique()-1}) = {F_stat:.6f}, p = {p_val:.6e}")
 ```
 
-```
+```         
 (120 singleton fixed effects removed)
 HDFE Linear regression
 Dep. var.: patents
@@ -259,18 +240,16 @@ Correlation test: patents1900 ~ treatmentgroup (year==1900)
   treatmentgroup |    -0.156312     0.043262      -3.61
 ------------------------------------------------------------
 ```
-
 :::
 
 **Result:** The pre-trend and event-study estimates are similar to those without controls.
 
 ### Figure 4.2: ES-TWFER with controls
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 reghdfe patents reltimeminus* reltimeplus*, absorb(year#patents1900 treatmentgroup) cluster(subclass)
@@ -284,7 +263,7 @@ graph export "figures/ch04_fig42_twfe_controls.png", replace width(1200)
 
 ### R
 
-```r
+``` r
 library(fixest); library(ggplot2)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
@@ -312,7 +291,7 @@ ggsave("figures/ch04_fig42_twfe_controls_R.png", width = 8, height = 5, dpi = 15
 
 ### Python
 
-```python
+``` python
 import pandas as pd, numpy as np, pyfixest as pf, matplotlib.pyplot as plt
 
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet")
@@ -340,29 +319,27 @@ plt.show()
 ```
 
 ![Python Figure 4.2](../figures/ch04_fig42_twfe_controls_Python.png)
-
 :::
 
 *Figure 4.2: Effects of compulsory licensing on US innovation, according to an ES-TWFER with controls. Standard errors are clustered at the patent subclass level. 95% confidence intervals shown.*
 
----
+------------------------------------------------------------------------
 
 ## CQ#12: DID with Nonparametric Trends (`did_multiplegt_dyn`)
 
 > Use the `did_multiplegt_dyn` command to perform the same estimation with `trends_nonparam(patents1900)`. Are results very different from those you obtained with the TWFE ES regression with controls?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 did_multiplegt_dyn patents subclass year twea, effects(21) placebo(18) trends_nonparam(patents1900)
 ```
 
-```
+```         
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -432,7 +409,7 @@ Test of joint nullity of the placebos : p-value = 1.685e-12
 
 ### R
 
-```r
+``` r
 library(haven); library(DIDmultiplegtDYN); library(polars)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 result_dyn <- did_multiplegt_dyn(
@@ -449,7 +426,7 @@ result_dyn <- did_multiplegt_dyn(
 print(result_dyn)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -512,7 +489,7 @@ Test of joint nullity of the placebos : p-value = 0.0000
 
 ### Python
 
-```python
+``` python
 import polars as pl
 import pandas as pd
 from did_multiplegt_dyn import DidMultiplegtDyn
@@ -532,7 +509,7 @@ model.fit()
 model.summary()
 ```
 
-```
+```         
                Block  Estimate       SE     LB CI    UB CI        N  Switchers
             Effect_1  0.012377 0.040790 -0.067569 0.092324   6992.0      336.0
             Effect_2  0.036850 0.042956 -0.047343 0.121043   6992.0      336.0
@@ -576,22 +553,20 @@ Average_Total_Effect  0.289371 0.048989  0.193355 0.385388 146832.0     7056.0
           Placebo_18  0.050048 0.048927 -0.045846 0.145943   6992.0      336.0
 Test of joint nullity of the placebos : p-value = 1.685e-12
 ```
-
 :::
 
 **Result:** The `did_multiplegt_dyn` estimates with `trends_nonparam(patents1900)` are very close to the TWFE ES estimates with controls. The average treatment effect on the treated is 0.2893714 (SE = 0.0489889). All estimates match across Stata, R, and Python to 7 decimal places.
 
----
+------------------------------------------------------------------------
 
 ## CQ#13–14: Interactive Fixed Effects (IFE)
 
 > Use `fect` to determine by cross-validation the optimal number of factors. Then estimate the TWFE-IFE model with bootstrap standard errors.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install fect, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
@@ -599,7 +574,7 @@ use "moser_voena_didtextbook.dta", clear
 fect patents, treat(twea) unit(subclass) time(year) method("ife") r(4) tol(1e-4) cv
 ```
 
-```
+```         
 Cross Validation...
 fe  r=0 force=two-way mspe=1.0384
 ife r=1 force=two-way mspe=.9232
@@ -609,7 +584,7 @@ ife r=4 force=two-way mspe=1.3805
 optimal r=2 in fe/ife model
 ```
 
-```stata
+``` stata
 * ssc install fect, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
@@ -619,7 +594,7 @@ fect patents, treat(twea) unit(subclass) time(year) method("ife") r(2) tol(1e-4)
 matrix list e(ATT)
 ```
 
-```
+```         
 e(ATT)[1,6]
             ATT            N           sd  Lower_Bound  Upper_Bound  pvalue
 r1     .2966552         7056    .04932318    .17481898    .37326233       0
@@ -627,7 +602,7 @@ r1     .2966552         7056    .04932318    .17481898    .37326233       0
 
 ### R
 
-```r
+``` r
 library(haven); library(fect)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 # Cross-validation
@@ -643,7 +618,7 @@ out_ife <- fect(patents ~ twea, data = as.data.frame(df),
 print(out_ife)
 ```
 
-```
+```         
 Cross-validating ...
 r = 0; sigma2 = 0.96706; IC = 0.28988; PC = 0.94215; MSPE = 1.06141
 r = 1; sigma2 = 0.78457; IC = 0.40405; PC = 0.85584; MSPE = 0.93293
@@ -654,18 +629,16 @@ r* = 2
 
 IFE ATT = 0.296834
 ```
-
 :::
 
 **Result:** Cross-validation selects **r\* = 2** factors in both Stata and R. The ATT is **0.296655** (Stata) and **0.296834** (R) — virtually identical (bootstrap variability). The `fect` package is not available in Python.
 
 ### Figure 4.3: TWFE vs IFE estimates
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
@@ -704,7 +677,7 @@ graph export "figures/ch04_fig43_ife_twfe.png", replace width(1200)
 
 ### R
 
-```r
+``` r
 library(fixest); library(fect); library(ggplot2)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
@@ -736,22 +709,20 @@ ggsave("figures/ch04_fig43_ife_twfe_R.png", width = 8, height = 5, dpi = 150)
 ```
 
 ![R Figure 4.3](../figures/ch04_fig43_ife_twfe_R.png)
-
 :::
 
 *Figure 4.3: TWFE estimates and TWFE-IFE estimates of Xu (2017), on the data of Moser and Voena (2012a). The `fect` package is not available in Python.*
 
----
+------------------------------------------------------------------------
 
 ## CQ#15: Synthetic Control (SC)
 
 > Install the `sdid_event` package and compute event-study SC estimators with 200 bootstrap replications.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Standard SC
@@ -759,7 +730,7 @@ set seed 1
 sdid_event patents subclass year twea, method("sc") brep(200)
 ```
 
-```
+```         
 Synthetic Control
              |  Estimate         SE      LB CI      UB CI  Switchers
 -------------+-------------------------------------------------------
@@ -787,7 +758,7 @@ Synthetic Control
    Effect_21 |  1.344864   .3207751   .7161445   1.973583        336
 ```
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 * Demeaned SC
@@ -799,7 +770,7 @@ set seed 1
 sdid_event patents_demeaned subclass year twea, method("sc") brep(200)
 ```
 
-```
+```         
 Synthetic Control (Demeaned)
              |  Estimate         SE      LB CI      UB CI  Switchers
 -------------+-------------------------------------------------------
@@ -829,7 +800,7 @@ Synthetic Control (Demeaned)
 
 ### R
 
-```r
+``` r
 library(haven); library(synthdid)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 panel <- panel.matrices(as.data.frame(df),
@@ -856,25 +827,23 @@ sc_dm_est <- sc_estimate(panel_dm$Y, panel_dm$N0, panel_dm$T0)
 cat("Demeaned SC ATT:", round(sc_dm_est, 6), "\n")
 ```
 
-```
+```         
 SC ATT = 0.491647
   (R uses synthdid package; Stata uses sdid_event — different algorithms)
 
 Demeaned SC ATT = 0.474263
   (Matches Stata exactly: 0.474263)
 ```
-
 :::
 
 **Result:** The demeaned SC ATT is **0.474263** in both Stata and R. The standard SC differs slightly (Stata: 0.414370, R: 0.491647) due to different implementations (`sdid_event` vs `synthdid`). SC estimators are noisier than TWFE, with some implausibly large or negative period-specific effects. The `synthdid` and `sdid_event` packages are not available in Python.
 
 ### Figure 4.4: SC vs TWFE estimates
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
@@ -911,29 +880,27 @@ graph export "figures/ch04_fig44_sc_twfe.png", replace width(1200)
 ```
 
 ![Stata Figure 4.4](../figures/ch04_fig44_sc_twfe.png)
-
 :::
 
 *Figure 4.4: TWFE estimates and Synthetic Control estimates of Arkhangelsky et al. (2021), on the data of Moser and Voena (2012a). The `synthdid`/`sdid_event` packages are not available in R or Python for event-study plots with bootstrap CIs.*
 
----
+------------------------------------------------------------------------
 
 ## CQ#16: Synthetic Difference-in-Differences (SDID)
 
 > Compute event-study SD estimators with 200 bootstrap replications.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 set seed 1
 sdid_event patents subclass year twea, brep(200)
 ```
 
-```
+```         
 Synthetic Difference-in-differences
              |  Estimate         SE      LB CI      UB CI  Switchers
 -------------+-------------------------------------------------------
@@ -960,18 +927,16 @@ Synthetic Difference-in-differences
    Effect_20 |  .6799514   .1033783   .4773299   .8825729        336
    Effect_21 |  .8084736   .1282819   .5570411   1.059906        336
 ```
-
 :::
 
 **Result:** The SDID ATT is **0.3019373** (Stata). The SDID estimates are very close to the TWFE estimates, suggesting that the TWFE results are robust. The `sdid_event` package is only available in Stata.
 
 ### Figure 4.5: SDID vs TWFE estimates
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
@@ -1008,36 +973,29 @@ graph export "figures/ch04_fig45_sdid_twfe.png", replace width(1200)
 ```
 
 ![Stata Figure 4.5](../figures/ch04_fig45_sdid_twfe.png)
-
 :::
 
 *Figure 4.5: TWFE estimates and Synthetic DID estimates, on the data of Moser and Voena (2012a). The `synthdid`/`sdid_event` packages are not available in R or Python for event-study plots with bootstrap CIs.*
 
----
+------------------------------------------------------------------------
 
 ## CQ#17: Sensitivity Analysis (Rambachan & Roth / HonestDiD)
 
 > Run the ES-TWFER with pre-trend variables ordered from last to first, including a reference period variable `reltimeminus0`, then run `honestdid` with 18 pre-periods and 21 post-periods. Is the 95% CI for ATT1 produced by the command much wider than that produced by the ES-TWFER?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
-ssc install honestdid, replace
-honestdid _plugin_check
-
+``` stata
+* ssc install honestdid, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
-
 gen reltimeminus0 = 0
-
 reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(year treatmentgroup) cluster(subclass)
-
-honestdid, pre(1/18) post(19/39) delta(rm) mvec(0.5(0.5)2) coefplot
+honestdid, pre(1/19) post(20/40) delta(rm) mvec(1)
 ```
 
-```
+```         
                              (Std. err. adjusted for 7,248 clusters in subclass)
 --------------------------------------------------------------------------------
                |               Robust
@@ -1095,7 +1053,7 @@ reltimeminus10 |   .0481978   .0482599     1.00   0.318    -.0464057    .1428012
 
 ### R
 
-```r
+``` r
 library(haven); library(fixest); library(HonestDiD)
 options(digits=7)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
@@ -1113,7 +1071,7 @@ delta_rm <- HonestDiD::createSensitivityResults_relativeMagnitudes(
 print(delta_rm)
 ```
 
-```
+```         
 OLS estimation, Dep. Var.: patents
 Observations: 289,920
 Fixed-effects: year: 40,  treatmentgroup: 2
@@ -1171,7 +1129,7 @@ RMSE: 1.33587     Adj. R2: 0.026953
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import numpy as np
 import torch
@@ -1183,15 +1141,19 @@ minus_vars = [f"reltimeminus{i}" for i in range(18, 0, -1)]
 plus_vars = [f"reltimeplus{i}" for i in range(1, 22)]
 fml = "patents ~ " + " + ".join(minus_vars + plus_vars) + " | year + treatmentgroup"
 m = pf.feols(fml, data=df, vcov={'CRV1': 'subclass'})
+pd.set_option('display.float_format', lambda x: f'{x:.7f}')
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+print(m.summary())
 betahat = torch.tensor(m.coef().values, dtype=torch.float64)
 sigma = torch.tensor(np.array(m._vcov), dtype=torch.float64)
 delta_rm = hd.createSensitivityResults_relativeMagnitudes(
     betahat=betahat, sigma=sigma,
-    numPrePeriods=18, numPostPeriods=21, Mbarvec=[1])
+    numPrePeriods=18, numPostPeriods=21, Mbarvec=[0.5, 1, 1.5, 2])
 print(delta_rm)
 ```
 
-```
+```         
       reltimeminus18 |    0.0344949   0.0443397      0.78     0.4366
       reltimeminus17 |    0.0376364   0.0502265      0.75     0.4537
       reltimeminus16 |    0.0220321   0.0441163      0.50     0.6175
@@ -1235,18 +1197,16 @@ print(delta_rm)
          lb        ub method    Delta  Mbar
 0 -0.200076  0.223196   C-LF  DeltaRM     1
 ```
-
 :::
 
-**Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **[−0.196, 0.221]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER.
+**Result:** The 95% CI produced by `honestdid` with $\bar{M} = 1$, **\[−0.196, 0.221\]** (Stata), is 2.4 times wider than the CI produced by the ES-TWFER.
 
 ### Figure 4.6: Confidence intervals computed by honestdid
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta" "moser_voena_didtextbook.dta", replace
 use "moser_voena_didtextbook.dta", clear
 
@@ -1310,7 +1270,7 @@ erase _plot_temp.dta
 
 ### R
 
-```r
+``` r
 library(fixest); library(HonestDiD); library(ggplot2)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"))
 
@@ -1351,28 +1311,6 @@ ggsave("figures/ch04_fig46_honestdid_R.png", width = 10, height = 5, dpi = 150)
 ```
 
 ![R Figure 4.6](../figures/ch04_fig46_honestdid_R.png)
-
 :::
 
 *Figure 4.6: Confidence intervals computed by honestdid, on the data of Moser and Voena (2012a). Black bars show usual 95% CIs from the ES-TWFER. Grey dashed bars show robust CIs computed by honestdid with M=1.*
-
----
-
-## Summary of Results
-
-| Estimator | Stata | R | Python |
-|-----------|-------|---|--------|
-| TWFE with controls (F-test) | F=5.07, p<0.001 | Chi2=91.313, p<0.001 | F=5.072919, p<0.001 |
-| `did_multiplegt_dyn` (Av. Total Effect) | **0.2893714** | **0.2893714** | **0.2893714** |
-| IFE ATT (r=2) | **0.296655** | **0.296834** | — |
-| SC ATT (standard) | **0.414370** | **0.491647** | — |
-| SC ATT (demeaned) | **0.474263** | **0.474263** | — |
-| SDID ATT | **0.301937** | **0.301844** | — |
-| HonestDiD (M=1) | [−0.196, 0.221] | [−0.200, 0.225] | [−0.200, 0.225] |
-
-**Notes:**
-
-- Python tabs are shown only where official packages exist (`pyfixest`, `py-did-multiplegt-dyn`, `honestdid`).
-- IFE, SC, and SDID do not have official Python packages (`fect`, `sdid_event`/`synthdid`).
-- The standard SC ATT differs between Stata (0.414370) and R (0.491647) due to different package implementations (`sdid_event` vs `synthdid`); the demeaned SC and SDID match exactly.
-- The IFE ATT differs slightly (0.296655 vs 0.296834) due to bootstrap variability across runs.

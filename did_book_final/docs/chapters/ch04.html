@@ -249,7 +249,6 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#figure-4.6-confidence-intervals-computed-by-honestdid" id="toc-figure-4.6-confidence-intervals-computed-by-honestdid" class="nav-link" data-scroll-target="#figure-4.6-confidence-intervals-computed-by-honestdid"><span class="header-section-number">2.7.1</span> Figure 4.6: Confidence intervals computed by honestdid</a></li>
   </ul></li>
-  <li><a href="#summary-of-results" id="toc-summary-of-results" class="nav-link" data-scroll-target="#summary-of-results"><span class="header-section-number">2.8</span> Summary of Results</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Credible-Answers/did_book/edit/main/chapters/ch04.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Credible-Answers/did_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -277,7 +276,7 @@ window.Quarto = {
 
 <section id="overview" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">2.1</span> Overview</h2>
-<p>Dataset: <strong>Moser &amp; Voena (2012)</strong> — <code>moser_voena_didtextbook.dta, moser_voena_didtextbook.RData, moser_voena_didtextbook.parquet</code></p>
+<p>Dataset: <strong>Moser &amp; Voena (2012)</strong> — <code>moser_voena_didtextbook.dta</code> (Stata), <code>moser_voena_didtextbook.RData</code> (R), <code>moser_voena_didtextbook.parquet</code> (Python)</p>
 <p>This chapter explores alternatives to the parallel trends assumption. We consider: (1) TWFE with control variables, (2) Interactive Fixed Effects, (3) Synthetic Control, (4) Synthetic DID, and (5) sensitivity analysis using HonestDiD.</p>
 <hr>
 </section>
@@ -352,23 +351,16 @@ reltimeminus18 |   .0573644   .0437614     1.31   0.190    -.0284207    .1431494
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fixest); <span class="fu">library</span>(haven); <span class="fu">library</span>(car); <span class="fu">library</span>(dplyr)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.RData"</span>))</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>formula_str <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"patents ~"</span>,</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="fu">paste0</span>(<span class="st">"reltimeminus"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>), <span class="at">collapse =</span> <span class="st">" + "</span>), <span class="st">"+"</span>,</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="fu">paste0</span>(<span class="st">"reltimeplus"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">21</span>), <span class="at">collapse =</span> <span class="st">" + "</span>),</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"| year^patents1900 + treatmentgroup"</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>model_controls <span class="ot">&lt;-</span> <span class="fu">feols</span>(<span class="fu">as.formula</span>(formula_str),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>subclass)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_controls)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># F-test on pre-trends</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">linearHypothesis</span>(model_controls, <span class="fu">paste0</span>(<span class="st">"reltimeminus"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>))</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation test</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>corr_test <span class="ot">&lt;-</span> <span class="fu">feols</span>(patents1900 <span class="sc">~</span> treatmentgroup,</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1900</span>))</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(corr_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>model_controls <span class="ot">&lt;-</span> <span class="fu">feols</span>(<span class="fu">as.formula</span>(formula_str), <span class="at">data =</span> df, <span class="at">cluster =</span> <span class="sc">~</span>subclass)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">coeftable</span>(model_controls), <span class="at">digits =</span> <span class="dv">6</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ftest <span class="ot">&lt;-</span> <span class="fu">linearHypothesis</span>(model_controls, <span class="fu">paste0</span>(<span class="st">"reltimeminus"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Chisq ="</span>, <span class="fu">round</span>(ftest<span class="sc">$</span>Chisq[<span class="dv">2</span>], <span class="dv">6</span>), <span class="st">" p-value ="</span>, <span class="fu">format</span>(ftest<span class="sc">$</span><span class="st">`</span><span class="at">Pr(&gt;Chisq)</span><span class="st">`</span>[<span class="dv">2</span>], <span class="at">scientific =</span> <span class="cn">TRUE</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>NOTE: 120/0 fixed-effect singletons were removed (120 observations).
 OLS estimation, Dep. Var.: patents
 Observations: 289,800
@@ -429,33 +421,22 @@ Correlation: treatmentgroup = -0.156312 (t = -3.61, p = 0.0003)</code></pre>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Moser%20and%20Voena%202012/moser_voena_didtextbook.parquet"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>minus_vars <span class="op">=</span> [<span class="ss">f"reltimeminus</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">19</span>)]</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>plus_vars <span class="op">=</span> [<span class="ss">f"reltimeplus</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">22</span>)]</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"year_x_pat1900"</span>] <span class="op">=</span> df[<span class="st">"year"</span>].astype(<span class="bu">str</span>) <span class="op">+</span> <span class="st">"_"</span> <span class="op">+</span> <span class="op">\</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                        df[<span class="st">"patents1900"</span>].astype(<span class="bu">str</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>fml <span class="op">=</span> <span class="st">"patents ~ "</span> <span class="op">+</span> <span class="st">" + "</span>.join(minus_vars <span class="op">+</span> plus_vars) <span class="op">+</span> <span class="op">\</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">" | year_x_pat1900 + treatmentgroup"</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> pf.feols(fml, data<span class="op">=</span>df, vcov<span class="op">=</span>{<span class="st">"CRV1"</span>: <span class="st">"subclass"</span>})</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(m.summary())</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># F-test on pre-trends</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> m.coef()</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>v_mat <span class="op">=</span> pd.DataFrame(m._vcov, index<span class="op">=</span>c.index, columns<span class="op">=</span>c.index)</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>pre_names <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> minus_vars <span class="cf">if</span> x <span class="kw">in</span> c.index]</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>beta_pre <span class="op">=</span> c[pre_names].values</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>V_pre <span class="op">=</span> v_mat.loc[pre_names, pre_names].values</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>F_stat <span class="op">=</span> beta_pre <span class="op">@</span> np.linalg.inv(V_pre) <span class="op">@</span> beta_pre <span class="op">/</span> <span class="bu">len</span>(pre_names)</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>p_val <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> stats.f.cdf(F_stat, <span class="bu">len</span>(pre_names),</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                          df[<span class="st">"subclass"</span>].nunique() <span class="op">-</span> <span class="dv">1</span>)</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"F-test: F(</span><span class="sc">{</span><span class="bu">len</span>(pre_names)<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>df[<span class="st">'subclass'</span>]<span class="sc">.</span>nunique()<span class="op">-</span><span class="dv">1</span><span class="sc">}</span><span class="ss">)"</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f" = </span><span class="sc">{</span>F_stat<span class="sc">:.6f}</span><span class="ss">, p = </span><span class="sc">{</span>p_val<span class="sc">:.6e}</span><span class="ss">"</span>)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation test</span></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>corr <span class="op">=</span> pf.feols(<span class="st">"patents1900 ~ treatmentgroup"</span>,</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df[df[<span class="st">"year"</span>] <span class="op">==</span> <span class="dv">1900</span>])</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(corr.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>minus_vars <span class="op">=</span> [<span class="ss">f"reltimeminus</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">19</span>)]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>plus_vars <span class="op">=</span> [<span class="ss">f"reltimeplus</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">22</span>)]</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"year_x_pat1900"</span>] <span class="op">=</span> df[<span class="st">"year"</span>].astype(<span class="bu">str</span>) <span class="op">+</span> <span class="st">"_"</span> <span class="op">+</span> df[<span class="st">"patents1900"</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>fml <span class="op">=</span> <span class="st">"patents ~ "</span> <span class="op">+</span> <span class="st">" + "</span>.join(minus_vars <span class="op">+</span> plus_vars) <span class="op">+</span> <span class="st">" | year_x_pat1900 + treatmentgroup"</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> pf.feols(fml, data<span class="op">=</span>df, vcov<span class="op">=</span>{<span class="st">"CRV1"</span>: <span class="st">"subclass"</span>})</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> m.coef()<span class="op">;</span> s <span class="op">=</span> m.se()<span class="op">;</span> t <span class="op">=</span> m.tstat()<span class="op">;</span> p <span class="op">=</span> m.pvalue()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Variable'</span><span class="sc">:&lt;16}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Coef'</span><span class="sc">:&gt;12}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Std.Err'</span><span class="sc">:&gt;12}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'t'</span><span class="sc">:&gt;10}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'P&gt;|t|'</span><span class="sc">:&gt;10}</span><span class="ss">"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> c.index:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:&lt;16}</span><span class="ss"> </span><span class="sc">{</span>c[name]<span class="sc">:&gt;12.7f}</span><span class="ss"> </span><span class="sc">{</span>s[name]<span class="sc">:&gt;12.7f}</span><span class="ss"> </span><span class="sc">{</span>t[name]<span class="sc">:&gt;10.4f}</span><span class="ss"> </span><span class="sc">{</span>p[name]<span class="sc">:&gt;10.6f}</span><span class="ss">"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>v_mat <span class="op">=</span> pd.DataFrame(m._vcov, index<span class="op">=</span>c.index, columns<span class="op">=</span>c.index)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>pre_names <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> minus_vars <span class="cf">if</span> x <span class="kw">in</span> c.index]</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>beta_pre <span class="op">=</span> c[pre_names].values</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>V_pre <span class="op">=</span> v_mat.loc[pre_names, pre_names].values</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>F_stat <span class="op">=</span> beta_pre <span class="op">@</span> np.linalg.inv(V_pre) <span class="op">@</span> beta_pre <span class="op">/</span> <span class="bu">len</span>(pre_names)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>p_val <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> stats.f.cdf(F_stat, <span class="bu">len</span>(pre_names), df[<span class="st">"subclass"</span>].nunique() <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">F-test: F(</span><span class="sc">{</span><span class="bu">len</span>(pre_names)<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>df[<span class="st">'subclass'</span>]<span class="sc">.</span>nunique()<span class="op">-</span><span class="dv">1</span><span class="sc">}</span><span class="ss">) = </span><span class="sc">{</span>F_stat<span class="sc">:.6f}</span><span class="ss">, p = </span><span class="sc">{</span>p_val<span class="sc">:.6e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>(120 singleton fixed effects removed)
 HDFE Linear regression
 Dep. var.: patents
@@ -1233,17 +1214,12 @@ Demeaned SC ATT = 0.474263
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-3" role="tab" aria-controls="tabset-10-3" aria-selected="false" href="">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ssc</span> install honestdid, <span class="kw">replace</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>honestdid _plugin_check</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta"</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">replace</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="kw">gen</span> reltimeminus0 = 0</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(<span class="fu">year</span> treatmentgroup) <span class="kw">cluster</span>(subclass)</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>honestdid, pre(1/18) <span class="kw">post</span>(19/39) delta(rm) mvec(0.5(0.5)2) coefplot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install honestdid, <span class="kw">replace</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Moser%20and%20Voena%202012/moser_voena_didtextbook.dta"</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"moser_voena_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="kw">gen</span> reltimeminus0 = 0</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>reghdfe patents reltimeminus18 reltimeminus17 reltimeminus16 reltimeminus15 reltimeminus14 reltimeminus13 reltimeminus12 reltimeminus11 reltimeminus10 reltimeminus9 reltimeminus8 reltimeminus7 reltimeminus6 reltimeminus5 reltimeminus4 reltimeminus3 reltimeminus2 reltimeminus1 reltimeminus0 reltimeplus*, absorb(<span class="fu">year</span> treatmentgroup) <span class="kw">cluster</span>(subclass)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>honestdid, pre(1/19) <span class="kw">post</span>(20/40) delta(rm) mvec(1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>                             (Std. err. adjusted for 7,248 clusters in subclass)
 --------------------------------------------------------------------------------
                |               Robust
@@ -1380,12 +1356,16 @@ RMSE: 1.33587     Adj. R2: 0.026953
 <span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>plus_vars <span class="op">=</span> [<span class="ss">f"reltimeplus</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">22</span>)]</span>
 <span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>fml <span class="op">=</span> <span class="st">"patents ~ "</span> <span class="op">+</span> <span class="st">" + "</span>.join(minus_vars <span class="op">+</span> plus_vars) <span class="op">+</span> <span class="st">" | year + treatmentgroup"</span></span>
 <span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> pf.feols(fml, data<span class="op">=</span>df, vcov<span class="op">=</span>{<span class="st">'CRV1'</span>: <span class="st">'subclass'</span>})</span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>betahat <span class="op">=</span> torch.tensor(m.coef().values, dtype<span class="op">=</span>torch.float64)</span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> torch.tensor(np.array(m._vcov), dtype<span class="op">=</span>torch.float64)</span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>delta_rm <span class="op">=</span> hd.createSensitivityResults_relativeMagnitudes(</span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    betahat<span class="op">=</span>betahat, sigma<span class="op">=</span>sigma,</span>
-<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>    numPrePeriods<span class="op">=</span><span class="dv">18</span>, numPostPeriods<span class="op">=</span><span class="dv">21</span>, Mbarvec<span class="op">=</span>[<span class="dv">1</span>])</span>
-<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delta_rm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.float_format'</span>, <span class="kw">lambda</span> x: <span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.7f}</span><span class="ss">'</span>)</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.max_columns'</span>, <span class="va">None</span>)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.width'</span>, <span class="va">None</span>)</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(m.summary())</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>betahat <span class="op">=</span> torch.tensor(m.coef().values, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> torch.tensor(np.array(m._vcov), dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>delta_rm <span class="op">=</span> hd.createSensitivityResults_relativeMagnitudes(</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>    betahat<span class="op">=</span>betahat, sigma<span class="op">=</span>sigma,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    numPrePeriods<span class="op">=</span><span class="dv">18</span>, numPostPeriods<span class="op">=</span><span class="dv">21</span>, Mbarvec<span class="op">=</span>[<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>])</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delta_rm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>      reltimeminus18 |    0.0344949   0.0443397      0.78     0.4366
       reltimeminus17 |    0.0376364   0.0502265      0.75     0.4537
       reltimeminus16 |    0.0220321   0.0441163      0.50     0.6175
@@ -1550,80 +1530,9 @@ RMSE: 1.33587     Adj. R2: 0.026953
 </div>
 </div>
 <p><em>Figure 4.6: Confidence intervals computed by honestdid, on the data of Moser and Voena (2012a). Black bars show usual 95% CIs from the ES-TWFER. Grey dashed bars show robust CIs computed by honestdid with M=1.</em></p>
-<hr>
-</section>
-</section>
-<section id="summary-of-results" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="summary-of-results"><span class="header-section-number">2.8</span> Summary of Results</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 37%">
-<col style="width: 24%">
-<col style="width: 10%">
-<col style="width: 27%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Estimator</th>
-<th>Stata</th>
-<th>R</th>
-<th>Python</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>TWFE with controls (F-test)</td>
-<td>F=5.07, p&lt;0.001</td>
-<td>Chi2=91.313, p&lt;0.001</td>
-<td>F=5.072919, p&lt;0.001</td>
-</tr>
-<tr class="even">
-<td><code>did_multiplegt_dyn</code> (Av. Total Effect)</td>
-<td><strong>0.2893714</strong></td>
-<td><strong>0.2893714</strong></td>
-<td><strong>0.2893714</strong></td>
-</tr>
-<tr class="odd">
-<td>IFE ATT (r=2)</td>
-<td><strong>0.296655</strong></td>
-<td><strong>0.296834</strong></td>
-<td>—</td>
-</tr>
-<tr class="even">
-<td>SC ATT (standard)</td>
-<td><strong>0.414370</strong></td>
-<td><strong>0.491647</strong></td>
-<td>—</td>
-</tr>
-<tr class="odd">
-<td>SC ATT (demeaned)</td>
-<td><strong>0.474263</strong></td>
-<td><strong>0.474263</strong></td>
-<td>—</td>
-</tr>
-<tr class="even">
-<td>SDID ATT</td>
-<td><strong>0.301937</strong></td>
-<td><strong>0.301844</strong></td>
-<td>—</td>
-</tr>
-<tr class="odd">
-<td>HonestDiD (M=1)</td>
-<td>[−0.196, 0.221]</td>
-<td>[−0.200, 0.225]</td>
-<td>[−0.200, 0.225]</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Notes:</strong></p>
-<ul>
-<li>Python tabs are shown only where official packages exist (<code>pyfixest</code>, <code>py-did-multiplegt-dyn</code>, <code>honestdid</code>).</li>
-<li>IFE, SC, and SDID do not have official Python packages (<code>fect</code>, <code>sdid_event</code>/<code>synthdid</code>).</li>
-<li>The standard SC ATT differs between Stata (0.414370) and R (0.491647) due to different package implementations (<code>sdid_event</code> vs <code>synthdid</code>); the demeaned SC and SDID match exactly.</li>
-<li>The IFE ATT differs slightly (0.296655 vs 0.296834) due to bootstrap variability across runs.</li>
-</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

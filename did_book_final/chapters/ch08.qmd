@@ -4,7 +4,7 @@ title: "Chapter 8: General Designs"
 
 ## Overview
 
-Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta` (16,872 observations, 1,195 counties, 16 election years 1868–1928)
+Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta (Stata), gentzkowetal_didtextbook.RData (R), gentzkowetal_didtextbook.parquet (Python)` (16,872 observations, 1,195 counties, 16 election years 1868–1928)
 
 This chapter studies **general designs** where the treatment may be non-binary (taking values 0, 1, 2, …) and/or non-absorbing (groups can enter and exit treatment), and where treatment lags may affect the outcome. The running example measures the effect of the number of daily newspapers (`numdailies`) on presidential voter turnout (`prestout`).
 
@@ -15,7 +15,7 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 **Packages used:**
 
 | Task | Stata | R | Python |
-|------|-------|---|--------|
+|------------------|------------------|------------------|-------------------|
 | PanelView | `panelview` (SSC) | `panelView` (CRAN) | `matplotlib` (manual) |
 | OLS / TWFE | `reg`, `areg` | `fixest`, `sandwich` | `statsmodels` |
 | Weight decomposition | `twowayfeweights` (SSC) | `TwoWayFEWeights` (CRAN) | Not available (`other_treatments`) |
@@ -24,30 +24,29 @@ Key topics: static TWFE decompositions with multiple treatments (`twowayfeweight
 
 **Installation notes:**
 
-- **R `DIDmultiplegtSTAT`:** `devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)`
-- **R `DIDmultiplegtDYN`:** The `design()` option works with `design=c(0.8,"console")`. Effects match across platforms.
-- **Python `did_multiplegt_dyn`:** `pip install py-did-multiplegt-dyn`. Requires `polars` DataFrames.
-- **Python `did_multiplegt_stat`:** Local notebook-based translation; see `py_did_multiplegt_stat`.
+-   **R `DIDmultiplegtSTAT`:** `devtools::install_github("chaisemartinPackages/did_multiplegt_stat/R", force = TRUE)`
+-   **R `DIDmultiplegtDYN`:** The `design()` option works with `design=c(0.8,"console")`. Effects match across platforms.
+-   **Python `did_multiplegt_dyn`:** `pip install py-did-multiplegt-dyn`. Requires `polars` DataFrames.
+-   **Python `did_multiplegt_stat`:** Local notebook-based translation; see `py_did_multiplegt_stat`.
 
-**Note on cross-platform differences:** GQ1–GQ4 and GQ6 match exactly between Stata and R to 7 decimals. GQ7 (`did_multiplegt_stat`) shows small differences between Stata, R, and Python due to internal implementation variations. N, switchers, and stayers counts are identical across all three.
+**Note on cross-platform differences:** CQ40–CQ43 and CQ45 match exactly between Stata and R to 7 decimals. CQ49 (`did_multiplegt_stat`) shows small differences between Stata, R, and Python due to internal implementation variations.. N, switchers, and stayers counts are identical across all three.
 
----
+------------------------------------------------------------------------
 
 ## CQ#40: Distributed-Lag TWFE Regression
 
 > Regress turnout on the number of newspapers and its lag, with county and year FEs, clustering standard errors at the county level. Interpret the results.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 areg prestout i.year numdailies lag_numdailies, absorb(cnty90) cluster(cnty90)
 ```
 
-```
+```         
                                (Std. err. adjusted for 1,195 clusters in cnty90)
 --------------------------------------------------------------------------------
                |               Robust
@@ -61,14 +60,14 @@ N = 15,629
 
 ### R
 
-```r
+``` r
 library(haven); library(fixest)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq3 <- feols(prestout ~ numdailies + lag_numdailies | cnty90 + year, data = df, cluster = ~cnty90)
 summary(gq3)
 ```
 
-```
+```         
                  Estimate Std. Error  t value Pr(>|t|)
 numdailies     -0.0007962  0.0013864 -0.5743   0.5658
 lag_numdailies  0.0050348  0.0014472  3.4790   0.0005
@@ -77,7 +76,7 @@ N = 15,629
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import pyfixest as pf
 df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
@@ -85,35 +84,33 @@ m8 = pf.feols("prestout ~ numdailies + lag_numdailies + C(year) | cnty90", data=
 print(m8.summary())
 ```
 
-```
+```         
   Variable                          Coef      Std.Err          t      P>|t|
   numdailies                  -0.0007962    0.0014419     -0.552     0.5810
   lag_numdailies               0.0050348    0.0015052      3.345     0.0008
   N = 15,629
 ```
-
 :::
 
 **Interpretation:** The distributed-lag TWFE regression gives $\hat\beta_0^{dl} = -0.0007962$ (insignificant) and $\hat\beta_1^{dl} = 0.0050348$ (significant). The contemporaneous effect of newspapers on turnout is small and insignificant, while the lagged effect is positive and significant.
 
----
+------------------------------------------------------------------------
 
 ## CQ#41: Weight Decomposition (`twowayfeweights`)
 
 > Use the `twowayfeweights` command and the `other_treatments` option to decompose $\hat\beta_0^{dl}$ and $\hat\beta_1^{dl}$, and interpret the results.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 twowayfeweights prestout cnty90 year numdailies, other_treatments(lag_numdailies) type(feTR)
 twowayfeweights prestout cnty90 year lag_numdailies, other_treatments(numdailies) type(feTR)
 ```
 
-```
+```         
 --- Decomposition of beta on numdailies (β = -0.0008) ---
 Under the common trends assumption, beta estimates a weighted sum of 10,056 ATTs.
  5,754 ATTs receive a positive weight, and 4,302 receive a negative weight.
@@ -131,14 +128,14 @@ Under the common trends assumption, beta estimates a weighted sum of 9,339 ATTs.
 
 ### R
 
-```r
+``` r
 library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq3a <- twowayfeweights(df, "prestout", "cnty90", "year", "numdailies", type = "feTR", other_treatments = "lag_numdailies")
 gq3b <- twowayfeweights(df, "prestout", "cnty90", "year", "lag_numdailies", type = "feTR", other_treatments = "numdailies")
 ```
 
-```
+```         
 --- Decomposition of beta on numdailies (β = -0.0008) ---
  Σ positive weights = 1.8541 (5,754 ATTs)
  Σ negative weights = -0.8541 (4,302 ATTs)
@@ -152,7 +149,7 @@ gq3b <- twowayfeweights(df, "prestout", "cnty90", "year", "lag_numdailies", type
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 from twowayfeweights import twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
@@ -160,7 +157,7 @@ res_a = twowayfeweights(df, "prestout", "cnty90", "year", "numdailies", type="fe
 res_b = twowayfeweights(df, "prestout", "cnty90", "year", "lag_numdailies", type="feTR", other_treatments="numdailies")
 ```
 
-```
+```         
 Decomposition of beta on numdailies:
 Positive weights: 5754, Σ = 1.8541
 Negative weights: 4302, Σ = -0.8541
@@ -171,22 +168,20 @@ Positive weights: 5273, Σ = 1.7820
 Negative weights: 4066, Σ = -0.7820
 Other treat (numdailies): 4933 pos (1.3558) | 5123 neg (-1.3558)
 ```
-
 :::
 
 **Interpretation:** Both coefficients are severely contaminated: the positive weights sum to 1.85, the negative weights to $-0.85$, and the cross-contamination from the other treatment sums to $\pm 1.21$. This means neither coefficient can be interpreted as a convex combination of causal effects.
 
----
+------------------------------------------------------------------------
 
 ## CQ#42: Non-Normalized Event-Study Effects (Figure 8.1)
 
 > Use `did_multiplegt_dyn` to compute, for $\ell \in \{1, \ldots, 4\}$, non-normalized event-study estimates $\widehat{AVSQ}_\ell$ of the effect of being exposed to a weakly larger number of newspapers for $\ell$ election cycles on turnout, as well as a test that effects are all equal using the `effects_equal` option. Also compute the pre-trend estimates $\widehat{AVSQ}_{-\ell}$ for $\ell \in \{1, \ldots, 4\}$.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
@@ -194,7 +189,7 @@ did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) effect
 graph export "$FIGDIR\ch08_fig81_nonnormalized_es.png", replace width(1200)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -230,7 +225,7 @@ Test of joint nullity of the placebos : p-value = 0.9922
 
 ### R
 
-```r
+``` r
 library(haven); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq4 <- did_multiplegt_dyn(
@@ -241,7 +236,7 @@ ggsave("figures/ch08_fig81_nonnormalized_es_R.png",
        plot = gq4$plot, width = 8, height = 5, dpi = 150)
 ```
 
-```
+```         
              Estimate SE      LB CI   UB CI   N     Switchers
 Effect_1     0.01442  0.00425 0.00610 0.02275 5,674 1,119
 Effect_2     0.01909  0.00584 0.00764 0.03054 4,648 1,054
@@ -264,7 +259,7 @@ Test of joint nullity of the placebos : p-value = 0.9922
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import polars as pl
 import matplotlib.pyplot as plt
@@ -279,7 +274,7 @@ gq4.plot()
 plt.savefig("figures/ch08_fig81_nonnormalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
-```
+```         
                Block   Estimate        SE      LB CI     UB CI      N  Switchers
             Effect_1  0.0144244 0.0042477  0.0060992 0.0227497   5674      1119
             Effect_2  0.0190899 0.0058429  0.0076381 0.0305418   4648      1054
@@ -297,31 +292,29 @@ Test of joint nullity of the placebos : p-value = 0.992198
 ```
 
 ![Python Event Study](../figures/ch08_fig81_nonnormalized_es_Python.png)
-
 :::
 
 **Interpretation:** All four non-normalized event-study effects are positive and significant, suggesting newspapers increase turnout. The effects grow with $\ell$, from 0.0144 at $\ell = 1$ to 0.0273 at $\ell = 4$. However, one cannot reject the null that all effects are equal (p-value = 0.4152). All placebo estimates are small and insignificant, with a joint p-value of 0.9922, strongly supporting the parallel-trends assumption. The average cumulative effect per treatment unit is 0.0161 (SE = 0.0048).
 
-*Figure 8.1: Non-normalized DID estimates of the effect of being exposed to a weakly larger number of newspapers for $\ell$ periods on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.*
+*Figure 8.1: Non-normalized DID estimates of the effect of being exposed to a weakly larger number of newspapers for* $\ell$ periods on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.
 
----
+------------------------------------------------------------------------
 
-## CQ#43–45: Treatment Path Descriptions
+## CQ#43–44: Treatment Path Descriptions
 
 > Rerun `did_multiplegt_dyn` with `design(0.8,console)` for $\ell = 1, 2, 4$. What are the three most common "actual-versus-status-quo" comparisons averaged in $AVSQ_\ell$?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, effects(1) design(0.8,console) graph_off
 ```
 
-```
+```         
 
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
@@ -360,12 +353,11 @@ Average number of time periods over which a treatment's effect is accumulated = 
  721 groups started with treatment 0 and then experienced treatment 1.
 ```
 
-```stata
+``` stata
 did_multiplegt_dyn prestout cnty90 year numdailies, effects(2) design(0.8,console) graph_off
 ```
 
-
-```
+```         
 
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
@@ -412,12 +404,11 @@ Average number of time periods over which a treatment's effect is accumulated = 
  343 groups started with treatment 0 and then experienced treatment vector (1, 1).
 ```
 
-
-```stata
+``` stata
 did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) design(0.8,console) graph_off
 ```
 
-```
+```         
 
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
@@ -515,14 +506,15 @@ Average number of time periods over which a treatment's effect is accumulated = 
 
 ### R
 
-```r
+``` r
 library(haven); library(polars); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData")); df <- as.data.frame(df)
 gq5_l1 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=1,
     design=c(0.8,"console"), graph_off=TRUE)
 ```
-```
+
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -549,16 +541,16 @@ Treatment paths detected in at least 80.00% of the 1126 switching groups for whi
 
 Design interpretation (first row):
 721 groups started with treatment 0 and experienced treatment path (1)
-
 ```
-```r
+
+``` r
 gq5_l2 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=2,
     design=c(0.8,"console"), graph_off=TRUE)
 print(gq5_l2)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -595,13 +587,13 @@ Design interpretation (first row):
 343 groups started with treatment 0 and experienced treatment path (1,1)
 ```
 
-```r
+``` r
 gq5_l4 <- did_multiplegt_dyn(df=df, outcome="prestout", group="cnty90",
     time="year", treatment="numdailies", effects=4,
     design=c(0.8,"console"), graph_off=TRUE)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -685,13 +677,11 @@ Treatment paths detected in at least 80.00% of the 933 switching groups for whic
 
 Design interpretation (first row):
 141 groups started with treatment 0 and experienced treatment path (1,1,1,1)
-
 ```
-
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import polars as pl
 from did_multiplegt_dyn import DidMultiplegtDyn
@@ -705,7 +695,7 @@ for ell in [1, 2, 4]:
     model.fit(); model.summary()
 ```
 
-```
+```         
 ================================================================================
   Detection of treatment paths - 1 periods after first switch
 ================================================================================
@@ -849,28 +839,26 @@ Test of joint nullity of the effects: p-value = 0.006814
 The development of this package was funded by the European Union.
 ERC REALLYCREDIBLE - GA N. 101043899
 ```
-
 :::
 
 **Interpretation:** At $\ell = 1$, most switchers transition from 0 to 1 newspaper (64%). As $\ell$ increases, the treatment paths become more heterogeneous: by $\ell = 4$, the top 3 paths account for only about 34% of all effects. Some counties gain newspapers and keep them, others gain and lose them. This heterogeneity complicates interpretation of $AVSQ_\ell$ at longer horizons.
 
----
+------------------------------------------------------------------------
 
-## CQ#45b: Path-Specific Event-Study Effects (`by_path`)
+## CQ#45: Path-Specific Event-Study Effects (`by_path`)
 
 > Estimate the first two event-study effects separately for the three most common $(D_{g,F_g-1}, D_{g,F_g}, D_{g,F_g+1})$ paths shared by more than 100 counties, using `by_path(3)`.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_dyn prestout cnty90 year numdailies, effects(2) by_path(3)
 ```
 
-```
+```         
 --- Path (0, 1, 1) ---
              |  Estimate         SE      LB CI      UB CI          N  Switchers
     Effect_1 |  .0131318   .0071358  -.0008542   .0271178       4529        343
@@ -892,13 +880,13 @@ Test of joint nullity of the effects : p-value = .05711112
 
 ### R
 
-```r
+``` r
 library(haven); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 did_multiplegt_dyn(df = as.data.frame(df), outcome = "prestout", group = "cnty90", time = "year", treatment = "numdailies", effects = 2, by_path = 3)
 ```
 
-```
+```         
 --- Path (0, 1, 1) ---
              Estimate SE      LB CI    UB CI   N     Switchers
 Effect_1     0.01326  0.00714 -0.00074 0.02725 4,479 343
@@ -920,7 +908,7 @@ Test of joint nullity of the effects : p-value = 0.0484
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import polars as pl
 from did_multiplegt_dyn import DidMultiplegtDyn
@@ -930,27 +918,25 @@ bp = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90", time="year",
 bp.fit(); bp.summary()
 ```
 
-```
+```         
 Note: The Python py_did_multiplegt_dyn package groups treatment paths differently
 from Stata/R (e.g., (None, 1, None) instead of (0, 1, 1)). Results are not
 directly comparable. Use Stata or R for by_path analysis.
 ```
-
 :::
 
 **Interpretation:** Event-study effects are insignificant for the $(D_{g,F_g-1}, D_{g,F_g}, D_{g,F_g+1}) = (0, 1, 1)$ and $(0, 1, 0)$ paths, and significant for the $(0, 1, 2)$ path. This might suggest that sustained exposure to an increasing number of newspapers is necessary to generate an effect, though event-study effects are noisy and may not significantly differ across paths.
 
----
+------------------------------------------------------------------------
 
 ## CQ#46–47: Normalized Event-Study Effects (Figure 8.2)
 
 > Compute normalized event-study estimates $\widehat{AVSQ}^n_\ell$ for $\ell \in \{1, \ldots, 4\}$ and normalized pre-trends. Test whether all normalized effects are equal. Produce Figure 8.2.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
@@ -958,7 +944,7 @@ did_multiplegt_dyn prestout cnty90 year numdailies, effects(4) placebo(4) normal
 graph export "$FIGDIR\ch08_fig82_normalized_es.png", replace width(1200)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -1000,7 +986,7 @@ Test of joint nullity of the placebos : p-value = 0.9922
 
 ### R
 
-```r
+``` r
 library(haven); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
 gq6 <- did_multiplegt_dyn(
@@ -1012,7 +998,7 @@ ggsave("figures/ch08_fig82_normalized_es_R.png",
        plot = gq6$plot, width = 8, height = 5, dpi = 150)
 ```
 
-```
+```         
              Estimate SE      LB CI   UB CI   N     Switchers
 Effect_1     0.0120186 0.0035392 0.0050818 0.0189554 5,674 1,119
 Effect_2     0.0082126 0.0025136 0.0032860 0.0131392 4,648 1,054
@@ -1035,7 +1021,7 @@ Joint nullity of placebos : p = 0.9922
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import polars as pl
 import matplotlib.pyplot as plt
@@ -1051,7 +1037,7 @@ gq6.plot()
 plt.savefig("figures/ch08_fig82_normalized_es_Python.png", dpi=150, bbox_inches="tight")
 ```
 
-```
+```         
                Block   Estimate        SE      LB CI     UB CI      N  Switchers
             Effect_1  0.0120186 0.0035392  0.0050818 0.0189554   5674      1119
             Effect_2  0.0082126 0.0025136  0.0032860 0.0131392   4648      1054
@@ -1069,31 +1055,133 @@ Equality of effects : p = 0.165258
 ```
 
 ![Python Normalized ES](../figures/ch08_fig82_normalized_es_Python.png)
-
 :::
 
 **Interpretation:** Normalized effects are decreasing with $\ell$ (from 0.0120 to 0.0054), but the equality test cannot reject the null ($p = 0.1653$). The weights $w_{\ell,k}$ are approximately equal across lags within each $\ell$: for $\ell = 4$, the weight on contemporaneous newspapers ($w_{4,0} = 0.28$) is similar to that on the third lag ($w_{4,3} = 0.24$). The decreasing pattern of normalized effects may suggest that lagged newspapers have a smaller effect than contemporaneous newspapers.
 
 *Figure 8.2: Normalized DID estimates of effects of newspapers on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.*
 
----
+------------------------------------------------------------------------
+
+## CQ#48: Joint Test of No Dynamic Effects
+
+> Restrict to counties whose treatment does not change between $F_g$ and $F_g + 1$, and test whether the first and second non-normalized effects are equal.
+
+::: panel-tabset
+### Stata
+
+``` stata
+* ssc install did_multiplegt_dyn, replace
+copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
+use "gentzkowetal_didtextbook.dta", clear
+did_multiplegt_dyn prestout cnty90 year numdailies if year<first_change | same_treat_after_first_change==1, effects(2) effects_equal(all) same_switchers graph_off
+```
+
+```         
+--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |    .01525   .0058956   .0036949   .0268052       5019        512
+    Effect_2 |  .0164091   .0073633   .0019773   .0308409       4101        512
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = .0291303
+Test of equality of the effects : p-value = .83016664
+--------------------------------------------------------------------------------
+               Average cumulative (total) effect per treatment unit
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
+-------------+--------------------------------------------------------------------------
+  Av_tot_eff |  .0138306   .0053281   .0033878   .0242734       5605       1024
+--------------------------------------------------------------------------------
+Average number of time periods over which a treatment's effect is accumulated = 1.5
+```
+
+### R
+
+``` r
+library(haven); library(DIDmultiplegtDYN)
+load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
+df_sub <- subset(df, year < first_change | same_treat_after_first_change == 1)
+bonus <- did_multiplegt_dyn(
+    df = df_sub, outcome = "prestout", group = "cnty90",
+    time = "year", treatment = "numdailies",
+    effects = 2, effects_equal = TRUE,
+    same_switchers = TRUE, graph_off = TRUE)
+```
+
+```         
+----------------------------------------------------------------------
+       Estimation of treatment effects: Event-study effects
+----------------------------------------------------------------------
+             Estimate SE      LB CI   UB CI   N     Switchers
+Effect_1     0.01525  0.00590 0.00369 0.02681 5,019 512
+Effect_2     0.01641  0.00736 0.00198 0.03084 4,101 512
+
+Test of joint nullity of the effects : p-value = 0.0291
+Test of equality of the effects : p-value = 0.8302
+
+----------------------------------------------------------------------
+    Average cumulative (total) effect per treatment unit
+----------------------------------------------------------------------
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.01383   0.00533   0.00339   0.02427     5,605     1,024
+Average number of time periods over which a treatment effect is accumulated: 1.5000
+```
+
+### Python
+
+``` python
+import pandas as pd
+import polars as pl
+from did_multiplegt_dyn import DidMultiplegtDyn
+df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
+df_sub = df[(df['year'] < df['first_change']) | (df['same_treat_after_first_change'] == 1)].copy()
+df_pl = pl.from_pandas(df_sub)
+bonus = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
+    time="year", treatment="numdailies", effects=2,
+    same_switchers=True, effects_equal=True, cluster="cnty90")
+bonus.fit(); bonus.summary()
+```
+
+```         
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI    UB CI      N  Switchers    N.w  Switchers.w
+            Effect_1  0.015250 0.005896  0.003695 0.026805 5019.0      512.0 5019.0        512.0
+            Effect_2  0.016409 0.007363  0.001977 0.030841 4101.0      512.0 4101.0        512.0
+Average_Total_Effect  0.013831 0.005328  0.003388 0.024273 5605.0     1024.0 5605.0       1024.0
+           Placebo_1 -0.001460 0.006378 -0.013961 0.011041 3936.0      413.0 3936.0        413.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.029130
+Test of equality of the effects: p-value = 0.830167
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+```
+:::
+
+**Interpretation:** In the subsample of 512 counties whose treatment does not change between $F_g$ and $F_g + 1$, the first and second event-study effects are very close (0.015 vs 0.016) and not significantly different ($p = 0.83$). This is consistent with the joint null that the first lag of newspapers does not affect turnout and that treatment effects are constant over time.
+
+------------------------------------------------------------------------
 
 ## CQ#49: ATS and WATS Estimators (`did_multiplegt_stat`)
 
 > Using `did_multiplegt_stat`, compute the ATS and WATS estimators with `exact_match` and one placebo. Compare to the normalized event-study effects.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_stat, replace
 copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
 use "gentzkowetal_didtextbook.dta", clear
 did_multiplegt_stat prestout cnty90 year numdailies, placebo(1) exact_match
 ```
 
-```
+```         
 -----------------------------------
 N                =            15466
 WAOSS Method     =  Reg. Adjustment
@@ -1131,116 +1219,15 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 
 **Interpretation:** The ATS ($\approx 0.006$) and WATS ($\approx 0.006$) are significant and positive. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of $\widehat{AVSQ}^n_1 = 0.012$, which suggests a non-linear treatment response.
 
----
-
-## CQ#48: Joint Test of No Dynamic Effects
-
-> Restrict to counties whose treatment does not change between $F_g$ and $F_g + 1$, and test whether the first and second non-normalized effects are equal.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-* ssc install did_multiplegt_dyn, replace
-copy "https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta" "gentzkowetal_didtextbook.dta", replace
-use "gentzkowetal_didtextbook.dta", clear
-did_multiplegt_dyn prestout cnty90 year numdailies if year<first_change | same_treat_after_first_change==1, effects(2) effects_equal(all) same_switchers graph_off
-```
-
-```
---------------------------------------------------------------------------------
-             Estimation of treatment effects: Event-study effects
---------------------------------------------------------------------------------
-             |  Estimate         SE      LB CI      UB CI          N  Switchers
--------------+------------------------------------------------------------------
-    Effect_1 |    .01525   .0058956   .0036949   .0268052       5019        512
-    Effect_2 |  .0164091   .0073633   .0019773   .0308409       4101        512
---------------------------------------------------------------------------------
-Test of joint nullity of the effects : p-value = .0291303
-Test of equality of the effects : p-value = .83016664
---------------------------------------------------------------------------------
-               Average cumulative (total) effect per treatment unit
---------------------------------------------------------------------------------
-             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
--------------+--------------------------------------------------------------------------
-  Av_tot_eff |  .0138306   .0053281   .0033878   .0242734       5605       1024
---------------------------------------------------------------------------------
-Average number of time periods over which a treatment's effect is accumulated = 1.5
-```
-
-### R
-
-```r
-library(haven); library(DIDmultiplegtDYN)
-load(url("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"))
-df_sub <- subset(df, year < first_change | same_treat_after_first_change == 1)
-bonus <- did_multiplegt_dyn(
-    df = df_sub, outcome = "prestout", group = "cnty90",
-    time = "year", treatment = "numdailies",
-    effects = 2, effects_equal = TRUE,
-    same_switchers = TRUE, graph_off = TRUE)
-```
-
-```
-----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate SE      LB CI   UB CI   N     Switchers
-Effect_1     0.01525  0.00590 0.00369 0.02681 5,019 512
-Effect_2     0.01641  0.00736 0.00198 0.03084 4,101 512
-
-Test of joint nullity of the effects : p-value = 0.0291
-Test of equality of the effects : p-value = 0.8302
-
-----------------------------------------------------------------------
-    Average cumulative (total) effect per treatment unit
-----------------------------------------------------------------------
- Estimate        SE     LB CI     UB CI         N Switchers
-  0.01383   0.00533   0.00339   0.02427     5,605     1,024
-Average number of time periods over which a treatment effect is accumulated: 1.5000
-```
-
-### Python
-
-```python
-import pandas as pd
-import polars as pl
-from did_multiplegt_dyn import DidMultiplegtDyn
-df = pd.read_parquet("https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.parquet")
-df_sub = df[(df['year'] < df['first_change']) | (df['same_treat_after_first_change'] == 1)].copy()
-df_pl = pl.from_pandas(df_sub)
-bonus = DidMultiplegtDyn(df=df_pl, outcome="prestout", group="cnty90",
-    time="year", treatment="numdailies", effects=2,
-    same_switchers=True, effects_equal=True, cluster="cnty90")
-bonus.fit(); bonus.summary()
-```
-
-```
-               Block  Estimate       SE     LB CI    UB CI      N  Switchers
-            Effect_1  0.015250 0.005896  0.003695 0.026805 5019.0      512.0
-            Effect_2  0.016409 0.007363  0.001977 0.030841 4101.0      512.0
-Average_Total_Effect  0.013831 0.005328  0.003388 0.024273 5605.0     1024.0
-
-Test of joint nullity of the effects: p-value = 0.029130
-Test of equality of the effects: p-value = 0.830167
-```
-
-:::
-
-**Interpretation:** In the subsample of 512 counties whose treatment does not change between $F_g$ and $F_g + 1$, the first and second event-study effects are very close (0.015 vs 0.016) and not significantly different ($p = 0.83$). This is consistent with the joint null that the first lag of newspapers does not affect turnout and that treatment effects are constant over time.
-
----
+------------------------------------------------------------------------
 
 ## Summary of Results
 
-| GQ | Method | Key Finding |
-|:---:|:------:|:------------|
-| GQ1 | OLS | $\Delta D$ and $D_1$ are correlated ($\beta = -0.0420$, $p = 0.008$) → possible OVB |
-| GQ2 | OLS | Urbanization predicts $\Delta D$ ($\beta = -0.1422$, $p < 0.001$) → not as-good-as-random |
-| GQ3 | Distributed-lag TWFE | Current effect NS ($-0.0008$), lag significant ($0.0050$); severe negative weights ($\Sigma = -0.85$) and cross-contamination ($\Sigma = \pm 1.21$) |
-| GQ4 | `did_multiplegt_dyn` | All effects positive & significant; placebos NS (joint $p = 0.992$) |
-| GQ5 | `design` option | Treatment paths increasingly heterogeneous as $\ell$ grows |
-| GQ6 | Normalized ES | Decreasing effects; cannot reject equality ($p = 0.165$); roughly equal lag weights |
-| GQ7 | `did_multiplegt_stat` | ATS ≈ WATS ≈ 0.006 (significant); placebos NS |
-| Bonus | No-dynamics test | Effects 1 & 2 not different ($p = 0.83$) → consistent with no dynamic effects |
+| CQ# | Method | Key Finding |
+|:---:|:---:|:---|
+| CQ#40 | Distributed-lag TWFE | Current effect NS (−0.0008), lag significant (0.0050); severe negative weights (Σ = −0.85) and cross-contamination (Σ = ±1.21) |
+| CQ#42 | `did_multiplegt_dyn` | All effects positive & significant; placebos NS (joint p = 0.992) |
+| CQ#43–44 | `design` option | Treatment paths increasingly heterogeneous as ℓ grows |
+| CQ#46–47 | Normalized ES | Decreasing effects; cannot reject equality (p = 0.165); roughly equal lag weights |
+| CQ#48 | No-dynamics test | Effects 1 & 2 not different (p = 0.83) → consistent with no dynamic effects |
+| CQ#49 | `did_multiplegt_stat` | ATS ≈ WATS ≈ 0.006 (significant); placebos NS |

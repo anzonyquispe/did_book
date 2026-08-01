@@ -4,23 +4,22 @@ title: "Chapter 6: Designs with Variation in Treatment Timing"
 
 ## Overview
 
-Dataset: **Wolfers (2006)** — `wolfers2006_didtextbook.dta`
+Dataset: **Wolfers (2006)** — `wolfers2006_didtextbook.dta(Stata), wolfers2006_didtextbook.RData (R), wolfers2006_didtextbook.parquet (Python)`
 
 This chapter analyzes the effect of unilateral divorce laws (UDL) on divorce rates using a binary-and-staggered design. Between 1968 and 1988, 29 US states adopted UDLs. The panel covers 51 states from 1956 to 1988, with population weights and state-clustered standard errors throughout.
 
 Key topics: decomposition of the static TWFE estimator, event-study TWFE, and four heterogeneity-robust estimators (Sun & Abraham, Callaway & Sant'Anna, de Chaisemartin & D'Haultfœuille, Borusyak et al.).
 
----
+------------------------------------------------------------------------
 
 ## PanelView
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
 ![Treatment Status: Wolfers (2006) — Stata](../figures/ch06_panelview_stata.png)
 
-```stata
+``` stata
 * ssc install panelview, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
@@ -29,7 +28,7 @@ panelview div_rate udl, i(state) t(year) type(treat) title("Treatment Status: Wo
 
 ### R
 
-```r
+``` r
 library(panelView)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 png("figures/ch06_panelview_R.png", width = 1000, height = 600)
@@ -44,7 +43,7 @@ dev.off()
 
 ![Treatment Status: Wolfers (2006) — Python](../figures/ch06_panelview_Python.png)
 
-```python
+``` python
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -77,26 +76,24 @@ ax.legend(handles=legend_elements, loc="lower right")
 plt.tight_layout()
 plt.savefig(FIGDIR / "ch06_panelview_Python.png", dpi=150)
 ```
-
 :::
 
----
+------------------------------------------------------------------------
 
 ## CQ#25: Static TWFE Regression
 
 > Run the static TWFE regression of `div_rate` on state and year FEs and the UDL treatment, weighting by population and clustering at the state level. Do UDLs have an effect on divorces?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 reg div_rate udl i.state i.year [w=stpop], vce(cluster state)
 ```
 
-```
+```         
 Linear regression                               Number of obs     =      1,631
                                                 R-squared         =     0.9305
                                                 Root MSE          =     .52417
@@ -112,7 +109,7 @@ Linear regression                               Number of obs     =      1,631
 
 ### R
 
-```r
+``` r
 library(haven); library(fixest)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 m1 <- feols(div_rate ~ udl + i(year) | state,
@@ -120,7 +117,7 @@ m1 <- feols(div_rate ~ udl + i(year) | state,
             ssc = ssc(fixef.K = "full"))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 udl                    -0.0548378      0.1507695      -0.36   [  -0.3503461,    0.2406705]
@@ -130,7 +127,7 @@ N = 1631  |  R-sq = 0.9305
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import pyfixest as pf
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
@@ -139,36 +136,34 @@ m1 = pf.feols('div_rate ~ udl + i(year) | state',
               ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 udl                    -0.0548378      0.1507695      -0.36   [  -0.3503461,    0.2406705]
 
 N = 1631  |  R-sq = 0.9305
 ```
-
 :::
 
 **Interpretation:** $\hat{\beta}_{fe} = -0.055$ (s.e. = 0.15, p = 0.72). The coefficient is small and insignificant — according to this regression, UDLs do not affect divorce rates.
 
----
+------------------------------------------------------------------------
 
 ## CQ#26: Decompose Static TWFE
 
 > Decompose $\hat{\beta}_{fe}$ using `twowayfeweights`. Does it estimate a convex combination of effects? Could it be biased for the ATT?
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 twowayfeweights div_rate state year udl, type(feTR) test_random_weights(exposurelength) weight(stpop)
 ```
 
-```
+```         
 Under the common trends assumption,
 the TWFE coefficient beta, equal to -0.0548, estimates a weighted sum of 522 ATTs.
 490 ATTs receive a positive weight, and 32 receive a negative weight.
@@ -189,7 +184,7 @@ exposurele~h   -8.2883613    .21360588    -38.80212   -.73253245
 
 ### R
 
-```r
+``` r
 library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 decomp2 <- twowayfeweights(df, "div_rate", "state", "year", "udl",
@@ -198,7 +193,7 @@ decomp2 <- twowayfeweights(df, "div_rate", "state", "year", "udl",
                             weights = df$stpop)
 ```
 
-```
+```         
 Under the common trends assumption,
 beta estimates a weighted sum of 522 ATTs.
 490 ATTs receive a positive weight, and 32 receive a negative weight.
@@ -215,7 +210,7 @@ RW_exposurelength -8.288361 0.2136059 -38.80212  -0.7325324
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 from twowayfeweights import twowayfeweights
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
@@ -224,7 +219,7 @@ result = twowayfeweights(df, "div_rate", "state", "year", "udl",
                           test_random_weights="exposurelength")
 ```
 
-```
+```         
 Under the common trends assumption,
 beta estimates a weighted sum of 522 ATTs.
 490 ATTs receive a positive weight, and 32 receive a negative weight.
@@ -236,28 +231,26 @@ Regression of variables possibly correlated with the treatment effect on the wei
                      Coef           SE       t-stat  Correlation
 exposurelength   -8.288361     0.213606    -38.8021   -0.732532
 ```
-
 :::
 
 **Interpretation:** Under parallel trends, $\hat{\beta}_{fe}$ estimates a weighted sum of ATTs. The vast majority receive positive weights (sum ≈ 1.026) and 32 receive negative weights (sum ≈ −0.026) — an "almost convex" combination. However, weights are strongly negatively correlated with exposure length (corr = −0.73, t = −38.8): $\hat{\beta}_{fe}$ heavily downweights long-run effects. It could differ from the ATT if treatment effects vary with length of exposure.
 
----
+------------------------------------------------------------------------
 
 ## CQ#27: Test Randomized Treatment Timing
 
 > Test whether pre-treatment outcomes differ across early, late, and never adopters (excluding always-treated states, restricting to years ≤ 1968).
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 reg div_rate i.early_late_never if cohort!=1956 & year<=1968 [w=stpop], vce(cluster state)
 ```
 
-```
+```         
 Linear regression                               Number of obs     =        611
                                                 F(2, 47)          =       7.46
                                                 Prob > F          =     0.0015
@@ -278,7 +271,7 @@ early_late_never |
 
 ### R
 
-```r
+``` r
 library(haven)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 df3 <- df %>% filter(cohort != 1956, year <= 1968)
@@ -287,7 +280,7 @@ m3 <- feols(div_rate ~ i(early_late_never),
             ssc = ssc(fixef.K = "full"))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 (Intercept)             3.0548909      0.2584305      11.82   [   2.5483670,    3.5614147]
@@ -299,7 +292,7 @@ N = 611  |  R-sq = 0.1707
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
 df3 = df[(df['cohort'] != 1956) & (df['year'] <= 1968)].copy()
@@ -308,7 +301,7 @@ m3 = pf.feols('div_rate ~ C(early_late_never)',
               ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 Intercept               3.0548909      0.2584305      11.82   [   2.5483670,    3.5614147]
@@ -317,29 +310,27 @@ C(early_late_never)[T.3.0]   -1.3633981      0.3751166      -3.63   [  -2.098626
 
 N = 611  |  R-sq = 0.1707
 ```
-
 :::
 
 **Interpretation:** F-test p-value = 0.0015 — we reject that pre-treatment outcomes are the same across groups. Treatment timing is not randomly assigned: never-adopters have significantly lower divorce rates before any state adopts a UDL.
 
----
+------------------------------------------------------------------------
 
 ## CQ#28: Event-Study TWFE Regression
 
 > Run the event-study TWFE regression with `rel_time` indicators. Test pre-trends jointly.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 reg div_rate rel_time* i.state i.year [w=stpop], vce(cluster state)
 test rel_timeminus1-rel_timeminus9
 ```
 
-```
+```         
                                    (Std. err. adjusted for 51 clusters in state)
 --------------------------------------------------------------------------------
                |               Robust
@@ -378,7 +369,7 @@ rel_timeminus9 |   .0558855   .1600016     0.35   0.728    -.2654871    .3772581
 
 ### R
 
-```r
+``` r
 library(haven)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 rt_vars <- c(paste0("rel_time", 1:16), paste0("rel_timeminus", 1:9))
@@ -389,7 +380,7 @@ m4 <- feols(rt_formula, data = df, weights = ~stpop, cluster = ~state,
 wald(m4, keep = paste0("rel_timeminus", 1:9))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 rel_time1               0.2891561      0.2054259       1.41   [  -0.1134786,    0.6917908]
@@ -424,7 +415,7 @@ Wald test: stat = 0.506103, p-value = 0.870968, on 9 and 1,523 DoF
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
 rt_pos = [c for c in df.columns if c.startswith("rel_time") and "minus" not in c]
@@ -434,7 +425,7 @@ m4 = pf.feols(fml, data=df, weights='stpop', vcov={'CRV1': 'state'},
               ssc=pf.ssc(adj=True, fixef_k='full', cluster_adj=True))
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 rel_time1               0.2891561      0.2054259       1.41   [  -0.1134786,    0.6917908]
@@ -465,29 +456,27 @@ rel_timeminus9          0.0558855      0.1600016       0.35   [  -0.2577175,    
 
 N = 1631  |  R-sq = 0.9351
 ```
-
 :::
 
-**Interpretation:** Pre-trends are individually and jointly insignificant (F(9, 50) = 0.51, p = 0.86). Post-treatment effects are positive for the first ~8 years, then turn negative after year 9.
+**Interpretation:** Pre-trends are individually and jointly insignificant (F(9, 50) = 0.51, p = 0.86). Post-treatment effects are positive for the first \~8 years, then turn negative after year 9.
 
----
+------------------------------------------------------------------------
 
 ## CQ#29–30: Decompose $\hat{\beta}_1^{fe}$
 
 > Decompose the first event-study coefficient $\hat{\beta}_1^{fe}$ using `twowayfeweights` with other treatments and controls.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install twowayfeweights, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 twowayfeweights div_rate state year rel_time1, type(feTR) test_random_weights(year) weight(stpop) other_treatments(rel_time2-rel_time16) controls(rel_timeminus1-rel_timeminus9)
 ```
 
-```
+```         
 Under the common trends assumption,
 the TWFE coefficient beta, equal to 0.2892, estimates the sum of several terms.
 
@@ -675,7 +664,7 @@ year   -15.333901    13.428752   -1.1418709   -.23224592
 
 ### R
 
-```r
+``` r
 library(haven); library(TwoWayFEWeights)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 rel_time_vars <- names(df)[grepl("^rel_time", names(df))]
@@ -689,7 +678,7 @@ decomp5 <- twowayfeweights(df, "div_rate", "state", "year", "rel_time1",
                             controls = controls)
 ```
 
-```
+```         
 Under the common trends assumption,
 the TWFE coefficient beta, equal to 0.2892, estimates the sum of several terms.
 
@@ -891,13 +880,11 @@ RW_year -15.33387 13.42876 -1.141868  -0.2322456
 
 
 The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).
-
-
 ```
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 from twowayfeweights import twowayfeweights
 import re
@@ -915,7 +902,7 @@ result5 = twowayfeweights(df, "div_rate", "state", "year", "rel_time1",
                            controls=controls)
 ```
 
-```
+```         
 Under the common trends assumption,
 the TWFE coefficient beta, equal to 0.2892, estimates the sum of several terms.
 
@@ -1099,24 +1086,21 @@ Regression of variables on the weights attached to the treatment
 
              Coef           SE       t-stat  Correlation
 year   -15.333901    13.428752   -1.1418709   -0.2322459
-
 ```
-
 :::
 
 **Interpretation:** All 27 ATTs for `rel_time1` receive positive weights — $\hat{\beta}_1^{fe}$ estimates a convex combination of first-year effects. Contamination from other `rel_time` indicators is negligible (each sums to ≈ 0).
 
----
+------------------------------------------------------------------------
 
 ## Figure 6.2: TWFE Event-Study
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
 ![TWFE Event-Study (Stata)](../figures/ch06_fig62_twfe_es.png)
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 * Run the regression
@@ -1176,7 +1160,7 @@ restore
 
 ![TWFE Event-Study (R)](../figures/ch06_fig62_twfe_es_R.png)
 
-```r
+``` r
 library(haven)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 es_coefs <- data.frame(
@@ -1200,7 +1184,7 @@ abline(h = 0, lty = 2, col = "gray60"); abline(v = 0, lty = 2, col = "gray60")
 
 ![TWFE Event-Study (Python)](../figures/ch06_fig62_twfe_es_Python.png)
 
-```python
+``` python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1213,27 +1197,25 @@ ax.set_ylabel("Effect"); ax.set_title("TWFE estimates")
 plt.tight_layout()
 plt.savefig(FIGDIR / "ch06_fig62_twfe_es_Python.png", dpi=150)
 ```
-
 :::
 
----
+------------------------------------------------------------------------
 
 ## CQ#31–32: Sun & Abraham Estimators
 
 > Estimate IW (interaction-weighted) event-study effects using Sun & Abraham (2021), dropping always-treated states.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install eventstudyinteract, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 eventstudyinteract div_rate rel_time* [aweight=stpop], absorb(i.state i.year) cohort(cohort) control_cohort(controlgroup) vce(cluster state)
 ```
 
-```
+```         
 IW estimates for dynamic effects                        Number of obs =  1,565
                                     (Std. err. adjusted for 49 clusters in state)
 ---------------------------------------------------------------------------------
@@ -1271,7 +1253,7 @@ rel_timeminus13 |  -.0118369   .1649912    -0.07   0.943    -.343574    .3199001
 
 ### R
 
-```r
+``` r
 library(haven); library(fixest); library(dplyr)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 df6 <- df %>%
@@ -1287,7 +1269,7 @@ m6 <- feols(div_rate ~ sunab(cohort_sa, year, ref.p = -1,
 summary(m6)
 ```
 
-```
+```         
 OLS estimation, Dep. Var.: div_rate
 Observations: 1,565
 Fixed-effects: state: 49,  year: 33
@@ -1322,30 +1304,27 @@ year::12  -0.526894   0.189981 -2.773404 0.00787668
 
 N = 1565  |  Clusters = 49
 ```
-
-
 :::
 
 **Interpretation:** Sun & Abraham estimates are very similar to TWFE event-study but slightly attenuated for long-run effects. All pre-treatment placebos are individually insignificant. The pattern is the same: positive short-run effects, negative long-run effects.
 
----
+------------------------------------------------------------------------
 
 ## CQ#33: Callaway & Sant'Anna Estimators
 
 > Estimate event-study effects using Callaway & Sant'Anna (2021) with not-yet-treated as the control group.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install csdid, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 csdid div_rate [weight=stpop], ivar(state) time(year) gvar(cohort) notyet agg(event)
 ```
 
-```
+```         
 Difference-in-difference with Multiple Time Periods
                                                          Number of obs = 1,540
 Outcome model  : regression adjustment
@@ -1409,7 +1388,7 @@ Control: Not yet Treated
 
 ### R
 
-```r
+``` r
 library(haven); library(did)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 df7 <- df %>% mutate(cohort_cs = ifelse(is.na(cohort) | cohort == 0, 0, cohort))
@@ -1422,7 +1401,7 @@ cs_out <- att_gt(yname = "div_rate", gname = "cohort_cs",
 cs_es <- aggte(cs_out, type = "dynamic")
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 Tm28                   -0.2690531      0.0542955      -4.96   [  -0.3754723,   -0.1626338]
@@ -1479,7 +1458,7 @@ Overall ATT =   -0.1035032  SE =    0.0921859
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 from csdid.att_gt import ATTgt
 import io, contextlib
@@ -1501,7 +1480,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 print(agg.summary())
 ```
 
-```
+```         
 Variable              Coefficient      Std. err.          t   [95% Conf. Interval]
 ------------------------------------------------------------------------------------------
 Tm28                   -0.2233961      0.0936317      -2.39   [  -0.4069143,   -0.0398779]
@@ -1556,29 +1535,27 @@ Tp19                   -0.1210525      0.1572955      -0.77   [  -0.4293517,    
 Note: Python csdid uses doubly-robust estimator with different weighting;
 estimates differ from Stata/R which use regression adjustment with iweights.
 ```
-
 :::
 
 **Interpretation:** Callaway & Sant'Anna estimates show the same qualitative pattern across all three implementations: positive short-run effects (years 0–7), turning negative for longer horizons. The Stata implementation reports an overall dynamic ATT of −0.182 (p = 0.13), and the R implementation reports −0.104 (s.e. = 0.092). Pre-treatment placebos are generally small and insignificant.
 
----
+------------------------------------------------------------------------
 
 ## CQ#34: de Chaisemartin & D'Haultfœuille Estimators
 
 > Estimate event-study effects using `did_multiplegt_dyn` with 13 effects and 13 placebos.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_multiplegt_dyn, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 did_multiplegt_dyn div_rate state year udl, effects(13) placebo(13) weight(stpop) graph_off
 ```
 
-```
+```         
 --------------------------------------------------------------------------------
              Estimation of treatment effects: Event-study effects
 --------------------------------------------------------------------------------
@@ -1637,7 +1614,7 @@ Test of joint nullity of the placebos : p-value = .52543032
 
 ### R
 
-```r
+``` r
 library(haven); library(DIDmultiplegtDYN)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 dcdh_results <- did_multiplegt_dyn(
@@ -1648,7 +1625,7 @@ dcdh_results <- did_multiplegt_dyn(
 summary(dcdh_results)
 ```
 
-```
+```         
 ----------------------------------------------------------------------
        Estimation of treatment effects: Event-study effects
 ----------------------------------------------------------------------
@@ -1698,7 +1675,7 @@ Test of joint nullity of the placebos : p-value = 0.5254
 
 ### Python
 
-```python
+``` python
 import pandas as pd
 import polars as pl
 from did_multiplegt_dyn.did_multiplegt_dyn import did_multiplegt_main
@@ -1720,7 +1697,7 @@ print("\nPlacebos:")
 print(dmd['Placebos'][['Estimate', 'SE', 'LB CI', 'UB CI', 'N', 'Switchers']].to_string())
 ```
 
-```
+```         
 Effects:
             Estimate        SE     LB CI     UB CI      N  Switchers
 Effect_1   0.3009668  0.0875908  0.1292921  0.4726416  320.0      27.0
@@ -1753,22 +1730,20 @@ Placebo_11  0.0396775  0.1616889 -0.2772288  0.3565838  203.0      26.0
 Placebo_12  0.0539247  0.1697544 -0.2787899  0.3866393  181.0      25.0
 Placebo_13  0.0256646  0.1832985 -0.3335925  0.3849217  160.0      24.0
 ```
-
 :::
 
-**Interpretation:** All three implementations produce identical estimates. Effects are positive for 1–8 years post-treatment, turning negative from year 9 onward. Average total effect = −0.053 (p > 0.10). All 13 placebos are insignificant (joint test p = 0.53), supporting parallel trends.
+**Interpretation:** All three implementations produce identical estimates. Effects are positive for 1–8 years post-treatment, turning negative from year 9 onward. Average total effect = −0.053 (p \> 0.10). All 13 placebos are insignificant (joint test p = 0.53), supporting parallel trends.
 
----
+------------------------------------------------------------------------
 
 ## CQ#35: Borusyak, Jaravel & Spiess Estimators
 
 > Estimate event-study effects using `did_imputation` with horizons 0–12 and 13 pre-treatment placebos.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
-```stata
+``` stata
 * ssc install did_imputation, replace
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
@@ -1776,7 +1751,7 @@ replace cohort=. if cohort==0
 did_imputation div_rate state year cohort [aweight=stpop], horizons(0/12) autosample minn(0) pre(13)
 ```
 
-```
+```         
 Warning: part of the sample was dropped for the following coefficients because
 FE could not be imputed: tau0 tau1 tau2 ... tau12.
 
@@ -1815,7 +1790,7 @@ FE could not be imputed: tau0 tau1 tau2 ... tau12.
 
 ### R
 
-```r
+``` r
 library(haven); library(didimputation)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 df9 <- df %>% mutate(gname = ifelse(cohort == 0, NA, cohort))
@@ -1827,7 +1802,7 @@ bjs_out <- did_imputation(
     pretrends = -(1:13))
 ```
 
-```
+```         
       term     estimate  std.error    conf.low   conf.high
  1:    -13 -0.078411415 0.07496659 -0.22534593  0.06852310
  2:    -12  0.001923454 0.10810331 -0.20995902  0.21380593
@@ -1861,7 +1836,7 @@ bjs_out <- did_imputation(
 
 ### Python
 
-```python
+``` python
 # pip install pyfixest
 # Place did_imputation.py (from the book's GitHub repo) in your working directory
 import pandas as pd
@@ -1879,7 +1854,7 @@ for _, row in result.iterrows():
     print(f"{row['term']:<25s} {row['estimate']:>14.7f} {row['std_error']:>14.7f} {t_stat:>10.2f}   [{row['conf_low']:>12.7f}, {row['conf_high']:>12.7f}]")
 ```
 
-```
+```         
       term     estimate  std.error    conf.low   conf.high
  1:    -13 -0.078411415 0.07496659 -0.22534593  0.06852310
  2:    -12  0.001923454 0.10810331 -0.20995902  0.21380593
@@ -1908,129 +1883,20 @@ for _, row in result.iterrows():
 25:     11 -0.427667610 0.19724401 -0.81426587 -0.04106935
 26:     12 -0.452101835 0.21766217 -0.87871969 -0.02548398
 ```
-
 :::
 
 **Interpretation:** The R (`didimputation`), Python (`did_imputation.py`), and Stata (`did_imputation`) implementations produce identical event-study effects (tau0–tau12) and pretrend estimates when weights are properly specified (`wname = "stpop"` in R/Python, `[aweight=stpop]` in Stata) and `cohort` is set to missing for never-treated groups. The pre-trend estimates computed by `did_imputation` are coefficients on treatment leads in a TWFER estimated on untreated cells, and as such are not directly comparable to the pre-trend estimates from other estimators.
 
----
-
-## Gardner (2022) Two-Stage DID Estimator (extra)
-
-> Estimate event-study effects using the `did2s` two-stage estimator (Gardner 2022). The first stage estimates unit and time FEs using untreated observations; the second stage regresses residualized outcomes on relative-time indicators.
-
-::: {.panel-tabset}
-
-### Stata
-
-```stata
-* ssc install did2s, replace
-copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
-use "wolfers2006_didtextbook.dta", clear
-did2s div_rate, first_stage(i.state i.year) second_stage(rel_timeminus9 rel_timeminus8 rel_timeminus7 rel_timeminus6 rel_timeminus5 rel_timeminus4 rel_timeminus3 rel_timeminus2 rel_time1 rel_time2 rel_time3 rel_time4 rel_time5 rel_time6 rel_time7 rel_time8 rel_time9 rel_time10 rel_time11 rel_time12 rel_time13 rel_time14 rel_time15 rel_time16) treatment(udl) cluster(state)
-```
-
-```
-(52 missing values generated)
-(52 observations deleted)
-                                    (Std. err. adjusted for clustering on state)
---------------------------------------------------------------------------------
-               | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
----------------+----------------------------------------------------------------
-rel_timeminus9 |    .022419   .0216001     1.04   0.299    -.0199165    .0647544
-rel_timeminus8 |   .1009879   .0843362     1.20   0.231    -.0643079    .2662838
-rel_timeminus7 |  -.0646302   .0721878    -0.90   0.371    -.2061158    .0768553
-rel_timeminus6 |  -.1678945   .1088472    -1.54   0.123    -.3812312    .0454421
-rel_timeminus5 |  -.1376113   .0789074    -1.74   0.081    -.2922671    .0170444
-rel_timeminus4 |  -.0069287   .0655755    -0.11   0.916    -.1354543    .1215969
-rel_timeminus3 |   .0420446   .0391845     1.07   0.283    -.0347556    .1188448
-rel_timeminus2 |  -.1337561   .1669834    -0.80   0.423    -.4610376    .1935255
-     rel_time1 |  -.2865803   .3033821    -0.94   0.345    -.8811982    .3080377
-     rel_time2 |  -.0327489   .2373089    -0.14   0.890    -.4978658     .432368
-     rel_time3 |  -.1900336   .3963492    -0.48   0.632    -.9668637    .5867965
-     rel_time4 |  -.1755098   .4328379    -0.41   0.685    -1.023856    .6728369
-     rel_time5 |  -.3019536   .4754439    -0.64   0.525    -1.233807    .6298993
-     rel_time6 |  -.2723135   .4695559    -0.58   0.562    -1.192626    .6479992
-     rel_time7 |  -.2806466   .4863407    -0.58   0.564    -1.233857    .6725637
-     rel_time8 |  -.3503459   .4152603    -0.84   0.399    -1.164241    .4635494
-     rel_time9 |  -.5232626   .4071845    -1.29   0.199     -1.32133    .2748044
-    rel_time10 |  -.7033494   .4888938    -1.44   0.150    -1.661564    .2548647
-    rel_time11 |  -.5861507   .4750857    -1.23   0.217    -1.517302    .3450002
-    rel_time12 |  -.6591217   .4607835    -1.43   0.153    -1.562241    .2439974
-    rel_time13 |  -.6691705   .5190124    -1.29   0.197    -1.686416    .3480751
-    rel_time14 |  -.8451094   .5440261    -1.55   0.120    -1.911381    .2211622
-    rel_time15 |  -.8217553   .5909285    -1.39   0.164    -1.979954    .3364433
-    rel_time16 |   .2231949    .328359     0.68   0.497     -.420377    .8667668
---------------------------------------------------------------------------------
-```
-
-### R
-
-```r
-library(haven); library(did2s)
-load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
-df$reltime <- ifelse(df$cohort > 0, df$year - df$cohort, -1000)
-df$reltime2 <- ifelse(df$reltime != -1000, df$reltime + 1, -1000)
-df$reltime2[df$reltime2 < -9 & df$reltime2 != -1000] <- -9
-df$reltime2[df$reltime2 > 16 & df$reltime2 != -1000] <- 16
-gq_did2s <- did2s(df, yname = "div_rate", first_stage = ~ 0 | state + year,
-                   second_stage = ~ i(reltime2, ref = 0), treatment = "udl",
-                   cluster_var = "state")
-summary(gq_did2s)
-```
-
-```
-OLS estimation, Dep. Var.: div_rate
-Observations: 1,565
-Standard-errors: Corrected Clustered (state)
-                     Estimate   Std. Error   t value   Pr(>|t|)
-reltime2::-9     0.0840711  0.0815488  1.0309   0.3027
-reltime2::-8     0.1009879  0.0843362  1.1974   0.2313
-reltime2::-7    -0.0646302  0.0721878 -0.8953   0.3708
-reltime2::-6    -0.1678945  0.1088472 -1.5425   0.1232
-reltime2::-5    -0.1376113  0.0789074 -1.7440   0.0814
-reltime2::-4    -0.0069287  0.0655755 -0.1057   0.9159
-reltime2::-3     0.0420446  0.0391845  1.0730   0.2834
-reltime2::-2    -0.1337561  0.1669834 -0.8010   0.4233
-reltime2::-1    -0.1544790  0.2074242 -0.7447   0.4565
-reltime2::1     -0.2865803  0.3033821 -0.9446   0.3450
-reltime2::2     -0.0327489  0.2373089 -0.1380   0.8903
-reltime2::3     -0.1900336  0.3963492 -0.4795   0.6317
-reltime2::4     -0.2418543  0.4353910 -0.5555   0.5786
-reltime2::5     -0.3693490  0.4806875 -0.7684   0.4424
-reltime2::6     -0.3472232  0.4747245 -0.7314   0.4646
-reltime2::7     -0.3610030  0.4921520 -0.7335   0.4634
-reltime2::8     -0.3974847  0.4258682 -0.9334   0.3508
-reltime2::9     -0.5813679  0.4188235 -1.3881   0.1653
-reltime2::10    -0.7643438  0.5033534 -1.5185   0.1291
-reltime2::11    -0.6478495  0.4898789 -1.3225   0.1862
-reltime2::12    -0.7259381  0.4718114 -1.5386   0.1241
-reltime2::13    -0.7326027  0.5376515 -1.3626   0.1732
-reltime2::14    -0.9224851  0.5651466 -1.6323   0.1028
-reltime2::15    -0.9079993  0.6150064 -1.4764   0.1400
-reltime2::16    -0.6375048  0.3373283 -1.8899   0.0590
-
-Coefficients match Stata from reltime -8 to +15 (7 decimals).
-Bin at -9 and +16 differ due to endpoint aggregation.
-```
-
-:::
-
-**Interpretation:** The Gardner (2022) two-stage DID estimates follow the same qualitative pattern as the other heterogeneity-robust estimators: pre-treatment effects are small and insignificant, while post-treatment effects are mostly negative and growing in magnitude. The point estimates from -8 to +15 match exactly between Stata and R (to 7 decimals). These results are broadly consistent with the Sun & Abraham, Callaway & Sant'Anna, and Borusyak et al. estimates, providing additional robustness evidence. The `did2s` package is only available in Stata and R.
-
----
-
 ## Figure 6.3: Four-Panel Comparison
 
-> This plot combines the event-study estimates from the four estimators computed in the previous sections (GQ4: TWFE, GQ6: Sun & Abraham, GQ7: Callaway & Sant'Anna, GQ9: Borusyak, Jaravel & Spiess). You must run all previous sections before generating this figure.
+> > This plot combines the event-study estimates from the four estimators computed in the previous sections (CQ#28: TWFE, CQ#31–32: Sun & Abraham, CQ#33: Callaway & Sant'Anna, CQ#35: Borusyak, Jaravel & Spiess). You must run all previous sections before generating this figure.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Stata
 
 ![Four-Panel Comparison (Stata)](../figures/ch06_fig63_4panel.png)
 
-```stata
+``` stata
 copy "https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.dta" "wolfers2006_didtextbook.dta", replace
 use "wolfers2006_didtextbook.dta", clear
 graph combine fig62 g1 g2 g4, cols(2) title("Effects of Unilateral Divorce Laws") note("95% CIs shown in red. Weighted by state population. SEs clustered at state level.")
@@ -2040,7 +1906,7 @@ graph combine fig62 g1 g2 g4, cols(2) title("Effects of Unilateral Divorce Laws"
 
 ![Four-Panel Comparison (R)](../figures/ch06_fig63_4panel_R.png)
 
-```r
+``` r
 library(haven)
 load(url("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.RData"))
 png(file.path(FIGDIR, "ch06_fig63_4panel_R.png"), width = 1600, height = 1200, res = 150)
@@ -2059,7 +1925,7 @@ dev.off()
 
 ![Four-Panel Comparison (Python)](../figures/ch06_fig63_4panel_Python.png)
 
-```python
+``` python
 import pandas as pd
 df = pd.read_parquet("https://raw.githubusercontent.com/anzonyquispe/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Wolfers%202006/wolfers2006_didtextbook.parquet")
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -2074,5 +1940,4 @@ fig.text(0.5, 0.01,
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.savefig(FIGDIR / "ch06_fig63_4panel_Python.png", dpi=150)
 ```
-
 :::

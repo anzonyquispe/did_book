@@ -230,11 +230,11 @@ window.Quarto = {
   <li><a href="#cq40-distributed-lag-twfe-regression" id="toc-cq40-distributed-lag-twfe-regression" class="nav-link" data-scroll-target="#cq40-distributed-lag-twfe-regression"><span class="header-section-number">6.2</span> CQ#40: Distributed-Lag TWFE Regression</a></li>
   <li><a href="#cq41-weight-decomposition-twowayfeweights" id="toc-cq41-weight-decomposition-twowayfeweights" class="nav-link" data-scroll-target="#cq41-weight-decomposition-twowayfeweights"><span class="header-section-number">6.3</span> CQ#41: Weight Decomposition (<code>twowayfeweights</code>)</a></li>
   <li><a href="#cq42-non-normalized-event-study-effects-figure-8.1" id="toc-cq42-non-normalized-event-study-effects-figure-8.1" class="nav-link" data-scroll-target="#cq42-non-normalized-event-study-effects-figure-8.1"><span class="header-section-number">6.4</span> CQ#42: Non-Normalized Event-Study Effects (Figure 8.1)</a></li>
-  <li><a href="#cq4345-treatment-path-descriptions" id="toc-cq4345-treatment-path-descriptions" class="nav-link" data-scroll-target="#cq4345-treatment-path-descriptions"><span class="header-section-number">6.5</span> CQ#43–45: Treatment Path Descriptions</a></li>
-  <li><a href="#cq45b-path-specific-event-study-effects-by_path" id="toc-cq45b-path-specific-event-study-effects-by_path" class="nav-link" data-scroll-target="#cq45b-path-specific-event-study-effects-by_path"><span class="header-section-number">6.6</span> CQ#45b: Path-Specific Event-Study Effects (<code>by_path</code>)</a></li>
+  <li><a href="#cq4344-treatment-path-descriptions" id="toc-cq4344-treatment-path-descriptions" class="nav-link" data-scroll-target="#cq4344-treatment-path-descriptions"><span class="header-section-number">6.5</span> CQ#43–44: Treatment Path Descriptions</a></li>
+  <li><a href="#cq45-path-specific-event-study-effects-by_path" id="toc-cq45-path-specific-event-study-effects-by_path" class="nav-link" data-scroll-target="#cq45-path-specific-event-study-effects-by_path"><span class="header-section-number">6.6</span> CQ#45: Path-Specific Event-Study Effects (<code>by_path</code>)</a></li>
   <li><a href="#cq4647-normalized-event-study-effects-figure-8.2" id="toc-cq4647-normalized-event-study-effects-figure-8.2" class="nav-link" data-scroll-target="#cq4647-normalized-event-study-effects-figure-8.2"><span class="header-section-number">6.7</span> CQ#46–47: Normalized Event-Study Effects (Figure 8.2)</a></li>
-  <li><a href="#cq49-ats-and-wats-estimators-did_multiplegt_stat" id="toc-cq49-ats-and-wats-estimators-did_multiplegt_stat" class="nav-link" data-scroll-target="#cq49-ats-and-wats-estimators-did_multiplegt_stat"><span class="header-section-number">6.8</span> CQ#49: ATS and WATS Estimators (<code>did_multiplegt_stat</code>)</a></li>
-  <li><a href="#cq48-joint-test-of-no-dynamic-effects" id="toc-cq48-joint-test-of-no-dynamic-effects" class="nav-link" data-scroll-target="#cq48-joint-test-of-no-dynamic-effects"><span class="header-section-number">6.9</span> CQ#48: Joint Test of No Dynamic Effects</a></li>
+  <li><a href="#cq48-joint-test-of-no-dynamic-effects" id="toc-cq48-joint-test-of-no-dynamic-effects" class="nav-link" data-scroll-target="#cq48-joint-test-of-no-dynamic-effects"><span class="header-section-number">6.8</span> CQ#48: Joint Test of No Dynamic Effects</a></li>
+  <li><a href="#cq49-ats-and-wats-estimators-did_multiplegt_stat" id="toc-cq49-ats-and-wats-estimators-did_multiplegt_stat" class="nav-link" data-scroll-target="#cq49-ats-and-wats-estimators-did_multiplegt_stat"><span class="header-section-number">6.9</span> CQ#49: ATS and WATS Estimators (<code>did_multiplegt_stat</code>)</a></li>
   <li><a href="#summary-of-results" id="toc-summary-of-results" class="nav-link" data-scroll-target="#summary-of-results"><span class="header-section-number">6.10</span> Summary of Results</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Credible-Answers/did_book/edit/main/chapters/ch08.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Credible-Answers/did_book/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -263,17 +263,17 @@ window.Quarto = {
 
 <section id="overview" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">6.1</span> Overview</h2>
-<p>Dataset: <strong>Gentzkow, Shapiro &amp; Sinkinson (2011)</strong> — <code>gentzkowetal_didtextbook.dta</code> (16,872 observations, 1,195 counties, 16 election years 1868–1928)</p>
+<p>Dataset: <strong>Gentzkow, Shapiro &amp; Sinkinson (2011)</strong> — <code>gentzkowetal_didtextbook.dta (Stata), gentzkowetal_didtextbook.RData (R), gentzkowetal_didtextbook.parquet (Python)</code> (16,872 observations, 1,195 counties, 16 election years 1868–1928)</p>
 <p>This chapter studies <strong>general designs</strong> where the treatment may be non-binary (taking values 0, 1, 2, …) and/or non-absorbing (groups can enter and exit treatment), and where treatment lags may affect the outcome. The running example measures the effect of the number of daily newspapers (<code>numdailies</code>) on presidential voter turnout (<code>prestout</code>).</p>
 <p>Key topics: static TWFE decompositions with multiple treatments (<code>twowayfeweights</code>), non-normalized and normalized event-study estimators (<code>did_multiplegt_dyn</code>), treatment-path descriptions (<code>design</code> option), and heterogeneity-robust estimators ruling out dynamic effects (<code>did_multiplegt_stat</code>).</p>
 <p>7 computer questions + 2 Figures + 1 Bonus test.</p>
 <p><strong>Packages used:</strong></p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 29%">
-<col style="width: 12%">
-<col style="width: 33%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 26%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -323,7 +323,7 @@ window.Quarto = {
 <li><strong>Python <code>did_multiplegt_dyn</code>:</strong> <code>pip install py-did-multiplegt-dyn</code>. Requires <code>polars</code> DataFrames.</li>
 <li><strong>Python <code>did_multiplegt_stat</code>:</strong> Local notebook-based translation; see <code>py_did_multiplegt_stat</code>.</li>
 </ul>
-<p><strong>Note on cross-platform differences:</strong> GQ1–GQ4 and GQ6 match exactly between Stata and R to 7 decimals. GQ7 (<code>did_multiplegt_stat</code>) shows small differences between Stata, R, and Python due to internal implementation variations. N, switchers, and stayers counts are identical across all three.</p>
+<p><strong>Note on cross-platform differences:</strong> CQ40–CQ43 and CQ45 match exactly between Stata and R to 7 decimals. CQ49 (<code>did_multiplegt_stat</code>) shows small differences between Stata, R, and Python due to internal implementation variations.. N, switchers, and stayers counts are identical across all three.</p>
 <hr>
 </section>
 <section id="cq40-distributed-lag-twfe-regression" class="level2" data-number="6.2">
@@ -556,11 +556,11 @@ Test of joint nullity of the placebos : p-value = 0.992198</code></pre>
 </div>
 </div>
 <p><strong>Interpretation:</strong> All four non-normalized event-study effects are positive and significant, suggesting newspapers increase turnout. The effects grow with <span class="math inline">\(\ell\)</span>, from 0.0144 at <span class="math inline">\(\ell = 1\)</span> to 0.0273 at <span class="math inline">\(\ell = 4\)</span>. However, one cannot reject the null that all effects are equal (p-value = 0.4152). All placebo estimates are small and insignificant, with a joint p-value of 0.9922, strongly supporting the parallel-trends assumption. The average cumulative effect per treatment unit is 0.0161 (SE = 0.0048).</p>
-<p><em>Figure 8.1: Non-normalized DID estimates of the effect of being exposed to a weakly larger number of newspapers for <span class="math inline">\(\ell\)</span> periods on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.</em></p>
+<p><em>Figure 8.1: Non-normalized DID estimates of the effect of being exposed to a weakly larger number of newspapers for</em> <span class="math inline">\(\ell\)</span> periods on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.</p>
 <hr>
 </section>
-<section id="cq4345-treatment-path-descriptions" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="cq4345-treatment-path-descriptions"><span class="header-section-number">6.5</span> CQ#43–45: Treatment Path Descriptions</h2>
+<section id="cq4344-treatment-path-descriptions" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="cq4344-treatment-path-descriptions"><span class="header-section-number">6.5</span> CQ#43–44: Treatment Path Descriptions</h2>
 <blockquote class="blockquote">
 <p>Rerun <code>did_multiplegt_dyn</code> with <code>design(0.8,console)</code> for <span class="math inline">\(\ell = 1, 2, 4\)</span>. What are the three most common “actual-versus-status-quo” comparisons averaged in <span class="math inline">\(AVSQ_\ell\)</span>?</p>
 </blockquote>
@@ -779,8 +779,7 @@ TreatPath3 54  4.80  1   2
 Treatment paths detected in at least 80.00% of the 1126 switching groups for which 1 effects could be estimated (Total % = 81.17%)
 
 Design interpretation (first row):
-721 groups started with treatment 0 and experienced treatment path (1)
-</code></pre>
+721 groups started with treatment 0 and experienced treatment path (1)</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gq5_l2 <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(<span class="at">df=</span>df, <span class="at">outcome=</span><span class="st">"prestout"</span>, <span class="at">group=</span><span class="st">"cnty90"</span>,</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">time=</span><span class="st">"year"</span>, <span class="at">treatment=</span><span class="st">"numdailies"</span>, <span class="at">effects=</span><span class="dv">2</span>,</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">design=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="st">"console"</span>), <span class="at">graph_off=</span><span class="cn">TRUE</span>)</span>
@@ -904,8 +903,7 @@ TreatPath56 3   0.32  2   1   1   2   2
 Treatment paths detected in at least 80.00% of the 933 switching groups for which 4 effects could be estimated (Total % = 80.17%)
 
 Design interpretation (first row):
-141 groups started with treatment 0 and experienced treatment path (1,1,1,1)
-</code></pre>
+141 groups started with treatment 0 and experienced treatment path (1,1,1,1)</code></pre>
 </div>
 <div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -1067,8 +1065,8 @@ ERC REALLYCREDIBLE - GA N. 101043899</code></pre>
 <p><strong>Interpretation:</strong> At <span class="math inline">\(\ell = 1\)</span>, most switchers transition from 0 to 1 newspaper (64%). As <span class="math inline">\(\ell\)</span> increases, the treatment paths become more heterogeneous: by <span class="math inline">\(\ell = 4\)</span>, the top 3 paths account for only about 34% of all effects. Some counties gain newspapers and keep them, others gain and lose them. This heterogeneity complicates interpretation of <span class="math inline">\(AVSQ_\ell\)</span> at longer horizons.</p>
 <hr>
 </section>
-<section id="cq45b-path-specific-event-study-effects-by_path" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="cq45b-path-specific-event-study-effects-by_path"><span class="header-section-number">6.6</span> CQ#45b: Path-Specific Event-Study Effects (<code>by_path</code>)</h2>
+<section id="cq45-path-specific-event-study-effects-by_path" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="cq45-path-specific-event-study-effects-by_path"><span class="header-section-number">6.6</span> CQ#45: Path-Specific Event-Study Effects (<code>by_path</code>)</h2>
 <blockquote class="blockquote">
 <p>Estimate the first two event-study effects separately for the three most common <span class="math inline">\((D_{g,F_g-1}, D_{g,F_g}, D_{g,F_g+1})\)</span> paths shared by more than 100 counties, using <code>by_path(3)</code>.</p>
 </blockquote>
@@ -1266,19 +1264,108 @@ Equality of effects : p = 0.165258</code></pre>
 <p><em>Figure 8.2: Normalized DID estimates of effects of newspapers on turnout. Standard errors clustered at the county level. 95% confidence intervals shown in red.</em></p>
 <hr>
 </section>
-<section id="cq49-ats-and-wats-estimators-did_multiplegt_stat" class="level2" data-number="6.8">
-<h2 data-number="6.8" class="anchored" data-anchor-id="cq49-ats-and-wats-estimators-did_multiplegt_stat"><span class="header-section-number">6.8</span> CQ#49: ATS and WATS Estimators (<code>did_multiplegt_stat</code>)</h2>
+<section id="cq48-joint-test-of-no-dynamic-effects" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="cq48-joint-test-of-no-dynamic-effects"><span class="header-section-number">6.8</span> CQ#48: Joint Test of No Dynamic Effects</h2>
+<blockquote class="blockquote">
+<p>Restrict to counties whose treatment does not change between <span class="math inline">\(F_g\)</span> and <span class="math inline">\(F_g + 1\)</span>, and test whether the first and second non-normalized effects are equal.</p>
+</blockquote>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false" href="">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies <span class="kw">if</span> <span class="fu">year</span>&lt;first_change | same_treat_after_first_change==1, <span class="kw">effects</span>(2) effects_equal(<span class="ot">all</span>) same_switchers graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>--------------------------------------------------------------------------------
+             Estimation of treatment effects: Event-study effects
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switchers
+-------------+------------------------------------------------------------------
+    Effect_1 |    .01525   .0058956   .0036949   .0268052       5019        512
+    Effect_2 |  .0164091   .0073633   .0019773   .0308409       4101        512
+--------------------------------------------------------------------------------
+Test of joint nullity of the effects : p-value = .0291303
+Test of equality of the effects : p-value = .83016664
+--------------------------------------------------------------------------------
+               Average cumulative (total) effect per treatment unit
+--------------------------------------------------------------------------------
+             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
+-------------+--------------------------------------------------------------------------
+  Av_tot_eff |  .0138306   .0053281   .0033878   .0242734       5605       1024
+--------------------------------------------------------------------------------
+Average number of time periods over which a treatment's effect is accumulated = 1.5</code></pre>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>df_sub <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, year <span class="sc">&lt;</span> first_change <span class="sc">|</span> same_treat_after_first_change <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>bonus <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df_sub, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">2</span>, <span class="at">effects_equal =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">same_switchers =</span> <span class="cn">TRUE</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>----------------------------------------------------------------------
+       Estimation of treatment effects: Event-study effects
+----------------------------------------------------------------------
+             Estimate SE      LB CI   UB CI   N     Switchers
+Effect_1     0.01525  0.00590 0.00369 0.02681 5,019 512
+Effect_2     0.01641  0.00736 0.00198 0.03084 4,101 512
+
+Test of joint nullity of the effects : p-value = 0.0291
+Test of equality of the effects : p-value = 0.8302
+
+----------------------------------------------------------------------
+    Average cumulative (total) effect per treatment unit
+----------------------------------------------------------------------
+ Estimate        SE     LB CI     UB CI         N Switchers
+  0.01383   0.00533   0.00339   0.02427     5,605     1,024
+Average number of time periods over which a treatment effect is accumulated: 1.5000</code></pre>
+</div>
+<div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>df_sub <span class="op">=</span> df[(df[<span class="st">'year'</span>] <span class="op">&lt;</span> df[<span class="st">'first_change'</span>]) <span class="op">|</span> (df[<span class="st">'same_treat_after_first_change'</span>] <span class="op">==</span> <span class="dv">1</span>)].copy()</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df_sub)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>    same_switchers<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>bonus.fit()<span class="op">;</span> bonus.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block  Estimate       SE     LB CI    UB CI      N  Switchers    N.w  Switchers.w
+            Effect_1  0.015250 0.005896  0.003695 0.026805 5019.0      512.0 5019.0        512.0
+            Effect_2  0.016409 0.007363  0.001977 0.030841 4101.0      512.0 4101.0        512.0
+Average_Total_Effect  0.013831 0.005328  0.003388 0.024273 5605.0     1024.0 5605.0       1024.0
+           Placebo_1 -0.001460 0.006378 -0.013961 0.011041 3936.0      413.0 3936.0        413.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.029130
+Test of equality of the effects: p-value = 0.830167
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899</code></pre>
+</div>
+</div>
+</div>
+<p><strong>Interpretation:</strong> In the subsample of 512 counties whose treatment does not change between <span class="math inline">\(F_g\)</span> and <span class="math inline">\(F_g + 1\)</span>, the first and second event-study effects are very close (0.015 vs 0.016) and not significantly different (<span class="math inline">\(p = 0.83\)</span>). This is consistent with the joint null that the first lag of newspapers does not affect turnout and that treatment effects are constant over time.</p>
+<hr>
+</section>
+<section id="cq49-ats-and-wats-estimators-did_multiplegt_stat" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="cq49-ats-and-wats-estimators-did_multiplegt_stat"><span class="header-section-number">6.9</span> CQ#49: ATS and WATS Estimators (<code>did_multiplegt_stat</code>)</h2>
 <blockquote class="blockquote">
 <p>Using <code>did_multiplegt_stat</code>, compute the ATS and WATS estimators with <code>exact_match</code> and one placebo. Compare to the normalized event-study effects.</p>
 </blockquote>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true" href="">Stata</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true" href="">Stata</a></li></ul>
 <div class="tab-content">
-<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_stat, <span class="kw">replace</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_stat prestout cnty90 <span class="fu">year</span> numdailies, placebo(1) exact_match</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_stat, <span class="kw">replace</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_stat prestout cnty90 <span class="fu">year</span> numdailies, placebo(1) exact_match</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>-----------------------------------
 N                =            15466
 WAOSS Method     =  Reg. Adjustment
@@ -1317,143 +1404,51 @@ WAOSS -0.0000123 0.0022931 -0.0045067 0.0044821 2,349   7,764
 <p><strong>Interpretation:</strong> The ATS (<span class="math inline">\(\approx 0.006\)</span>) and WATS (<span class="math inline">\(\approx 0.006\)</span>) are significant and positive. The placebo estimates are small and insignificant, supporting the parallel-trends assumption. These estimates are roughly half the magnitude of <span class="math inline">\(\widehat{AVSQ}^n_1 = 0.012\)</span>, which suggests a non-linear treatment response.</p>
 <hr>
 </section>
-<section id="cq48-joint-test-of-no-dynamic-effects" class="level2" data-number="6.9">
-<h2 data-number="6.9" class="anchored" data-anchor-id="cq48-joint-test-of-no-dynamic-effects"><span class="header-section-number">6.9</span> CQ#48: Joint Test of No Dynamic Effects</h2>
-<blockquote class="blockquote">
-<p>Restrict to counties whose treatment does not change between <span class="math inline">\(F_g\)</span> and <span class="math inline">\(F_g + 1\)</span>, and test whether the first and second non-normalized effects are equal.</p>
-</blockquote>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true" href="">Stata</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-3" role="tab" aria-controls="tabset-8-3" aria-selected="false" href="">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode stata code-with-copy"><code class="sourceCode stata"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>* <span class="kw">ssc</span> install did_multiplegt_dyn, <span class="kw">replace</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>copy <span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.dta"</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">replace</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="st">"gentzkowetal_didtextbook.dta"</span>, <span class="kw">clear</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>did_multiplegt_dyn prestout cnty90 <span class="fu">year</span> numdailies <span class="kw">if</span> <span class="fu">year</span>&lt;first_change | same_treat_after_first_change==1, <span class="kw">effects</span>(2) effects_equal(<span class="ot">all</span>) same_switchers graph_off</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>--------------------------------------------------------------------------------
-             Estimation of treatment effects: Event-study effects
---------------------------------------------------------------------------------
-             |  Estimate         SE      LB CI      UB CI          N  Switchers
--------------+------------------------------------------------------------------
-    Effect_1 |    .01525   .0058956   .0036949   .0268052       5019        512
-    Effect_2 |  .0164091   .0073633   .0019773   .0308409       4101        512
---------------------------------------------------------------------------------
-Test of joint nullity of the effects : p-value = .0291303
-Test of equality of the effects : p-value = .83016664
---------------------------------------------------------------------------------
-               Average cumulative (total) effect per treatment unit
---------------------------------------------------------------------------------
-             |  Estimate         SE      LB CI      UB CI          N  Switch x Periods
--------------+--------------------------------------------------------------------------
-  Av_tot_eff |  .0138306   .0053281   .0033878   .0242734       5605       1024
---------------------------------------------------------------------------------
-Average number of time periods over which a treatment's effect is accumulated = 1.5</code></pre>
-</div>
-<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven); <span class="fu">library</span>(DIDmultiplegtDYN)</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data%20sets/Gentzkow%20et%20al%202011/gentzkowetal_didtextbook.RData"</span>))</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>df_sub <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, year <span class="sc">&lt;</span> first_change <span class="sc">|</span> same_treat_after_first_change <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>bonus <span class="ot">&lt;-</span> <span class="fu">did_multiplegt_dyn</span>(</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">df =</span> df_sub, <span class="at">outcome =</span> <span class="st">"prestout"</span>, <span class="at">group =</span> <span class="st">"cnty90"</span>,</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="st">"year"</span>, <span class="at">treatment =</span> <span class="st">"numdailies"</span>,</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">effects =</span> <span class="dv">2</span>, <span class="at">effects_equal =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">same_switchers =</span> <span class="cn">TRUE</span>, <span class="at">graph_off =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>----------------------------------------------------------------------
-       Estimation of treatment effects: Event-study effects
-----------------------------------------------------------------------
-             Estimate SE      LB CI   UB CI   N     Switchers
-Effect_1     0.01525  0.00590 0.00369 0.02681 5,019 512
-Effect_2     0.01641  0.00736 0.00198 0.03084 4,101 512
-
-Test of joint nullity of the effects : p-value = 0.0291
-Test of equality of the effects : p-value = 0.8302
-
-----------------------------------------------------------------------
-    Average cumulative (total) effect per treatment unit
-----------------------------------------------------------------------
- Estimate        SE     LB CI     UB CI         N Switchers
-  0.01383   0.00533   0.00339   0.02427     5,605     1,024
-Average number of time periods over which a treatment effect is accumulated: 1.5000</code></pre>
-</div>
-<div id="tabset-8-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-3-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> did_multiplegt_dyn <span class="im">import</span> DidMultiplegtDyn</span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://raw.githubusercontent.com/Credible-Answers/did_book/main/cc_xd_didtextbook_2025_9_30/Data</span><span class="sc">%20s</span><span class="st">ets/Gentzkow</span><span class="sc">%20e</span><span class="st">t%20al%202011/gentzkowetal_didtextbook.parquet"</span>)</span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>df_sub <span class="op">=</span> df[(df[<span class="st">'year'</span>] <span class="op">&lt;</span> df[<span class="st">'first_change'</span>]) <span class="op">|</span> (df[<span class="st">'same_treat_after_first_change'</span>] <span class="op">==</span> <span class="dv">1</span>)].copy()</span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df_sub)</span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> DidMultiplegtDyn(df<span class="op">=</span>df_pl, outcome<span class="op">=</span><span class="st">"prestout"</span>, group<span class="op">=</span><span class="st">"cnty90"</span>,</span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="st">"year"</span>, treatment<span class="op">=</span><span class="st">"numdailies"</span>, effects<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    same_switchers<span class="op">=</span><span class="va">True</span>, effects_equal<span class="op">=</span><span class="va">True</span>, cluster<span class="op">=</span><span class="st">"cnty90"</span>)</span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>bonus.fit()<span class="op">;</span> bonus.summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>               Block  Estimate       SE     LB CI    UB CI      N  Switchers
-            Effect_1  0.015250 0.005896  0.003695 0.026805 5019.0      512.0
-            Effect_2  0.016409 0.007363  0.001977 0.030841 4101.0      512.0
-Average_Total_Effect  0.013831 0.005328  0.003388 0.024273 5605.0     1024.0
-
-Test of joint nullity of the effects: p-value = 0.029130
-Test of equality of the effects: p-value = 0.830167</code></pre>
-</div>
-</div>
-</div>
-<p><strong>Interpretation:</strong> In the subsample of 512 counties whose treatment does not change between <span class="math inline">\(F_g\)</span> and <span class="math inline">\(F_g + 1\)</span>, the first and second event-study effects are very close (0.015 vs 0.016) and not significantly different (<span class="math inline">\(p = 0.83\)</span>). This is consistent with the joint null that the first lag of newspapers does not affect turnout and that treatment effects are constant over time.</p>
-<hr>
-</section>
 <section id="summary-of-results" class="level2" data-number="6.10">
 <h2 data-number="6.10" class="anchored" data-anchor-id="summary-of-results"><span class="header-section-number">6.10</span> Summary of Results</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 19%">
-<col style="width: 30%">
-<col style="width: 50%">
+<col style="width: 35%">
+<col style="width: 35%">
+<col style="width: 28%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: center;">GQ</th>
+<th style="text-align: center;">CQ#</th>
 <th style="text-align: center;">Method</th>
 <th style="text-align: left;">Key Finding</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">GQ1</td>
-<td style="text-align: center;">OLS</td>
-<td style="text-align: left;"><span class="math inline">\(\Delta D\)</span> and <span class="math inline">\(D_1\)</span> are correlated (<span class="math inline">\(\beta = -0.0420\)</span>, <span class="math inline">\(p = 0.008\)</span>) → possible OVB</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">GQ2</td>
-<td style="text-align: center;">OLS</td>
-<td style="text-align: left;">Urbanization predicts <span class="math inline">\(\Delta D\)</span> (<span class="math inline">\(\beta = -0.1422\)</span>, <span class="math inline">\(p &lt; 0.001\)</span>) → not as-good-as-random</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">GQ3</td>
+<td style="text-align: center;">CQ#40</td>
 <td style="text-align: center;">Distributed-lag TWFE</td>
-<td style="text-align: left;">Current effect NS (<span class="math inline">\(-0.0008\)</span>), lag significant (<span class="math inline">\(0.0050\)</span>); severe negative weights (<span class="math inline">\(\Sigma = -0.85\)</span>) and cross-contamination (<span class="math inline">\(\Sigma = \pm 1.21\)</span>)</td>
+<td style="text-align: left;">Current effect NS (−0.0008), lag significant (0.0050); severe negative weights (Σ = −0.85) and cross-contamination (Σ = ±1.21)</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">GQ4</td>
+<td style="text-align: center;">CQ#42</td>
 <td style="text-align: center;"><code>did_multiplegt_dyn</code></td>
-<td style="text-align: left;">All effects positive &amp; significant; placebos NS (joint <span class="math inline">\(p = 0.992\)</span>)</td>
+<td style="text-align: left;">All effects positive &amp; significant; placebos NS (joint p = 0.992)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">GQ5</td>
+<td style="text-align: center;">CQ#43–44</td>
 <td style="text-align: center;"><code>design</code> option</td>
-<td style="text-align: left;">Treatment paths increasingly heterogeneous as <span class="math inline">\(\ell\)</span> grows</td>
+<td style="text-align: left;">Treatment paths increasingly heterogeneous as ℓ grows</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">GQ6</td>
+<td style="text-align: center;">CQ#46–47</td>
 <td style="text-align: center;">Normalized ES</td>
-<td style="text-align: left;">Decreasing effects; cannot reject equality (<span class="math inline">\(p = 0.165\)</span>); roughly equal lag weights</td>
+<td style="text-align: left;">Decreasing effects; cannot reject equality (p = 0.165); roughly equal lag weights</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">GQ7</td>
+<td style="text-align: center;">CQ#48</td>
+<td style="text-align: center;">No-dynamics test</td>
+<td style="text-align: left;">Effects 1 &amp; 2 not different (p = 0.83) → consistent with no dynamic effects</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">CQ#49</td>
 <td style="text-align: center;"><code>did_multiplegt_stat</code></td>
 <td style="text-align: left;">ATS ≈ WATS ≈ 0.006 (significant); placebos NS</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Bonus</td>
-<td style="text-align: center;">No-dynamics test</td>
-<td style="text-align: left;">Effects 1 &amp; 2 not different (<span class="math inline">\(p = 0.83\)</span>) → consistent with no dynamic effects</td>
 </tr>
 </tbody>
 </table>

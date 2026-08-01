@@ -258,8 +258,8 @@ window.Quarto = {
 
 <section id="overview" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">3.1</span> Overview</h2>
-<p>Dataset: <strong>Gentzkow, Shapiro &amp; Sinkinson (2011)</strong> — <code>gentzkowetal_didtextbook.dta, gentzkowetal_didtextbook.RData, gentzkowetal_didtextbook.parquet</code></p>
-<p>This chapter investigates what the TWFE estimator <span class="math inline">\(\hat{\beta}^{fe}\)</span> estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1872 to 1928.</p>
+<p>Dataset: <strong>Gentzkow, Shapiro &amp; Sinkinson (2011)</strong> — <code>gentzkowetal_didtextbook.dta (Stata), gentzkowetal_didtextbook.RData (R), gentzkowetal_didtextbook.parquet (Python)</code></p>
+<p>This chapter investigates what the TWFE estimator <span class="math inline">\(\hat{\beta}^{fe}\)</span> estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1868 to 1928.</p>
 <p>Key tool: the <code>twowayfeweights</code> package (Stata/R) decomposes <span class="math inline">\(\hat{\beta}^{fe}\)</span> into a weighted sum of treatment effects, where some weights may be negative — meaning <span class="math inline">\(\hat{\beta}^{fe}\)</span> may not estimate a convex combination of effects.</p>
 <p>No event-study plots in this chapter — only numerical outputs from regressions and decompositions.</p>
 <hr>

@@ -4,9 +4,9 @@ title: "Chapter 5: TWFE Estimators Outside of the Classical Design"
 
 ## Overview
 
-Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta, gentzkowetal_didtextbook.RData, gentzkowetal_didtextbook.parquet`
+Dataset: **Gentzkow, Shapiro & Sinkinson (2011)** — `gentzkowetal_didtextbook.dta (Stata), gentzkowetal_didtextbook.RData (R), gentzkowetal_didtextbook.parquet (Python)`
 
-This chapter investigates what the TWFE estimator $\hat{\beta}^{fe}$ estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1872 to 1928.
+This chapter investigates what the TWFE estimator $\hat{\beta}^{fe}$ estimates outside the classical design, using the effect of newspapers on voter turnout. The design features a non-binary treatment (number of newspapers), non-absorbing treatment changes, and variation in treatment timing across 1,195 US counties from 1868 to 1928.
 
 Key tool: the `twowayfeweights` package (Stata/R) decomposes $\hat{\beta}^{fe}$ into a weighted sum of treatment effects, where some weights may be negative — meaning $\hat{\beta}^{fe}$ may not estimate a convex combination of effects.
 
